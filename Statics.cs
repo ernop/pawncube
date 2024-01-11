@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Chess;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,12 @@ namespace PawnCube
 {
     internal static class Statics
     {
+        public static string DescribeChessBoard(ChessBoard board)
+        {
+            var h = board.Headers;
+            var res = $"{h.GetValueOrDefault("White")}-{h.GetValueOrDefault("Black")}-{h.GetValueOrDefault("Date")}-{h.GetValueOrDefault("Result")}";
+            return res;
+        }
 
         public static bool IsInBounds(Tuple<short, short> inp)
         {

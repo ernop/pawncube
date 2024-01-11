@@ -81,7 +81,7 @@ namespace PawnCube
 
     public class SevenPercentForEachDrawEvaluator : INumericalEvaluator
     {
-        public string Name => nameof(TenPercentForEachDrawEvaluator);
+        public string Name => nameof(SevenPercentForEachDrawEvaluator);
         public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
         {
             var drawcount = 0;

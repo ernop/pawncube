@@ -28,7 +28,7 @@ namespace PawnCube
                         var l = move.Parameter.ShortStr;
                         if (l == "=" || l == "=q" || l == "=r" || l == "=b" || l == "=n")
                         {
-                            var det = $"Promotion: move {Statics.MakeNormalMoveNumberDescriptor(ii)} of {board.Headers["FilePath"]}";
+                            var det = $"Promotion: move {Statics.MakeNormalMoveNumberDescriptor(ii)} of {Statics.DescribeChessBoard(board)}";
                             return new BooleanEvaluationResult(true, det);
                         }
                     }                    
@@ -66,7 +66,7 @@ namespace PawnCube
                 if (pawnPromotionsThisGame >= 2)
                 {
                     var joined = string.Join(',', promotionPoints.Select(MakeNormalMoveNumberDescriptor));
-                    var det = $"Game with >=2 promotions: there were {pawnPromotionsThisGame} in {joined} of {board.Headers["FilePath"]}";
+                    var det = $"Game with >=2 promotions: there were {pawnPromotionsThisGame} in {joined} of {Statics.DescribeChessBoard(board)}";
                     return new BooleanEvaluationResult(true, det);
                 }
                 
@@ -106,7 +106,8 @@ namespace PawnCube
                 }
                 if (hasShort && hasLong)
                 {
-                    var det = $"Opposite Side Castled in: {board.Headers["FilePath"]}";
+                    var det = $"Opposite Side Castled in: {Statics.DescribeChessBoard(board)}";
+                    Console.WriteLine(board.ToAscii());
                     return new BooleanEvaluationResult(true, det);
                 }
 
@@ -129,7 +130,7 @@ namespace PawnCube
                     var m = board.ExecutedMoves[ii];
                     if (m.CapturedPiece != null && m.CapturedPiece.Type == PieceType.Queen && m.Piece.Type == PieceType.Rook)
                     {
-                        var res = new BooleanEvaluationResult(true, $"move {MakeNormalMoveNumberDescriptor(ii)} of {board.Headers["FilePath"]}");
+                        var res = new BooleanEvaluationResult(true, $"move {MakeNormalMoveNumberDescriptor(ii)} of {Statics.DescribeChessBoard(board)}");
                         return res;
                     }
                 }
@@ -154,7 +155,7 @@ namespace PawnCube
                     var m = board.ExecutedMoves[ii];
                     if (m.CapturedPiece != null && m.CapturedPiece.Type == PieceType.Queen && m.Piece.Type == PieceType.Pawn)
                     {
-                        var res = new BooleanEvaluationResult(true, $"move {MakeNormalMoveNumberDescriptor(ii)} of {board.Headers["FilePath"]}");
+                        var res = new BooleanEvaluationResult(true, $"move {MakeNormalMoveNumberDescriptor(ii)} of {Statics.DescribeChessBoard(board)}");
                         return res;
                     }
                 }

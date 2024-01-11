@@ -22,7 +22,7 @@ namespace PawnCube
                 if (board.ExecutedMoves.Count > max)
                 {
                     max = board.ExecutedMoves.Count;
-                    det = $"Longest game is {board.Headers["FilePath"]}, with {board.ExecutedMoves.Count} moves.";
+                    det = $"Longest game is {Statics.DescribeChessBoard(board)}, with {board.ExecutedMoves.Count} moves.";
                 }
             }
 
@@ -44,7 +44,7 @@ namespace PawnCube
                 if (board.ExecutedMoves.Count > max)
                 {
                     max = board.ExecutedMoves.Count;
-                    det = $"Longest game is {board.Headers["FilePath"]}, with {board.ExecutedMoves.Count} moves.";
+                    det = $"Longest game is {Statics.DescribeChessBoard(board)}, with {board.ExecutedMoves.Count} moves.";
                 }
             }
 
@@ -61,8 +61,7 @@ namespace PawnCube
         {
             foreach (var board in boards)
             {
-                var testBoard = new ChessBoard() { AutoEndgameRules = AutoEndgameRules.All };
-                testBoard.AddHeader("FilePath", board.Headers["FilePath"]);
+                var testBoard = new ChessBoard();
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
@@ -81,7 +80,7 @@ namespace PawnCube
                     catch (Exception ex)
                     {
                         Console.WriteLine(testBoard.ToAscii());
-                        Console.WriteLine(testBoard.Headers["FilePath"]);
+                        Console.WriteLine(Statics.DescribeChessBoard(board));
                         testBoard.Move(move);
                     }
 
@@ -102,7 +101,7 @@ namespace PawnCube
                 }
                 if (count == 14)
                 {
-                    return new BooleanEvaluationResult(true, $"game ended by {board.EndGame.EndgameType} with 14 pieces in {board.ExecutedMoves.Count} moves: {board.Headers["FilePath"]}");
+                    return new BooleanEvaluationResult(true, $"game ended by {board.EndGame.EndgameType} with 14 pieces in {board.ExecutedMoves.Count} moves: {Statics.DescribeChessBoard(board)}");
                 }
             }
             return new BooleanEvaluationResult(false, "");
@@ -121,8 +120,7 @@ namespace PawnCube
             foreach (var board in boards)
             {
                 queensSeen += 2;
-                var testBoard = new ChessBoard() { AutoEndgameRules = AutoEndgameRules.All };
-                testBoard.AddHeader("FilePath", board.Headers["FilePath"]);
+                var testBoard = new ChessBoard();// { AutoEndgameRules = AutoEndgameRules.All };
                 var wOrigQueenPos = new Position("d1");
                 var bOrigQueenPos = new Position("d8");
                 var wOrigQueenDead = false;
@@ -143,7 +141,7 @@ namespace PawnCube
                     catch (Exception ex)
                     {
                         Console.WriteLine(testBoard.ToAscii());
-                        Console.WriteLine(testBoard.Headers["FilePath"]);
+                        Console.WriteLine(Statics.DescribeChessBoard(board));
                         testBoard.Move(move);
                     }
 
@@ -202,7 +200,7 @@ namespace PawnCube
             {
                 if (board.EndGame.EndgameType == EndgameType.Timeout)
                 {
-                    return new BooleanEvaluationResult(true, $"{board.Headers["FilePath"]}");
+                    return new BooleanEvaluationResult(true, $"{Statics.DescribeChessBoard(board)}");
                 }
             }
             return new BooleanEvaluationResult(false, "");

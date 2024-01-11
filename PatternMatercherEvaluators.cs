@@ -19,8 +19,7 @@ namespace PawnCube
         {
             foreach (var board in boards)
             {
-                var testBoard = new ChessBoard() { AutoEndgameRules = AutoEndgameRules.All };
-                testBoard.AddHeader("FilePath", board.Headers["FilePath"]);
+                var testBoard = new ChessBoard();// { AutoEndgameRules = AutoEndgameRules.All };
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
@@ -38,7 +37,7 @@ namespace PawnCube
                     catch (Exception ex)
                     {
                         Console.WriteLine(testBoard.ToAscii());
-                        Console.WriteLine(testBoard.Headers["FilePath"]);
+                        Statics.DescribeChessBoard(testBoard);
                         testBoard.Move(move);
                     }
 
@@ -49,7 +48,7 @@ namespace PawnCube
                             //checking starting pos xx,yy for the pattern.
                             if (CheckForPattern(testBoard, xx, yy))
                             {
-                                return new BooleanEvaluationResult(true, $"Pattern shows up at move {Statics.MakeNormalMoveNumberDescriptor(ii)}, position: xx{xx}, yy{yy} in game: {board.Headers["FilePath"]}\r\n{testBoard.ToAscii()}");
+                                return new BooleanEvaluationResult(true, $"Pattern shows up at move {Statics.MakeNormalMoveNumberDescriptor(ii)}, position: xx={xx + 1}, yy={yy+1} in game: {Statics.DescribeChessBoard(board)}\r\n{testBoard.ToAscii()}");
                             }
                         }
                     }
@@ -315,7 +314,6 @@ namespace PawnCube
 
         public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
         {
-            //Console.WriteLine(testBoard.Headers["FilePath"]);
             var upright = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 1), new Tuple<short, short>(2, 2), new Tuple<short, short>(3, 3), };
             var right = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 0), new Tuple<short, short>(2, 0), new Tuple<short, short>(3, 0), };
             var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0, 3), };
