@@ -1,0 +1,17 @@
+
+[Event "Play-In"]
+[White "Ding, Liren"]
+[Black "Kravtsiv, Martyn"]
+[WhiteFideId "8603677"]
+[BlackFideId "14113147"]
+[WhiteElo "2830"]
+[BlackElo "2675"]
+[Result "0-1"]
+[Round "4"]
+[TimeControl "600+2"]
+[Date "2023.06.12"]
+[WhiteClock "0:00:00"]
+[BlackClock "0:05:41"]
+[Board "15"]
+
+1. e4 {[%clk 0:09:33]}  e5 {[%clk 0:09:57]} 2. Nf3 {[%clk 0:09:29]}  Nc6 {[%clk 0:09:57]} 3. Bc4 {[%clk 0:09:21]}  Nf6 {[%clk 0:09:55]} 4. d3 {[%clk 0:09:21]}  Bc5 {[%clk 0:09:55]} 5. Bg5 {[%clk 0:09:12]}  h6 {[%clk 0:09:49]} 6. Bh4 {[%clk 0:09:12]}  g5 {[%clk 0:09:10]} 7. Bg3 {[%clk 0:09:11]}  d6 {[%clk 0:09:09]} 8. c3 {[%clk 0:00:26]}  Qe7 {[%clk 0:09:01]} 9. Nbd2 {[%clk 0:00:25]}  a6 {[%clk 0:08:57]} 10. a4 {[%clk 0:00:22]}  Ba7 {[%clk 0:07:44]} 11. b4 {[%clk 0:00:21]}  Nh5 {[%clk 0:07:08]} 12. b5 {[%clk 0:00:13]}  Na5 {[%clk 0:07:04]} 13. Ba2 {[%clk 0:00:14]}  g4 {[%clk 0:06:23]} 14. Nh4 {[%clk 0:00:12]}  Qf6 {[%clk 0:06:24]} 15. O-O {[%clk 0:00:13]}  Nf4 {[%clk 0:06:22]} 16. d4 {[%clk 0:00:11]}  exd4 {[%clk 0:06:04]} 17. cxd4 {[%clk 0:00:00]}  Bxd4 {[%clk 0:05:41]} 0-1
