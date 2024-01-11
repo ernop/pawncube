@@ -141,8 +141,9 @@ namespace PawnCube
                 pergame.Add($"h:{gameh}v:{gamev}");
             }
             var raw = -4 * horizontalCount + 3 * verticalCount;
-            var joined = string.Join(',', pergame).Replace(",", ", ");
-            var det = $"Total horizontal knight moves in games: {horizontalCount}, total vertical: {verticalCount} ({joined} by game)";
+            //var joined = string.Join(',', pergame).Replace(",", ", ");
+
+            var det = $"Total horizontal knight moves in games: {horizontalCount}, total vertical: {verticalCount}";
             return new NumericalEvaluationResult(raw, det);
         }
     }

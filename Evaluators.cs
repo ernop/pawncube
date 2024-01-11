@@ -31,7 +31,7 @@ namespace PawnCube
                             var det = $"Promotion: move {Statics.MakeNormalMoveNumberDescriptor(ii)} of {Statics.DescribeChessBoard(board)}";
                             return new BooleanEvaluationResult(true, det);
                         }
-                    }                    
+                    }
                 }
 
             }
@@ -69,7 +69,7 @@ namespace PawnCube
                     var det = $"Game with >=2 promotions: there were {pawnPromotionsThisGame} in {joined} of {Statics.DescribeChessBoard(board)}";
                     return new BooleanEvaluationResult(true, det);
                 }
-                
+
 
             }
             return new BooleanEvaluationResult(false, "");
@@ -116,7 +116,110 @@ namespace PawnCube
         }
     }
 
+    public class BishopManualUndoEvaluator : IBooleanEvaluator
+    {
+        public string Name => nameof(BishopManualUndoEvaluator);
 
+        public BooleanEvaluationResult Evaluate(List<ChessBoard> boards)
+        {
+            foreach (var board in boards)
+            {
+                var bishopMovedPriorW = false;
+                Position? bishopPositionPriorW = null;
+
+
+                var bishopMovedPriorB = false;
+                Position? bishopPositionPriorB = null;
+
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    //WHITE=0, BLACK=1;
+                    var WHITE = 0;
+                    var BLACK = 1;
+                    var color = ii % 2;
+                    
+
+                    if (move.Piece.Type == PieceType.Bishop)
+                    {
+                        if (color == WHITE )
+                        {
+                            if (bishopMovedPriorW && bishopPositionPriorW != null)
+                            {
+                                if (move.NewPosition == bishopPositionPriorW)
+                                {
+                                    return new BooleanEvaluationResult(true, $"W's bishop moved back to: {bishopPositionPriorW} on move {Statics.MakeNormalMoveNumberDescriptor(ii)}  in game {Statics.DescribeChessBoard(board)}");
+                                }
+                            }
+                            if (move.CapturedPiece == null)
+                            {
+                                bishopMovedPriorW = true;
+                                bishopPositionPriorW = move.OriginalPosition;
+                            }
+                            else
+                            {
+                                bishopMovedPriorW = false;
+                                bishopPositionPriorW = null;
+                            }
+                        }
+                        
+
+                        if (color == BLACK)
+                        {
+                            if (bishopMovedPriorB && bishopPositionPriorB != null)
+                            {
+                                if (move.NewPosition == bishopPositionPriorB)
+                                {
+                                    //yes
+                                    return new BooleanEvaluationResult(true, $"B's bishop moved back to: {bishopPositionPriorB} on move {Statics.MakeNormalMoveNumberDescriptor(ii)} in game {Statics.DescribeChessBoard(board)}");
+                                }
+                            }
+
+                            //this determine if you only count cases where it literally moves, response, then back. without taking.
+                            //TODO make this clarificatrion.
+                            if (move.CapturedPiece == null)
+                            {
+                                bishopMovedPriorB = true;
+                                bishopPositionPriorB = move.OriginalPosition;
+                            }
+                            else
+                            {
+                                bishopMovedPriorB = false;
+                                bishopPositionPriorB = null;
+                            }
+                        }
+                        
+                    }
+                    else
+                    {
+                        if (color == WHITE)
+                        {
+                            bishopMovedPriorW = false;
+                            bishopPositionPriorW = null;
+                        }
+                        else
+                        {
+                            bishopMovedPriorB = false; 
+                            bishopPositionPriorB = null;
+                        }
+                    }
+
+                    //if (move.Piece.Type == PieceType.Bishop)
+                    //{
+                    //    Console.WriteLine(ii.ToString() + ", " + move.San);
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine(ii.ToString());
+                    //}
+                    //Console.WriteLine($"{nameof(bishopMovedPriorW)}={bishopMovedPriorW}, {nameof(bishopPositionPriorW)}={bishopPositionPriorW}");
+                    //Console.WriteLine($"{nameof(bishopMovedPriorB)}={bishopMovedPriorB}, {nameof(bishopPositionPriorB)}={bishopPositionPriorB}");
+
+                }
+            }
+            return new BooleanEvaluationResult(false, "");
+        }
+    }
     internal class RookTakesAQueenEvaluator : IBooleanEvaluator
     {
         public string Name => nameof(RookTakesAQueenEvaluator);

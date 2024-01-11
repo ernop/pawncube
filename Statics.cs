@@ -31,7 +31,12 @@ namespace PawnCube
             return $"Move {Math.Floor(s) + 1}, B";
         }
 
-
+        
+        /// <summary>
+        /// The point of all this is to judge these two prediction markets
+        /// </summary>
+        static string RelatedMarket1 = "https://manifold.markets/Ernie/rosen-score-of-weird-thing-that-wil";
+        static string RelatedMarket2 = "https://manifold.markets/Ernie/what-will-happen-during-ding-lirens";
         static string items = @"Daniel Naroditsky is one of the live commentators
 1% for each move in the longest game
 King in a corner
