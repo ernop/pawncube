@@ -55,6 +55,45 @@ namespace PawnCube
             return res;
         }
     }
+
+    public class TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator);
+        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        {
+            var indecisiveCount = 0;
+            var decisiveCount = 0;
+            foreach (var board in boards)
+            {
+                var e = board.EndGame;
+                //Checkmate,
+                //Resigned,
+                //Timeout,
+                //Stalemate,aa
+                //DrawDeclared,aa
+                //InsufficientMaterial,aa
+                //FiftyMoveRule,aa
+                //Repetition,aa
+                if ( e.EndgameType == EndgameType.DrawDeclared 
+                     || e.EndgameType == EndgameType.Stalemate
+                     || e.EndgameType == EndgameType.InsufficientMaterial
+                     || e.EndgameType == EndgameType.Repetition
+                     || e.EndgameType == EndgameType.FiftyMoveRule)
+                {
+                    indecisiveCount++;
+                }
+                else
+                {
+                    decisiveCount++;
+                }
+            }
+            var raw = 20*decisiveCount+ -10 * indecisiveCount;
+            var det = $"Decisive: {decisiveCount}, indecisive: {indecisiveCount}";
+            var res = new NumericalEvaluationResult(raw, det);
+            return res;
+        }
+    }
+
     public class TenPercentForEachDrawEvaluator : INumericalEvaluator
     {
         public string Name => nameof(TenPercentForEachDrawEvaluator);

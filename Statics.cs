@@ -10,8 +10,26 @@ namespace PawnCube
 {
     internal static class Statics
     {
+
+        public static int GlobalExampleMax = 3;
+
+        /// <summary>
+        /// just copy a board's headers.
+        /// </summary>
+        public static ChessBoard CopyBoardBase(ChessBoard board)
+        {
+            var res = new ChessBoard();
+            foreach (var h in board.Headers)
+            {
+                if (string.IsNullOrEmpty(h.Value)) { continue; }
+                res.AddHeader(h.Key, h.Value);
+            }
+            return res;
+        }
+
         public static string DescribeChessBoard(ChessBoard board)
         {
+
             var h = board.Headers;
             var res = $"{h.GetValueOrDefault("White")}-{h.GetValueOrDefault("Black")}-{h.GetValueOrDefault("Date")}-{h.GetValueOrDefault("Result")}";
             return res;
@@ -24,14 +42,16 @@ namespace PawnCube
         }
 
 
-        public static string MakeNormalMoveNumberDescriptor(int n)
+        public static string MakeNormalMoveNumberDescriptor(int plies)
         {
-            var s = n / 2.0;
-            if (s % 1 == 0) { return $"Move {Math.Floor(s) + 1}, W"; }
-            return $"Move {Math.Floor(s) + 1}, B";
+            var s = plies / 2.0;
+            if (plies % 2 == 1) { 
+                return $"W{Math.Floor(s) + 1}";
+            }
+            return $"B{Math.Floor(s) + 1}";
         }
 
-        
+
         /// <summary>
         /// The point of all this is to judge these two prediction markets
         /// </summary>

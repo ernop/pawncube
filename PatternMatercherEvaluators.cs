@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using static PawnCube.Statics;
 
 namespace PawnCube
 {
@@ -14,23 +15,26 @@ namespace PawnCube
     public abstract class PatternMatcherChecker : IBooleanEvaluator
     {
         public abstract string Name { get; }
-        public abstract bool CheckForPattern(ChessBoard board, short xx, short yy);
-        public BooleanEvaluationResult Evaluate(List<ChessBoard> boards)
+        public abstract bool CheckForPattern(ChessBoard board, short xx, short yy, out string details);
+        public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
         {
+            var examples = new List<BooleanExample>();
             foreach (var board in boards)
             {
-                var testBoard = new ChessBoard();// { AutoEndgameRules = AutoEndgameRules.All };
+                var testBoard = CopyBoardBase(board);
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
                     try
                     {
                         testBoard.Move(move);
-                        
+
                     }
                     catch (Chess.ChessGameEndedException ex)
                     {
                         //okay sometimes the pgn goes beyond the official 3fold end of the game.
+                        Console.WriteLine($"game moves go beyond games end. {Statics.DescribeChessBoard(board)}");
+                        Console.WriteLine(ex.Message);
                         break;
 
                     }
@@ -41,20 +45,34 @@ namespace PawnCube
                         testBoard.Move(move);
                     }
 
+                    //we check every position since the move you just did may NOT be at the anchor point of the pattern descriptor vector in the class
+                    //AND we skip the rest of the game once its found once, otherwise we keep detecting it over and over for this game.
+
+                    var alreadyFoundOneForThisGame = false;
                     for (short xx = 0; xx < 8; xx++)
                     {
                         for (short yy = 0; yy < 8; yy++)
                         {
                             //checking starting pos xx,yy for the pattern.
-                            if (CheckForPattern(testBoard, xx, yy))
+                            if (CheckForPattern(testBoard, xx, yy, out string details))
                             {
-                                return new BooleanEvaluationResult(true, $"Pattern shows up at move {Statics.MakeNormalMoveNumberDescriptor(ii)}, position: xx={xx + 1}, yy={yy+1} in game: {Statics.DescribeChessBoard(board)}\r\n{testBoard.ToAscii()}");
+                                var det = $"Pattern shows up: {details}";
+                                var exa = new BooleanExample(testBoard, det);
+                                examples.Add(exa);
+                                if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                                {
+                                    return new BooleanEvaluationResult("", examples);
+                                }
+                                alreadyFoundOneForThisGame = true;
+                                break;
                             }
                         }
+                        if (alreadyFoundOneForThisGame) break;
                     }
+                    if (alreadyFoundOneForThisGame) { continue; }
                 }
             }
-            return new BooleanEvaluationResult(false, "");
+            return new BooleanEvaluationResult("", examples);
         }
     }
 
@@ -62,8 +80,9 @@ namespace PawnCube
     {
         public override string Name => nameof(TripledPawnEvaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2) };
 
 
@@ -94,6 +113,7 @@ namespace PawnCube
             }
 
             //we got through a whole vector without dying.
+            details = $"at: {xx+1},{yy+1} {xx + 1 + up[0].Item1},{yy + 1 + up[0].Item2} {xx + 1 + up[1].Item1},{yy + 1 + up[1].Item2}";
             return true;
         }
     }
@@ -102,8 +122,9 @@ namespace PawnCube
     {
         public override string Name => nameof(QuadrupledPawnEvaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0, 3), };
 
 
@@ -133,6 +154,7 @@ namespace PawnCube
                 }
             }
 
+            details = $"at:  {xx + 1},{yy + 1} {xx + 1 + up[0].Item1},{yy + 1 + up[0].Item2} {xx + 1 + up[1].Item1},{yy + 1 + up[1].Item2} {xx + 1 + up[2].Item1},{yy + 1 + up[2].Item2}";
             //we got through a whole vector without dying.
             return true;
         }
@@ -142,17 +164,20 @@ namespace PawnCube
     {
         public override string Name => nameof(QueenInACornerEvaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var positions = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 0), new Tuple<short, short>(7, 0), new Tuple<short, short>(0, 7), new Tuple<short, short>(7, 7) };
             foreach (var pos in positions)
             {
                 var p = testBoard[pos.Item1, pos.Item2];
                 if (p != null && p.Type == PieceType.Queen)
                 {
+                    details = $"at: {xx + 1},{yy + 1}";
                     return true;
                 }
             }
+            
             return false;
         }
     }
@@ -161,14 +186,20 @@ namespace PawnCube
     {
         public override string Name => nameof(KingInACornerEvaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var positions = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 0), new Tuple<short, short>(7, 0), new Tuple<short, short>(0, 7), new Tuple<short, short>(7, 7) };
+            
+            //for this type of single spot pattern it doesn't really make sense to check every square.
+            //i could just check the one. so this is duplicated effort.
+
             foreach (var pos in positions)
             {
                 var p = testBoard[pos.Item1, pos.Item2];
                 if (p != null && p.Type == PieceType.King)
                 {
+                    details = $"at: {xx + 1},{yy + 1}";
                     return true;
                 }
             }
@@ -180,8 +211,9 @@ namespace PawnCube
     {
         public override string Name => nameof(Connect5Evaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var upright = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 1), new Tuple<short, short>(2, 2), new Tuple<short, short>(3, 3), new Tuple<short, short>(4, 4) };
             var right = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 0), new Tuple<short, short>(2, 0), new Tuple<short, short>(3, 0), new Tuple<short, short>(4, 0) };
             var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0, 3), new Tuple<short, short>(0, 4) };
@@ -236,6 +268,11 @@ namespace PawnCube
 
 
                 //we got through a whole vector without dying.
+                foreach (var pos in vector)
+                {
+                    details += $" {xx + pos.Item1},{yy + pos.Item2}";
+                }
+
                 return true;
             }
             return false;
@@ -246,8 +283,9 @@ namespace PawnCube
     {
         public override string Name => nameof(Connect3Evaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var upright = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 1), new Tuple<short, short>(2, 2), };
             var right = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 0), new Tuple<short, short>(2, 0), };
             var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), };
@@ -301,7 +339,12 @@ namespace PawnCube
                 }
 
 
+                details = $"{xx + 1},{yy + 1}";
                 //we got through a whole vector without dying.
+                foreach (var pos in vector)
+                {
+                    details += $" {xx + pos.Item1},{yy + pos.Item2}";
+                }
                 return true;
             }
             return false;
@@ -312,8 +355,9 @@ namespace PawnCube
     {
         public override string Name => nameof(Connect4Evaluator);
 
-        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy)
+        public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
         {
+            details = "";
             var upright = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 1), new Tuple<short, short>(2, 2), new Tuple<short, short>(3, 3), };
             var right = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 0), new Tuple<short, short>(2, 0), new Tuple<short, short>(3, 0), };
             var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0, 3), };
@@ -366,8 +410,12 @@ namespace PawnCube
                     break;
                 }
 
-
+                details = $"{xx + 1},{yy + 1}";
                 //we got through a whole vector without dying.
+                foreach (var pos in vector)
+                {
+                    details += $" {xx + pos.Item1},{yy + pos.Item2}";
+                }
                 return true;
             }
             return false;

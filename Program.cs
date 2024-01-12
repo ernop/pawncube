@@ -79,8 +79,10 @@ if (testBrokenEPPGNLoad)
     BrokenLoad();
 }
 
+Console.WriteLine($"start");
 var rr = new Regex(@"[\d]{1,1000}\.");
 var pgnStrings = SplitPgns(based);
+Console.WriteLine($"Loading PGNStrings. {pgnStrings.Count()}");
 foreach (var pgnStr in pgnStrings)
 {
     var useBrokenMethod = false;
@@ -163,11 +165,28 @@ foreach (var pgnStr in pgnStrings)
 }
 
 
-var booleanEvaluators = new List<IBooleanEvaluator>() { new RookTakesAQueenEvaluator(), new KingInACornerEvaluator(), new PawnTakesAQueenEvaluator(), new AnyOppositeSideCastlingGameEvaluator(), new AnyPawnPromotionEvaluator(), new QueenInACornerEvaluator(), new AnyTimeOutEvaluator(), new FourteenPieceGameEndEvaluator(), new Connect5Evaluator(), new Connect3Evaluator(), new TripledPawnEvaluator(), new Connect4Evaluator(), new QuadrupledPawnEvaluator(), new TwoPawnPromotionsInOneGameEvaluator(), new BishopManualUndoEvaluator()
+var booleanEvaluators = new List<IBooleanEvaluator>() { 
+    new RookTakesAQueenEvaluator(), new KingInACornerEvaluator(), new PawnTakesAQueenEvaluator(), new AnyOppositeSideCastlingGameEvaluator(), new AnyPawnPromotionEvaluator(), new QueenInACornerEvaluator(), new AnyTimeOutEvaluator(), new FourteenPieceGameEndEvaluator(), new Connect5Evaluator(), new Connect3Evaluator(), new TripledPawnEvaluator(), new Connect4Evaluator(), new QuadrupledPawnEvaluator(), new TwoPawnPromotionsInOneGameEvaluator(), new BishopManualUndoEvaluator(),
+    new EnPassantEvaluator(),new PromoteAndCheckEvaluator(),
+    new BishopMovesSevenSquaresEvaluator(), new BishopMovesSixSquaresEvaluator(),
+    new CheckmateWithAPawnEvaluator(),
+    new NonQueenPromotionEvaluator(),
+    new SamePieceMovesEightTimesInARowEvaluator(),
+
+    new EverQvsRREndgameEvaluator(),
+    new CastleAfterMove40Evaluator(),
+    new CastleAfterMove20Evaluator(),
+    new EnPassantRefusedEvaluator(),
 };
-var numericalEvaluators = new List<INumericalEvaluator>() { new OnePercentForEachMoveInLongestGameEvaluator(), new Pawn10VsKnightMinus10FirstMoveEvaluator(), new TenPercentPerResignationEvaluator(), new Black40VsWhiteMinus10WinEvalutor(),
-new SevenPercentForEachDrawEvaluator(), new TenPercentForEachDrawEvaluator(), new ShortCastleTenPercentVsLongCastleMinusFivePercentEvaluator(), new SurvivingQueen5PercentEachEvaluator(),
- new HalfPercentForEachMoveInLongestGameEvaluator(), new KnightDirectionNumerical3PercentVerticalMinus4PercentHorizontalEvaluator(),
+var numericalEvaluators = new List<INumericalEvaluator>() { 
+    new OnePercentForEachMoveInLongestGameEvaluator(), new Pawn10VsKnightMinus10FirstMoveEvaluator(), new TenPercentPerResignationEvaluator(), new Black40VsWhiteMinus10WinEvalutor(),
+    new SevenPercentForEachDrawEvaluator(), new TenPercentForEachDrawEvaluator(), new ShortCastleTenPercentVsLongCastleMinusFivePercentEvaluator(), new SurvivingQueen5PercentEachEvaluator(),
+    new HalfPercentForEachMoveInLongestGameEvaluator(), new KnightDirectionNumerical3PercentVerticalMinus4PercentHorizontalEvaluator(),
+    new CapturedBishopsFiveCapturedPawnsMinusOneEvaluator(),
+    new TenPercentForeEachWinEvaluator(),
+    new TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator(),
+    new TwentyPercentPerEnPassantCaptureEvaluator(),
+
 };
 
 Console.WriteLine($"Evaluating {boards.Count} games for {booleanEvaluators.Count} boolean evaluators, {numericalEvaluators.Count} numerical evaluators");
@@ -175,9 +194,16 @@ Console.WriteLine($"Evaluating {boards.Count} games for {booleanEvaluators.Count
 Console.WriteLine($"\r\nBoolean evaluators: {booleanEvaluators.Count}");
 foreach (var be in booleanEvaluators.OrderBy(el => el.Name))
 {
-    var res = be.Evaluate(boards);
+    var res = be.Evaluate(true, boards);
     var mr = res.Result ? "100%" : "0%";
     Console.WriteLine($"\t{be.Name,-40}\tManifold: {mr,4}\t                {res.Details,-50}");
+    var ii = 0;
+    foreach (var qq in res.Examples.Take(Statics.GlobalExampleMax))
+    {
+        ii++;
+        var genericDetails = MakeGenericDetails(qq.Board);
+        Console.WriteLine($"\t{ii,-3}\t{genericDetails}\t{qq.Details,-60}\r\n{qq.Board.ToAscii()}\r\n");
+    }
 }
 
 Console.WriteLine($"\r\nNumerical evaluators: {numericalEvaluators.Count}");
@@ -187,3 +213,11 @@ foreach (var ne in numericalEvaluators.OrderBy(el => el.Name))
     Console.WriteLine($"\t{ne.Name,-40}\tManifold: {res.ManifoldResult(),3}%\t(raw: {res.RawResult,3})\t{res.Details,-40}");
 }
 
+static string MakeGenericDetails(ChessBoard board)
+{
+    var ply = board.ExecutedMoves.Count();
+    var NormalMoveNumber = Statics.MakeNormalMoveNumberDescriptor(ply);
+
+    var res = $"{NormalMoveNumber}:{board.ExecutedMoves.Last()} of {Statics.DescribeChessBoard(board)}";
+    return res;
+}

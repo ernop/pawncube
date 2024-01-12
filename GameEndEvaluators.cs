@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static PawnCube.Statics;
+
 namespace PawnCube
 {
 
@@ -57,11 +59,12 @@ namespace PawnCube
     public class FourteenPieceGameEndEvaluator : IBooleanEvaluator
     {
         public string Name => nameof(FourteenPieceGameEndEvaluator);
-        public BooleanEvaluationResult Evaluate(List<ChessBoard> boards)
+        public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
         {
+            var examples = new List<BooleanExample>();
             foreach (var board in boards)
             {
-                var testBoard = new ChessBoard();
+                var testBoard = CopyBoardBase(board);
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
@@ -101,10 +104,16 @@ namespace PawnCube
                 }
                 if (count == 14)
                 {
-                    return new BooleanEvaluationResult(true, $"game ended by {board.EndGame.EndgameType} with 14 pieces in {board.ExecutedMoves.Count} moves: {Statics.DescribeChessBoard(board)}");
+                    var det = $"game ended by {board.EndGame.EndgameType} with 14 pieces";
+                    var exa = new BooleanExample(testBoard, det);
+                    examples.Add(exa);
+                    if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                    {
+                        return new BooleanEvaluationResult("", examples);
+                    }
                 }
             }
-            return new BooleanEvaluationResult(false, "");
+            return new BooleanEvaluationResult("", examples);
         }
     }
 
@@ -120,7 +129,7 @@ namespace PawnCube
             foreach (var board in boards)
             {
                 queensSeen += 2;
-                var testBoard = new ChessBoard();// { AutoEndgameRules = AutoEndgameRules.All };
+                var testBoard = CopyBoardBase(board);
                 var wOrigQueenPos = new Position("d1");
                 var bOrigQueenPos = new Position("d8");
                 var wOrigQueenDead = false;
@@ -194,17 +203,29 @@ namespace PawnCube
     public class AnyTimeOutEvaluator : IBooleanEvaluator
     {
         public string Name => nameof(AnyTimeOutEvaluator);
-        public BooleanEvaluationResult Evaluate(List<ChessBoard> boards)
+        public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
         {
+            var examples = new List<BooleanExample>();
             foreach (var board in boards)
             {
+                var testBoard = CopyBoardBase(board);
                 if (board.EndGame.EndgameType == EndgameType.Timeout)
                 {
-                    return new BooleanEvaluationResult(true, $"{Statics.DescribeChessBoard(board)}");
+                    foreach (var m in board.ExecutedMoves)
+                    {
+                        testBoard.Move(m);
+                    }
+                    var det = "Timeout";
+                    var exa = new BooleanExample(testBoard, det);
+                    examples.Add(exa);
+
+                    if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                    {
+                        return new BooleanEvaluationResult("", examples);
+                    }
                 }
             }
-            return new BooleanEvaluationResult(false, "");
+            return new BooleanEvaluationResult( "", examples);
         }
     }
-
 }
