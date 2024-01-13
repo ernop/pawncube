@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static PawnCube.Statics;
+
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace PawnCube
 {
 
@@ -30,6 +34,107 @@ namespace PawnCube
             }
             var raw = 10 * pawns + -10 * knights;
             var det = $"Total of {pawns} pawn first moves, {knights} knight first moves, so result is: {raw}";
+            var res = new NumericalEvaluationResult(raw, det);
+            return res;
+        }
+    }
+
+    public class PawnMoveTypesFiveForTwoJumpMinusFiveForOtherFirstMove : INumericalEvaluator
+    {
+        //1% for every piece on its starting square in the final position of every game
+        public string Name => nameof(OnePercentPerUnmovedPieceEvaluator);
+        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        {
+            var twoSpaceJumpCount = 0;
+            var oneSpaceJumpCount = 0;
+            var firstMoveCaptures = 0;
+
+            foreach (var board in boards)
+            {
+                var testBoard = CopyBoardBase(board);
+                for (var ii = 0; ii < board.ExecutedMoves.Count(); ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    testBoard.Move(move);
+                    if (move.Piece.Type == PieceType.Pawn)
+                    {
+                        //pawn is on his starting square
+                        if ((move.Piece.Color == PieceColor.White && move.OriginalPosition.Y == 1) ||
+                            (move.Piece.Color == PieceColor.Black && move.OriginalPosition.Y == 6))
+                        {
+                            var gap = Math.Abs(move.OriginalPosition.Y - move.NewPosition.Y);
+                            if (gap == 2)
+                            {
+                                twoSpaceJumpCount++;
+                            }
+                            else if (gap == 1)
+                            {
+                                if (move.CapturedPiece == null)
+                                {
+                                    oneSpaceJumpCount++;
+                                }
+                                else
+                                {
+                                    firstMoveCaptures++;
+                                }
+                            }
+                            else
+                            {
+                                var a = 4;
+                            }
+                        }
+                    }
+                }
+            }
+
+            var raw = 5 * twoSpaceJumpCount * -5 * (oneSpaceJumpCount + firstMoveCaptures);
+            var det = $"Total of {twoSpaceJumpCount} two space jumps, {oneSpaceJumpCount} one space jumps, and {firstMoveCaptures} first move captures.";
+            var res = new NumericalEvaluationResult(raw, det);
+            return res;
+        }
+    }
+
+    public class OnePercentPerUnmovedPieceEvaluator : INumericalEvaluator
+    {
+        //1% for every piece on its starting square in the final position of every game
+        public string Name => nameof(OnePercentPerUnmovedPieceEvaluator);
+        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        {
+            var unmovedCount = 0;
+            foreach (var board in boards)
+            {
+                var unmoved = new Dictionary<Position, bool>();
+                for (short xx = 0; xx < 8; xx++)
+                {
+                    foreach (short yy in new List<short>() { 0, 1, 6, 7 })
+                    {
+                        var pos = new Position(xx, yy);
+                        unmoved[pos] = true;
+                    }
+                }
+
+                var testBoard = CopyBoardBase(board);
+                for (var ii = 0; ii < board.ExecutedMoves.Count(); ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    unmoved[move.OriginalPosition] = false;
+                    unmoved[move.NewPosition] = false;
+                    testBoard.Move(move);
+                }
+
+                var thisUnmovedCount = 0;
+                foreach (var k in unmoved.Keys)
+                {
+                    if (unmoved[k])
+                    {
+                        thisUnmovedCount++;
+                    }
+                }
+                //Console.WriteLine($"game with {thisUnmovedCount} unmoved\r\n{testBoard.ToAscii()}");
+                unmovedCount += thisUnmovedCount;
+            }
+            var raw = 1 * unmovedCount;
+            var det = $"Total of {unmovedCount} unmoved pieces.";
             var res = new NumericalEvaluationResult(raw, det);
             return res;
         }
@@ -74,7 +179,7 @@ namespace PawnCube
                 //InsufficientMaterial,aa
                 //FiftyMoveRule,aa
                 //Repetition,aa
-                if ( e.EndgameType == EndgameType.DrawDeclared 
+                if (e.EndgameType == EndgameType.DrawDeclared
                      || e.EndgameType == EndgameType.Stalemate
                      || e.EndgameType == EndgameType.InsufficientMaterial
                      || e.EndgameType == EndgameType.Repetition
@@ -87,7 +192,7 @@ namespace PawnCube
                     decisiveCount++;
                 }
             }
-            var raw = 20*decisiveCount+ -10 * indecisiveCount;
+            var raw = 20 * decisiveCount + -10 * indecisiveCount;
             var det = $"Decisive: {decisiveCount}, indecisive: {indecisiveCount}";
             var res = new NumericalEvaluationResult(raw, det);
             return res;

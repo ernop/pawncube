@@ -60,6 +60,13 @@ namespace PawnCube
             foreach (var board in boards)
             {
                 var testBoard = CopyBoardBase(board);
+                //todo tomorrow: convert this to full iteration over a precalculated set of full board and available moves.
+                //it's not good to recalculate the entire thing.
+                //that way this will turn out to be like:
+                //foreach (var bp in board.all_positions) { 
+
+                //}
+
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
@@ -73,7 +80,7 @@ namespace PawnCube
                             Console.WriteLine("Error: mate without check detected. HMMMM");
                             continue;
                         }
-                        if (move.Parameter!=null && move.Parameter.ShortStr.Substring(0,1) == "=")
+                        if (move.Parameter != null && move.Parameter.ShortStr.Substring(0, 1) == "=")
                         {
                             //this system counts promotions as pawn moves.
                             //note: this means they also count promotion mates as NOT by the promoted piece!
@@ -95,12 +102,15 @@ namespace PawnCube
         }
     }
 
-    public class SamePieceMovesEightTimesInARowEvaluator : IBooleanEvaluator
+    
+
+    public class NoCapturesBeforeMove30Evaluator : IBooleanEvaluator
     {
-        public string Name => nameof(SamePieceMovesEightTimesInARowEvaluator);
+        public string Name => nameof(NoCapturesBeforeMove30Evaluator);
 
         public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
         {
+            var lim = 60;
             var examples = new List<BooleanExample>();
             foreach (var board in boards)
             {
@@ -109,31 +119,133 @@ namespace PawnCube
                 {
                     var move = board.ExecutedMoves[ii];
                     testBoard.Move(move);
-                    if (ii < 14) { continue; }
-                    var checkedCount = 0;
-                    while (true)
+                    if (ii <= lim && move.CapturedPiece != null)
                     {
-                        var move1 = board.ExecutedMoves[ii - checkedCount * 2];
-                        var move2 = board.ExecutedMoves[ii - checkedCount * 2 - 2];
-                        if (move1.Piece.Type != move2.Piece.Type) { break; }
-                        if (move1.OriginalPosition != move2.NewPosition) { break; }
-                        checkedCount++;
-                        //so, we know the piece moved here 2 plys ago, is the same piece
-                        if (checkedCount == 7) //7 comparisons succeeding means 8 in a row.
-                        {
-                            var joined = string.Join(',', board.ExecutedMoves.Select(el => el.San).Take(ii));
-                            var det = $"{move.Piece} moved 8 times in a row: {joined}";
-                            var exa = new BooleanExample(testBoard, det);
-                            examples.Add(exa);
-                            if (!doAll || examples.Count >= Statics.GlobalExampleMax)
-                            {
-                                return new BooleanEvaluationResult("", examples);
-                            }
-
-                        }
+                        break;
                     }
-                }
+                    if (ii > lim)
+                    {
+                        var endCapture = "Game ended with no piece ever taken.";
+                        var innerCopy = CopyBoardBase(testBoard);
+                        for (var jj = 0; jj < board.ExecutedMoves.Count; jj++)
+                        {
+                            var mm = board.ExecutedMoves[jj];
+                            if (mm.CapturedPiece != null)
+                            {
+                                endCapture = $"The first capture was: {Statics.MakeNormalMoveNumberDescriptor(jj)} {mm} taking a {innerCopy[mm.NewPosition]}";
+                                break;
+                            }
+                            innerCopy.Move(mm);
+                        }
+                        var det = $"Game with no captures through move {lim / 2}; {endCapture}";
+                        var exa = new BooleanExample(testBoard, det);
+                        examples.Add(exa);
+                        if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                        {
+                            return new BooleanEvaluationResult("", examples);
+                        }
+                        break;
+                    }
 
+                }
+            }
+            return new BooleanEvaluationResult("", examples);
+        }
+    }
+
+    public class NoCapturesBeforeMove20Evaluator : IBooleanEvaluator
+    {
+        public string Name => nameof(NoCapturesBeforeMove20Evaluator);
+
+        public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
+        {
+            var lim = 40;
+            var examples = new List<BooleanExample>();
+            foreach (var board in boards)
+            {
+                var testBoard = CopyBoardBase(board);
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    testBoard.Move(move);
+                    if (ii <= lim && move.CapturedPiece != null)
+                    {
+                        break;
+                    }
+                    if (ii > lim)
+                    {
+                        var endCapture = "Game ended with no piece ever taken.";
+                        var innerCopy = CopyBoardBase(testBoard);
+                        for (var jj = 0; jj < board.ExecutedMoves.Count; jj++)
+                        {
+                            var mm = board.ExecutedMoves[jj];
+                            if (mm.CapturedPiece != null)
+                            {
+                                endCapture = $"The first capture was: {Statics.MakeNormalMoveNumberDescriptor(jj)} {mm} taking a {innerCopy[mm.NewPosition]}";
+                                break;
+                            }
+                            innerCopy.Move(mm);
+                        }
+                        var det = $"Game with no captures through move {lim / 2}; {endCapture}";
+                        var exa = new BooleanExample(testBoard, det);
+                        examples.Add(exa);
+                        if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                        {
+                            return new BooleanEvaluationResult("", examples);
+                        }
+                        break;
+                    }
+
+                }
+            }
+            return new BooleanEvaluationResult("", examples);
+        }
+    }
+
+    public class NoCapturesBeforeMove10Evaluator : IBooleanEvaluator
+    {
+        public string Name => nameof(NoCapturesBeforeMove10Evaluator);
+
+        public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
+        {
+            var lim = 20;
+            var examples = new List<BooleanExample>();
+            foreach (var board in boards)
+            {
+                var testBoard = CopyBoardBase(board);
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    testBoard.Move(move);
+                    if (ii <= lim && move.CapturedPiece != null)
+                    {
+                        break;
+                    }
+                    if (ii > lim)
+                    {
+                        var endCapture = "Game ended with no piece ever taken.";
+                        var innerCopy = CopyBoardBase(testBoard);
+                        for (var jj = 0; jj < board.ExecutedMoves.Count; jj++)
+                        {
+                            var mm = board.ExecutedMoves[jj];
+                            if (mm.CapturedPiece != null)
+                            {
+                                endCapture = $"The first capture was: {Statics.MakeNormalMoveNumberDescriptor(jj)} {mm} taking a {innerCopy[mm.NewPosition]}";
+                                break;
+                            }
+                            innerCopy.Move(mm);
+                        }
+                        var det = $"Game with no captures through move {lim/2}; {endCapture}";
+                        var exa = new BooleanExample(testBoard, det);
+                        examples.Add(exa);
+                        if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                        {
+                            return new BooleanEvaluationResult("", examples);
+                        }
+                        break;
+                    }
+
+                }
             }
             return new BooleanEvaluationResult("", examples);
         }
@@ -480,7 +592,7 @@ namespace PawnCube
                     //now we check if this move enabled an en passant capture by the opponent
 
                     //if this was last move of the game, skip.
-                    if (board.ExecutedMoves.Count == ii+1) { continue; }
+                    if (board.ExecutedMoves.Count == ii + 1) { continue; }
 
                     var nextMove = board.ExecutedMoves[ii + 1];
                     //if they actually did ep, skip this.
@@ -494,7 +606,7 @@ namespace PawnCube
                     if (move.Piece.Type != PieceType.Pawn) { continue; }
                     if (move.NewPosition.Y != 3 && move.NewPosition.Y != 4) { continue; }
                     if (move.OriginalPosition.Y != 1 && move.NewPosition.Y != 6) { continue; }
-                    
+
                     //okay so now we look to see if they COULD have done EP this move. Since we know they didn't, if EP is in this list, it's a 
                     //case of refusal.
                     var candidateMoves = testBoard.Moves().Where(el => el.Parameter != null).Where(el => el.Parameter.ShortStr == "e.p.");
@@ -529,7 +641,7 @@ namespace PawnCube
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
-                    
+
                     if (move.Parameter != null)
                     {
                         if (move.Parameter.ShortStr == "e.p.")
@@ -658,6 +770,50 @@ namespace PawnCube
                     return new BooleanEvaluationResult("", examples);
                 }
 
+
+            }
+            return new BooleanEvaluationResult("", examples);
+        }
+    }
+
+    public class SamePieceMovesEightTimesInARowEvaluator : IBooleanEvaluator
+    {
+        public string Name => nameof(SamePieceMovesEightTimesInARowEvaluator);
+
+        public BooleanEvaluationResult Evaluate(bool doAll, List<ChessBoard> boards)
+        {
+            var examples = new List<BooleanExample>();
+            foreach (var board in boards)
+            {
+                var testBoard = CopyBoardBase(board);
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    testBoard.Move(move);
+                    if (ii < 14) { continue; }
+                    var checkedCount = 0;
+                    while (true)
+                    {
+                        var move1 = board.ExecutedMoves[ii - checkedCount * 2];
+                        var move2 = board.ExecutedMoves[ii - checkedCount * 2 - 2];
+                        if (move1.Piece.Type != move2.Piece.Type) { break; }
+                        if (move1.OriginalPosition != move2.NewPosition) { break; }
+                        checkedCount++;
+                        //so, we know the piece moved here 2 plys ago, is the same piece
+                        if (checkedCount == 7) //7 comparisons succeeding means 8 in a row.
+                        {
+                            var joined = string.Join(',', board.ExecutedMoves.Select(el => el.San).Take(ii));
+                            var det = $"{move.Piece} moved 8 times in a row: {joined}";
+                            var exa = new BooleanExample(testBoard, det);
+                            examples.Add(exa);
+                            if (!doAll || examples.Count >= Statics.GlobalExampleMax)
+                            {
+                                return new BooleanEvaluationResult("", examples);
+                            }
+
+                        }
+                    }
+                }
 
             }
             return new BooleanEvaluationResult("", examples);
