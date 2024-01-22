@@ -2,30 +2,226 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PawnCube
 {
     internal static class Statics
     {
+        public static int NumberOfExamplesToCollect = int.MaxValue;
+        public static int NumberOfExamplesToShow = 1;
+        internal static Regex rr = new Regex(@"[\d]{1,1000}\.");
 
-        public static int GlobalExampleMax = 3;
+        public static List<ChessBoard> LoadBoards()
+        {
+            var boards = new List<ChessBoard>();
+            var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Ding\Ding.pgn");
+            var maxGamesToProcess = 20000;
+            //maxGamesToProcess = 1;
+            var ct = 0;
+            var pgnStrings = Statics.SplitPgns(based);
+            Console.WriteLine($"Loading PGNStrings. {pgnStrings.Count()}");
+            foreach (var pgnStr in pgnStrings)
+            {
+                boards.Add(Statics.Pgn2Board(pgnStr.Trim()));
+                ct++;
+                if (ct >= maxGamesToProcess)
+                {
+                    break;
+                }
+            }
+            
+            return boards;
+        }
+
+        /// <summary>
+        /// okay, so some PGNs have moves in them from beyond the extent of the actual game.
+        /// i.e. at least this engine thinks the game is already ended but the PGN has move moves.
+        /// That's fine, but the problem is, it throws then.
+        /// So, let's just clean that up here by cutting those all off
+        /// So that internally, there will be a guarantee that ChessBoard c does not have that problem, ever.
+        /// </summary>
+        public static ChessBoard Pgn2Board(string pgnStr)
+        {
+            var usep = pgnStr;
+            var parts = usep.Split("\r\n\r\n");
+            var result = parts[1].Split("  ")[1].Trim();
+
+            var moves = parts[1].Replace(result, "").Replace("  ", "");
+            var joined = string.Join('\n', moves).Replace("\r\n", " ");
+            joined = rr.Replace(joined, "").Trim();
+
+            //will this work - telling the loader that just the first move happened, then the game ended, but actually adding on moves after?
+            //on the theory that MOVES work but loading from pgn including EP doesnt work?
+            var fakeString = parts[0] + "\r\n\r\n";
+            var board = ChessBoard.LoadFromPgn(fakeString);
+            if (joined.ToLower().Contains("e.p."))
+            {
+                Console.WriteLine(pgnStr);
+                Console.WriteLine(joined);
+            }
+
+            foreach (var m in joined.Split(' '))
+            {
+                //if the EP is from the b file, is it confused by bishop vs b pawn doing EP? both error cases were from that file.
+                try
+                {
+                    board.Move(m);
+                }
+                catch (Chess.ChessGameEndedException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    var qq = 4;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    var mm = board.Moves();
+                    //the bug in this case is that it fails to generate the ep move from the prior position.
+                    var ae = 3;
+                }
+            }
+
+            if (board.EndGame == null)
+            {
+
+                if (result == "1-0")
+                {
+                    board!.Resign(PieceColor.Black);
+                }
+                else if (result == "0-1")
+                {
+                    board!.Resign(PieceColor.White);
+                }
+                else if (result == "1/2-1/2")
+                {
+                    board!.Draw();
+                }
+                else
+                {
+                    throw new Exception("E");
+                }
+            }
+
+            var id = 1;
+            for (short xx = 0; xx < 8; xx++)
+            {
+                foreach (var yy in new List<short>() { 0, 1, 6, 7 })
+                {
+                    var piece = board[new Position(xx, yy)];
+                    if (piece != null)
+                    {
+                        piece.Id = id;
+                    }
+                    else
+                    {
+                        var wwe = 43;
+                    }
+                    id++;
+                }
+            }
+
+            return board;
+        }
+
+        public static IEnumerable<string> SplitPgns(string fp)
+        {
+
+            var lines = System.IO.File.ReadAllText(fp);
+            var parts = lines.Split("[Event");
+            foreach (var p in parts)
+            {
+                if (string.IsNullOrEmpty(p)) { continue; }
+                yield return "[Event" + p;
+            }
+
+        }
 
         /// <summary>
         /// just copy a board's headers.
+        /// for convenience we also assign a fake ID to each piece in the initial position.
+        /// That way later we know if they are taken or lost or whatever.
+        /// such pieces will be labelled with ID 1..16 as below.
+        /// 
+        /// Hmm, problem, I DO want to give the moves, but I don't want to actually have them "in" the game yet.
+        /// Geez, why am I copying the board so much. isn't it really just a matter of moving back and forth within it?
+        /// okay, just don't use this. it's pointless.
         /// </summary>
-        public static ChessBoard CopyBoardBase(ChessBoard board)
-        {
-            var res = new ChessBoard();
-            foreach (var h in board.Headers)
-            {
-                if (string.IsNullOrEmpty(h.Value)) { continue; }
-                res.AddHeader(h.Key, h.Value);
-            }
-            return res;
-        }
+        //public static ChessBoard CopyBoardBaseXX(ChessBoard board)
+        //{
+        //    var boardCopy = new ChessBoard();
+        //    foreach (var h in board.Headers)
+        //    {
+        //        if (string.IsNullOrEmpty(h.Value)) { continue; }
+        //        boardCopy.AddHeader(h.Key, h.Value);
+        //    }
+        //    var id = 1;
+        //    foreach (var move in board.ExecutedMoves)
+        //    {
+        //        boardCopy.Move(move);
+        //    }
+        //    board.GoToStartingPosition();
+
+        //    //my new hack: also assign the pieces this new ID which represents that it was a new piece from the beginning of the game.
+
+        //    //wow, awful we have to manually recalculate the endgame.
+        //    if (boardCopy.EndGame == null)
+        //    {
+        //        if (board.EndGame == null)
+        //        {
+        //            var ae = 4;
+        //            Console.WriteLine("game has no endgame.");
+        //        }
+        //        //boardCopy.Last();
+        //        //board.
+        //        var wonSide = board.EndGame.WonSide;
+        //        var lostSide = board.EndGame.WonSide;
+        //        if (board.EndGame.WonSide == PieceColor.Black)
+        //        {
+        //            lostSide = PieceColor.White;
+        //        }
+
+        //        switch (board.EndGame.EndgameType)
+        //        {
+
+        //            case EndgameType.Timeout:
+        //                boardCopy.Resign(lostSide);
+        //                break;
+        //            case EndgameType.InsufficientMaterial:
+        //                boardCopy.Draw();
+        //                break;
+        //            case EndgameType.FiftyMoveRule:
+        //                boardCopy.Draw();
+        //                break;
+        //            case EndgameType.Resigned:
+        //                boardCopy.Resign(lostSide);
+        //                break;
+        //            case EndgameType.DrawDeclared:
+        //                boardCopy.Draw();
+        //                break;
+        //            case EndgameType.Checkmate:
+        //                boardCopy.Resign(lostSide);
+        //                break;
+        //            case EndgameType.Repetition:
+        //                boardCopy.Draw();
+        //                break;
+        //            default:
+        //                throw new Exception("E");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        //Console.WriteLine("had endgame."); 
+        //        var ae = 43;
+        //    }
+
+        //    return boardCopy;
+        //}
 
         public static string DescribeChessBoard(ChessBoard board)
         {
@@ -41,16 +237,19 @@ namespace PawnCube
             return true;
         }
 
-
         public static string MakeNormalMoveNumberDescriptor(int plies)
         {
-            var s = plies / 2.0;
-            if (plies % 2 == 1) { 
-                return $"W{Math.Floor(s) + 1}";
+            if (plies == 0)
+            {
+                return "Initial Position";
             }
-            return $"B{Math.Floor(s) + 1}";
+            var s = plies / 2.0;
+            if (plies % 2 == 1)
+            {
+                return $"B{Math.Floor(s) + 1}";
+            }
+            return $"W{Math.Floor(s) + 1}";
         }
-
 
         /// <summary>
         /// The point of all this is to judge these two prediction markets

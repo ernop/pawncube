@@ -2,32 +2,27 @@
 
 namespace PawnCube
 {
+    /// <summary>
+    /// boolean searchers will create one of these, with a useful custom description specific to it
+    /// for every time it's found.
+    /// (things like move number, board layout can be generically added later)
+    /// </summary>
     public class BooleanExample
     {
-        public BooleanExample(ChessBoard testBoard, string det)
+        public BooleanExample(ChessBoard board, string det, int moveNumber)
         {
-            //I should actually make a copy of this testboard so the original isn't touched.
-            var copy = new ChessBoard();
-            foreach (var m in testBoard.ExecutedMoves)
-            {
-                copy.Move(m);
-
-            }
-            foreach (var h in testBoard.Headers)
-            {
-                copy.AddHeader(h.Key, h.Value);
-            }
-
-            Board = copy;
+            Board = board;
             Details = det;
+            ExampleMoveIndex = moveNumber;
         }
 
         /// <summary>
-        /// in the demonstrated position
+        /// this is the original!
         /// </summary>
         public ChessBoard Board { get; set; }
 
         //move number or whatever explaining the example.
         public string Details { get; set; }
+        public int ExampleMoveIndex { get; set; }
     }
 }
