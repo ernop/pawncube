@@ -2,7 +2,6 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/PawnCube
-/ChessLibrary/bin/Debug/net6.0
-/ChessLibrary/obj
+/.vs
+/bin/Debug/net7.0
 /obj

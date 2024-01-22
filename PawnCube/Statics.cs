@@ -20,7 +20,7 @@ namespace PawnCube
         public static List<ChessBoard> LoadBoards()
         {
             var boards = new List<ChessBoard>();
-            var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Ding\Ding.pgn");
+            var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn");
             var maxGamesToProcess = 20000;
             //maxGamesToProcess = 1;
             var ct = 0;
