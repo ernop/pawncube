@@ -91,7 +91,7 @@ public class TripledPawnEvaluator : PatternMatcherChecker
         }
 
         //we got through a whole vector without dying.
-        details = $"at: {xx + 1},{yy + 1} {xx + 1 + up[0].Item1},{yy + 1 + up[0].Item2} {xx + 1 + up[1].Item1},{yy + 1 + up[1].Item2}";
+        details = $"at:  {new Position(xx, yy)}, {new Position((short)(xx + up[0].Item1), (short)(yy + up[0].Item2))}, {new Position((short)(xx + up[1].Item1), (short)(yy + up[1].Item2))}";
         return true;
     }
 }
@@ -131,7 +131,7 @@ public class QuadrupledPawnEvaluator : PatternMatcherChecker
             }
         }
 
-        details = $"at:  {xx + 1},{yy + 1} {xx + 1 + up[0].Item1},{yy + 1 + up[0].Item2} {xx + 1 + up[1].Item1},{yy + 1 + up[1].Item2} {xx + 1 + up[2].Item1},{yy + 1 + up[2].Item2}";
+        details = $"at:  {new Position(xx, yy)}, {new Position((short)(xx + up[0].Item1), (short)(yy + up[0].Item2))}, {new Position((short)(xx + up[1].Item1), (short)(yy + up[1].Item2))}, {new Position((short)(xx + up[2].Item1), (short)(yy + up[2].Item2))}";
         //we got through a whole vector without dying.
         return true;
     }
@@ -150,7 +150,7 @@ public class QueenInACornerEvaluator : PatternMatcherChecker
             var p = testBoard[pos.Item1, pos.Item2];
             if (p != null && p.Type == PieceType.Queen)
             {
-                details = $"at: {xx + 1},{yy + 1}";
+                details = $"at: {new Position(xx,yy)}";
                 return true;
             }
         }
@@ -176,7 +176,32 @@ public class KingInACornerEvaluator : PatternMatcherChecker
             var p = testBoard[pos.Item1, pos.Item2];
             if (p != null && p.Type == PieceType.King)
             {
-                details = $"at: {xx + 1},{yy + 1}";
+                details = $"at: {new Position(xx,yy)}";
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+public class BishopInACornerEvaluator : PatternMatcherChecker
+{
+    public override string Name => nameof(BishopInACornerEvaluator);
+
+    public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
+    {
+        details = "";
+        var positions = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 0), new Tuple<short, short>(7, 0), new Tuple<short, short>(0, 7), new Tuple<short, short>(7, 7) };
+
+        //for this type of single spot pattern it doesn't really make sense to check every square.
+        //i could just check the one. so this is duplicated effort.
+
+        foreach (var pos in positions)
+        {
+            var p = testBoard[pos.Item1, pos.Item2];
+            if (p != null && p.Type == PieceType.Bishop)
+            {
+                details = $"at: {new Position(xx,yy)}";
                 return true;
             }
         }

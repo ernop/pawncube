@@ -14,6 +14,12 @@ namespace Chess;
 /// </summary>
 public partial class ChessBoard
 {
+    /// <summary>
+    /// why not store this eh.
+    /// </summary>
+    internal string Pgn { get; set; } = "";
+    public string AllMoves() => string.Join(',', MovesToSan);
+
     internal Piece?[,] pieces;
 
     /// <summary>
@@ -284,7 +290,7 @@ public partial class ChessBoard
         if (!IsLastMoveDisplayed)
             throw new ChessInvalidMoveException(this, "Please use board.DisplayLastMove(); to be able to perform new moves in this chess game", move);
 
-        if (IsValidMove(move, this, true, true))
+        if (IsValidMove(move: move, board: this, raise: true, checkTurn: true))
         {
             if (move.San is null)
                 ParseToSan(move);
@@ -429,8 +435,39 @@ public partial class ChessBoard
     /// <summary>
     /// So dumb this isn't included by default.
     /// This goes to the starting position.
+    /// 
+    /// Also, because the lib feels its necessary to kill and recreate a piece every time it moves (!), we have to restore the ids here.
+    /// But even that... won't work.
     /// </summary>
-    public void GoToStartingPosition() => MoveIndex = -1;
+    public void GoToStartingPosition()
+    {
+        MoveIndex = -1;
+    }
+
+    //ugh even with this, the ids can be lost on the following list (incomplete:) <strikethrough>the king</s> probably more.
+    internal void RestoreIds()
+    {
+        //restore the IDs...
+        var id = 1;
+        foreach (var yy in new List<short>() { 0, 1, 6, 7 })
+        {
+            for (short xx = 0; xx < 8; xx++)
+            {
+                var piece = this[new Position(xx, yy)];
+                if (piece != null)
+                {
+                    piece.Id = id;
+                }
+                else
+                {
+                    var wwe = 43;
+                    Console.WriteLine("fail.");
+                    //probably the library kills all the original piece IDs when it resets the position... ofc.
+                }
+                id++;
+            }
+        }
+    }
 
     /// <summary>
     /// Declares resign of one of sides
@@ -476,7 +513,10 @@ public partial class ChessBoard
     internal static void DropPiece(Move move, ChessBoard board)
     {
         //Old way:
-        board.pieces[move.NewPosition.Y, move.NewPosition.X] = new(board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Color, board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Type);
+        var newPiece = new Piece(board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Color, board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Type);
+        newPiece.Id = board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Id;
+
+        board.pieces[move.NewPosition.Y, move.NewPosition.X] = newPiece;
 
         // Clearing old position
         board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X] = null;
@@ -484,8 +524,13 @@ public partial class ChessBoard
 
     internal static void RestorePiece(Move move, ChessBoard board)
     {
+        Console.WriteLine("restore piece");
         // Moving piece to its original position
-        board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X] = new(board.pieces[move.NewPosition.Y, move.NewPosition.X].Color, board.pieces[move.NewPosition.Y, move.NewPosition.X].Type);
+        var oldPiece = new Piece(board.pieces[move.NewPosition.Y, move.NewPosition.X].Color, board.pieces[move.NewPosition.Y, move.NewPosition.X].Type);
+        oldPiece.Id = board.pieces[move.NewPosition.Y, move.NewPosition.X].Id;
+        
+        //TODO not working.
+        board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X] = oldPiece;
 
         // Clearing new position / or setting captured piece back
         board.pieces[move.NewPosition.Y, move.NewPosition.X] = move.CapturedPiece;
@@ -578,5 +623,7 @@ public partial class ChessBoard
         pieces[7, 5] = new Piece(PieceColor.Black, PieceType.Bishop);
         pieces[7, 6] = new Piece(PieceColor.Black, PieceType.Knight);
         pieces[7, 7] = new Piece(PieceColor.Black, PieceType.Rook);
+
+        RestoreIds();
     }
 }

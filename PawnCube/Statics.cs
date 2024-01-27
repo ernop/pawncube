@@ -22,7 +22,7 @@ namespace PawnCube
             var boards = new List<ChessBoard>();
             var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn");
             var maxGamesToProcess = 20000;
-            //maxGamesToProcess = 1;
+            //maxGamesToProcess = 200;
             var ct = 0;
             var pgnStrings = Statics.SplitPgns(based);
             Console.WriteLine($"Loading PGNStrings. {pgnStrings.Count()}");
@@ -108,23 +108,7 @@ namespace PawnCube
                 }
             }
 
-            var id = 1;
-            for (short xx = 0; xx < 8; xx++)
-            {
-                foreach (var yy in new List<short>() { 0, 1, 6, 7 })
-                {
-                    var piece = board[new Position(xx, yy)];
-                    if (piece != null)
-                    {
-                        piece.Id = id;
-                    }
-                    else
-                    {
-                        var wwe = 43;
-                    }
-                    id++;
-                }
-            }
+            board.GoToStartingPosition();
 
             return board;
         }
@@ -141,87 +125,6 @@ namespace PawnCube
             }
 
         }
-
-        /// <summary>
-        /// just copy a board's headers.
-        /// for convenience we also assign a fake ID to each piece in the initial position.
-        /// That way later we know if they are taken or lost or whatever.
-        /// such pieces will be labelled with ID 1..16 as below.
-        /// 
-        /// Hmm, problem, I DO want to give the moves, but I don't want to actually have them "in" the game yet.
-        /// Geez, why am I copying the board so much. isn't it really just a matter of moving back and forth within it?
-        /// okay, just don't use this. it's pointless.
-        /// </summary>
-        //public static ChessBoard CopyBoardBaseXX(ChessBoard board)
-        //{
-        //    var boardCopy = new ChessBoard();
-        //    foreach (var h in board.Headers)
-        //    {
-        //        if (string.IsNullOrEmpty(h.Value)) { continue; }
-        //        boardCopy.AddHeader(h.Key, h.Value);
-        //    }
-        //    var id = 1;
-        //    foreach (var move in board.ExecutedMoves)
-        //    {
-        //        boardCopy.Move(move);
-        //    }
-        //    board.GoToStartingPosition();
-
-        //    //my new hack: also assign the pieces this new ID which represents that it was a new piece from the beginning of the game.
-
-        //    //wow, awful we have to manually recalculate the endgame.
-        //    if (boardCopy.EndGame == null)
-        //    {
-        //        if (board.EndGame == null)
-        //        {
-        //            var ae = 4;
-        //            Console.WriteLine("game has no endgame.");
-        //        }
-        //        //boardCopy.Last();
-        //        //board.
-        //        var wonSide = board.EndGame.WonSide;
-        //        var lostSide = board.EndGame.WonSide;
-        //        if (board.EndGame.WonSide == PieceColor.Black)
-        //        {
-        //            lostSide = PieceColor.White;
-        //        }
-
-        //        switch (board.EndGame.EndgameType)
-        //        {
-
-        //            case EndgameType.Timeout:
-        //                boardCopy.Resign(lostSide);
-        //                break;
-        //            case EndgameType.InsufficientMaterial:
-        //                boardCopy.Draw();
-        //                break;
-        //            case EndgameType.FiftyMoveRule:
-        //                boardCopy.Draw();
-        //                break;
-        //            case EndgameType.Resigned:
-        //                boardCopy.Resign(lostSide);
-        //                break;
-        //            case EndgameType.DrawDeclared:
-        //                boardCopy.Draw();
-        //                break;
-        //            case EndgameType.Checkmate:
-        //                boardCopy.Resign(lostSide);
-        //                break;
-        //            case EndgameType.Repetition:
-        //                boardCopy.Draw();
-        //                break;
-        //            default:
-        //                throw new Exception("E");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        //Console.WriteLine("had endgame."); 
-        //        var ae = 43;
-        //    }
-
-        //    return boardCopy;
-        //}
 
         public static string DescribeChessBoard(ChessBoard board)
         {

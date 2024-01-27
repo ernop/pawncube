@@ -57,7 +57,10 @@ public partial class ChessBoard
 
         if (!succeeded && exception is not null)
             throw exception;
-
+        
+        ///we might as well actually save the pgn we used to make the game.
+        board.Pgn = pgn;
         return board!;
     }
+
 }

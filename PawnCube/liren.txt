@@ -39,13 +39,13 @@
 #En passant refused
 #First piece captured in a game is a rook
 #A full rank (at least two non original pieces)
-
-More knights survive than bishops, judging by the final position of each game
-A game ends with a full complement of knights and bishops
+#A game ends with a full complement of knights and bishops
+#More knights survive than bishops, judging by the final position of each game
+#Bishop in a corner
+#10% for every piece which ends a game in its starting square after having moved, over all games
 
 10% for each black win
-Bishop in a corner
-10% for every piece which ends a game in its starting square after having moved, over all games
+
 20% for each extra pawn held by the side with the greatest pawn advantage, in any position in any game
 We get to a bishop and knight endgame
 10% * n where n is the side length of the largest n x n empty square that appears in any final position in any game

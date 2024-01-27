@@ -89,14 +89,22 @@ public class MoveCastle : IMoveParameter
         switch (CastleType)
         {
             case CastleType.King:
-                board.pieces[y, 6] = new Piece(move.Piece.Color, PieceType.King);
-                board.pieces[y, 5] = new Piece(move.Piece.Color, PieceType.Rook);
+                var newKing = new Piece(move.Piece.Color, PieceType.King);
+                newKing.Id = board.pieces[y, 4].Id;
+                var newRook = new Piece(move.Piece.Color, PieceType.Rook);
+                newRook.Id = board.pieces[y, 7].Id;
+                board.pieces[y, 6] = newKing;
+                board.pieces[y, 5] = newRook;
                 board.pieces[y, 4] = null;
                 board.pieces[y, 7] = null;
                 break;
             case CastleType.Queen:
-                board.pieces[y, 2] = new Piece(move.Piece.Color, PieceType.King);
-                board.pieces[y, 3] = new Piece(move.Piece.Color, PieceType.Rook);
+                var newKing2 = new Piece(move.Piece.Color, PieceType.King);
+                newKing2.Id = board.pieces[y, 4].Id;
+                var newRook2 = new Piece(move.Piece.Color, PieceType.Rook);
+                newRook2.Id = board.pieces[y, 0].Id;
+                board.pieces[y, 2] = newKing2;
+                board.pieces[y, 3] = newRook2;
                 board.pieces[y, 4] = null;
                 board.pieces[y, 0] = null;
                 break;

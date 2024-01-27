@@ -44,6 +44,194 @@ namespace PawnCube
                     break;
                 }
             }
+        }
+    }
+
+    public class FullComplimentOfMinorPiecesEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(FullComplimentOfMinorPiecesEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            board.Last();
+            var originalKnights = 0;
+            var originalBishops = 0;
+
+            for (short xx = 0; xx < 8; xx++)
+            {
+                for (short yy = 0; yy < 8; yy++)
+                {
+                    var p = board[new Position(xx, yy)];
+                    if (p == null)
+                    {
+                        continue;
+                    }
+                    if (p.Type == PieceType.Knight)
+                    {
+                        if (p.Id > 0)
+                        {
+                            originalKnights++;
+                        }
+                        else
+                        {
+                            Console.WriteLine(board.ExecutedMoves);
+                            var a = 54;
+                        }
+
+                    }
+                    if (p.Type == PieceType.Bishop)
+                    {
+                        if (p.Id > 0)
+                        {
+                            originalBishops++;
+                        }
+                        else
+                        {
+                            //foreach (var m in board.Moves())
+                            //{
+                            //    Console.WriteLine(m);
+                            //}
+                            foreach (var m in board.ExecutedMoves)
+                            {
+                                Console.WriteLine(m);
+                            }
+                            Console.WriteLine(board.ToAscii());
+                            var a = 54;
+                        }
+                    }
+                }
+            }
+
+            if (originalBishops == 4 && originalKnights == 4)
+            {
+                yield return new BooleanExample(board, "All minor pieces survived, wow.", board.ExecutedMoves.Count - 1);
+            }
+        }
+    }
+
+    public class MoreKnightsSurviveThanBishopsEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(MoreKnightsSurviveThanBishopsEvaluator);
+
+        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        {
+            var originalKnights = 0;
+            var originalBishops = 0;
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                board.Last();
+
+                for (short xx = 0; xx < 8; xx++)
+                {
+                    for (short yy = 0; yy < 8; yy++)
+                    {
+                        var p = board[new Position(xx, yy)];
+                        if (p == null)
+                        {
+                            continue;
+                        }
+                        if (p.Type == PieceType.Knight)
+                        {
+                            if (p.Id > 0)
+                            {
+                                originalKnights++;
+                            }
+                            else
+                            {
+                                Console.WriteLine(board.ExecutedMoves);
+                                var a = 54;
+                            }
+
+                        }
+                        if (p.Type == PieceType.Bishop)
+                        {
+                            if (p.Id > 0)
+                            {
+                                originalBishops++;
+                            }
+                            else
+                            {
+                                Console.WriteLine(board.ToAscii());
+                                var a = 54;
+                            }
+                        }
+                    }
+                }
+            }
+
+            var det = $"Total surviving knights;{originalKnights}, total surviving bishops: {originalBishops}";
+            var raw = (originalKnights - originalBishops > 0) ? 100 : 0;
+            return new NumericalEvaluationResult(raw, det);
+
+        }
+    }
+
+    /// <summary>
+    /// definitely not debugged.
+    /// </summary>
+    public class HomecomingPiecesTenPercentEachEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(HomecomingPiecesTenPercentEachEvaluator);
+
+        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        {
+            //we have to calculate the pieces
+            //which are on their home squares,
+            //minus the pieces who moved. Then give 10% for each.
+            var homecomingPieces = 0;
+
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                board.Last();
+
+                var moved = new Dictionary<int, bool>();
+                for (var ii = 0; ii < 32; ii++)
+                {
+                    moved[ii] = false;
+                }
+                foreach (var move in board.ExecutedMoves)
+                {
+                    var pid = move.Piece.Id;
+                    if (pid <= 0)
+                    {
+                        var ase = board.AllMoves();
+                        throw new Exception("Error: piece id is 0 or less.?");
+                    }
+                    moved[pid] = true;
+                }
+
+                //okay now go through and count the pieces that are home and moved.
+                var id = 0;
+                foreach (var yy in new List<short>() { 0, 1, 6, 7 })
+                {
+                    for (short xx = 0; xx < 8; xx++)
+                    {
+                        id++;
+                        if (!moved[id-1])
+                        {
+                            continue;
+                        }
+                        var piece = board[new Position(xx, yy)];
+                        if (piece != null)
+                        {
+                            if (piece != null)
+                            {
+                                if (piece.Id == id-1)
+                                {
+                                    homecomingPieces++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var det = $"Total homecoming pieces: {homecomingPieces}";
+            var raw = homecomingPieces * 10;
+            return new NumericalEvaluationResult(raw, det);
 
         }
     }
@@ -519,7 +707,7 @@ namespace PawnCube
                 if (move.Parameter != null && move.Parameter.ShortStr == "e.p.")
                 {
                     var det = $"Player subsequently En Passants with {move}";
-                    yield return new BooleanExample(board, det, ii-1);
+                    yield return new BooleanExample(board, det, ii - 1);
                 }
             }
         }
@@ -653,7 +841,7 @@ namespace PawnCube
             {
                 var move = board.ExecutedMoves[ii];
                 board.Next();
-                
+
                 if (move.Parameter != null)
                 {
                     var l = move.Parameter.ShortStr;
