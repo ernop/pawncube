@@ -89,20 +89,16 @@ public class MoveCastle : IMoveParameter
         switch (CastleType)
         {
             case CastleType.King:
-                var newKing = new Piece(move.Piece.Color, PieceType.King);
-                newKing.Id = board.pieces[y, 4].Id;
-                var newRook = new Piece(move.Piece.Color, PieceType.Rook);
-                newRook.Id = board.pieces[y, 7].Id;
+                var newKing = new Piece(move.Piece.Color, PieceType.King, board.pieces[y, 4].Id);
+                var newRook = new Piece(move.Piece.Color, PieceType.Rook, board.pieces[y, 7].Id);
                 board.pieces[y, 6] = newKing;
                 board.pieces[y, 5] = newRook;
                 board.pieces[y, 4] = null;
                 board.pieces[y, 7] = null;
                 break;
             case CastleType.Queen:
-                var newKing2 = new Piece(move.Piece.Color, PieceType.King);
-                newKing2.Id = board.pieces[y, 4].Id;
-                var newRook2 = new Piece(move.Piece.Color, PieceType.Rook);
-                newRook2.Id = board.pieces[y, 0].Id;
+                var newKing2 = new Piece(move.Piece.Color, PieceType.King, board.pieces[y, 4].Id);
+                var newRook2 = new Piece(move.Piece.Color, PieceType.Rook, board.pieces[y, 0].Id);
                 board.pieces[y, 2] = newKing2;
                 board.pieces[y, 3] = newRook2;
                 board.pieces[y, 4] = null;
@@ -116,17 +112,22 @@ public class MoveCastle : IMoveParameter
     void IMoveParameter.Undo(Move move, ChessBoard board)
     {
         var y = move.NewPosition.Y;
+
         switch (CastleType)
         {
             case CastleType.King:
-                board.pieces[y, 4] = new Piece(move.Piece.Color, PieceType.King);
-                board.pieces[y, 7] = new Piece(move.Piece.Color, PieceType.Rook);
+                var newKing = new Piece(move.Piece.Color, PieceType.King, board.pieces[y, 6].Id);
+                var newRook = new Piece(move.Piece.Color, PieceType.Rook, board.pieces[y, 5].Id);
+                board.pieces[y, 4] = newKing;
+                board.pieces[y, 7] = newRook;
                 board.pieces[y, 6] = null;
                 board.pieces[y, 5] = null;
                 break;
             case CastleType.Queen:
-                board.pieces[y, 4] = new Piece(move.Piece.Color, PieceType.King);
-                board.pieces[y, 0] = new Piece(move.Piece.Color, PieceType.Rook);
+                var newKing2 = new Piece(move.Piece.Color, PieceType.King, board.pieces[y, 2].Id);
+                var newRook2 = new Piece(move.Piece.Color, PieceType.Rook, board.pieces[y, 3].Id);
+                board.pieces[y, 4] = newKing2;
+                board.pieces[y, 0] = newRook2;
                 board.pieces[y, 2] = null;
                 board.pieces[y, 3] = null;
                 break;
@@ -210,7 +211,8 @@ public class MovePromotion : IMoveParameter
 
         // Making sure original type(pawn) is saved
 
-        board.pieces[move.NewPosition.Y, move.NewPosition.X].Type = PromotionType switch
+        var piece = board.pieces[move.NewPosition.Y, move.NewPosition.X];
+        piece.Type = PromotionType switch
         {
             PromotionType.ToQueen or PromotionType.Default => PieceType.Queen,
             PromotionType.ToRook => PieceType.Rook,
@@ -218,6 +220,8 @@ public class MovePromotion : IMoveParameter
             PromotionType.ToKnight => PieceType.Knight,
             _ => throw new ChessArgumentException(board, nameof(PromotionType), nameof(IMoveParameter.Execute)),
         };
+        piece.Id = 0;
+        //ALSO! we DO have to clear the ID when we promote!
     }
 
     void IMoveParameter.Undo(Move move, ChessBoard board)

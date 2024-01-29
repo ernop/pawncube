@@ -7,6 +7,8 @@
 // *****************************************************
 //                                    Made by Geras1mleo
 
+using System.Linq;
+
 namespace Chess;
 
 /// <summary>
@@ -135,7 +137,7 @@ public partial class ChessBoard
                 captured.AddRange(FenBuilder!.WhiteCaptured);
 
             captured.AddRange(DisplayedMoves.Where(m => m.CapturedPiece?.Color == PieceColor.White)
-                                            .Select(m => new Piece(m.CapturedPiece.Color, m.CapturedPiece.Type)));
+                                            .Select(m => new Piece(m.CapturedPiece.Color, m.CapturedPiece.Type, m.CapturedPiece.Id)));
 
             return captured.ToArray();
         }
@@ -154,7 +156,7 @@ public partial class ChessBoard
                 captured.AddRange(FenBuilder!.BlackCaptured);
 
             captured.AddRange(DisplayedMoves.Where(m => m.CapturedPiece?.Color == PieceColor.Black)
-                                            .Select(m => new Piece(m.CapturedPiece.Color, m.CapturedPiece.Type)));
+                                            .Select(m => new Piece(m.CapturedPiece.Color, m.CapturedPiece.Type, m.CapturedPiece.Id)));
 
             return captured.ToArray();
         }
@@ -513,8 +515,9 @@ public partial class ChessBoard
     internal static void DropPiece(Move move, ChessBoard board)
     {
         //Old way:
-        var newPiece = new Piece(board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Color, board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Type);
-        newPiece.Id = board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X].Id;
+        var oldPiece = board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X];
+
+        var newPiece = new Piece(oldPiece.Color, oldPiece.Type, oldPiece.Id);
 
         board.pieces[move.NewPosition.Y, move.NewPosition.X] = newPiece;
 
@@ -526,11 +529,9 @@ public partial class ChessBoard
     {
         Console.WriteLine("restore piece");
         // Moving piece to its original position
-        var oldPiece = new Piece(board.pieces[move.NewPosition.Y, move.NewPosition.X].Color, board.pieces[move.NewPosition.Y, move.NewPosition.X].Type);
-        oldPiece.Id = board.pieces[move.NewPosition.Y, move.NewPosition.X].Id;
+        var pieceWeArereMovingBack = new Piece(board.pieces[move.NewPosition.Y, move.NewPosition.X].Color, board.pieces[move.NewPosition.Y, move.NewPosition.X].Type, board.pieces[move.NewPosition.Y, move.NewPosition.X].Id);
         
-        //TODO not working.
-        board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X] = oldPiece;
+        board.pieces[move.OriginalPosition.Y, move.OriginalPosition.X] = pieceWeArereMovingBack;
 
         // Clearing new position / or setting captured piece back
         board.pieces[move.NewPosition.Y, move.NewPosition.X] = move.CapturedPiece;
@@ -589,7 +590,7 @@ public partial class ChessBoard
         pieces = new Piece[8, 8];
 
         pieces[0, 0] = new Piece(PieceColor.White, PieceType.Rook);
-        pieces[0, 1] = new Piece(PieceColor.White, PieceType.Knight);
+        pieces[0, 1] = new Piece(PieceColor.White, PieceType.Knight );
         pieces[0, 2] = new Piece(PieceColor.White, PieceType.Bishop);
         pieces[0, 3] = new Piece(PieceColor.White, PieceType.Queen);
         pieces[0, 4] = new Piece(PieceColor.White, PieceType.King);

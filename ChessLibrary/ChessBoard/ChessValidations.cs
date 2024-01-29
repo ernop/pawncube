@@ -287,16 +287,28 @@ public partial class ChessBoard
             // If En Passant => pass to parameters
             else if (IsValidEnPassant(move, board, v, h))
             {
-                move.Parameter = new MoveEnPassant()
+                var cpp = new Position()
                 {
-                    CapturedPawnPosition = new()
-                    {
-                        Y = (short)(move.NewPosition.Y - v),
-                        X = move.NewPosition.X
-                    }
+                    Y = (short)(move.NewPosition.Y - v),
+                    X = move.NewPosition.X
                 };
 
-                move.CapturedPiece = new Piece(move.Piece.Color.OppositeColor(), PieceType.Pawn);
+                move.Parameter = new MoveEnPassant()
+                {
+                    CapturedPawnPosition = cpp
+                };
+
+                //var piece = board.pieces[cpp.X, cpp.Y];
+                //var piece2 = board.pieces[cpp.X-1, cpp.Y-1];
+                //var capturedId = board.pieces[cpp.X, cpp.Y].Id;
+
+                //ugh this handling just sucks.  leave it for now, known error with tracking captured piece ids.
+                //Console.WriteLine(board.ToAscii());
+                //foreach (var m in board.ExecutedMoves) { Console.Write(m); Console.Write(' '); }
+
+                //oh, just grab the damn previous move and get that piece, and that's your id.
+                var capturedId = board.ExecutedMoves.Last().Piece.Id;
+                move.CapturedPiece = new Piece(move.Piece.Color.OppositeColor(), PieceType.Pawn, capturedId);
 
                 return true;
             }

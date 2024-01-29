@@ -15,7 +15,7 @@ namespace PawnCube
     {
         public static int NumberOfExamplesToCollect = int.MaxValue;
         public static int NumberOfExamplesToShow = 1;
-        internal static Regex rr = new Regex(@"[\d]{1,1000}\.");
+        internal static Regex numberMatcher = new Regex(@"[\d]{1,1000}\.");
 
         public static List<ChessBoard> LoadBoards()
         {
@@ -54,7 +54,7 @@ namespace PawnCube
 
             var moves = parts[1].Replace(result, "").Replace("  ", "");
             var joined = string.Join('\n', moves).Replace("\r\n", " ");
-            joined = rr.Replace(joined, "").Trim();
+            joined = numberMatcher.Replace(joined, "").Trim();
 
             //will this work - telling the loader that just the first move happened, then the game ended, but actually adding on moves after?
             //on the theory that MOVES work but loading from pgn including EP doesnt work?
@@ -152,6 +152,35 @@ namespace PawnCube
                 return $"B{Math.Floor(s) + 1}";
             }
             return $"W{Math.Floor(s) + 1}";
+        }
+
+        /// <summary>
+        /// +x for w, -x means b leads on board.
+        /// </summary>
+        public static int GetMaterialDifference(ChessBoard board)
+        {
+            var count = 0;
+            
+            for (short xx = 0; xx < 8; xx++)
+            {
+                for (short yy = 0; yy < 8; yy++)
+                {
+                    var piece = board[new Position(xx,yy)];
+                    var mult = 1;
+                    if (piece == null) { continue; }
+                    if (piece.Color == PieceColor.Black) { mult = -1; }
+                    if (piece.Type == PieceType.Pawn) { mult *= 1; }
+                    if (piece.Type == PieceType.Knight) { mult *= 3; }
+                    if (piece.Type == PieceType.Bishop) { mult *= 3; }
+                    if (piece.Type == PieceType.Rook) { mult *= 5; }
+                    if (piece.Type == PieceType.Queen) { mult *= 9; }
+                    count += mult;
+                }
+            }
+            //Console.WriteLine(board.ToAscii());
+            
+            //Console.WriteLine(count);
+            return count;
         }
 
         /// <summary>

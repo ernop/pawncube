@@ -2,9 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 using static PawnCube.Statics;
 
@@ -16,7 +19,7 @@ namespace PawnCube
     public class Pawn10VsKnightMinus10FirstMoveEvaluator : INumericalEvaluator
     {
         public string Name => nameof(Pawn10VsKnightMinus10FirstMoveEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var knights = 0;
             var pawns = 0;
@@ -42,7 +45,7 @@ namespace PawnCube
     public class PawnMoveTypesFiveForTwoJumpMinusFiveForOtherFirstMove : INumericalEvaluator
     {
         public string Name => nameof(PawnMoveTypesFiveForTwoJumpMinusFiveForOtherFirstMove);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var twoSpaceJumpCount = 0;
             var oneSpaceJumpCount = 0;
@@ -65,21 +68,21 @@ namespace PawnCube
                             if (gap == 2)
                             {
                                 Console.WriteLine(move);
-                                Console.WriteLine(board.ToAscii());                                
+                                Console.WriteLine(board.ToAscii());
                                 twoSpaceJumpCount++;
                             }
                             else if (gap == 1)
                             {
                                 if (move.CapturedPiece == null)
                                 {
-                                    Console.WriteLine(move);
-                                    Console.WriteLine(board.ToAscii());
+                                    //Console.WriteLine(move);
+                                    //Console.WriteLine(board.ToAscii());
                                     oneSpaceJumpCount++;
                                 }
                                 else
                                 {
-                                    Console.WriteLine(move);
-                                    Console.WriteLine(board.ToAscii());
+                                    //Console.WriteLine(move);
+                                    //Console.WriteLine(board.ToAscii());
                                     firstMoveCaptures++;
                                 }
                             }
@@ -95,55 +98,10 @@ namespace PawnCube
         }
     }
 
-    public class OnePercentPerUnmovedPieceEvaluator : INumericalEvaluator
-    {
-        //1% for every piece on its starting square in the final position of every game
-        public string Name => nameof(OnePercentPerUnmovedPieceEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
-        {
-            var unmovedCount = 0;
-            foreach (var board in boards)
-            {
-                board.GoToStartingPosition();
-                var unmoved = new Dictionary<Position, bool>();
-                for (short xx = 0; xx < 8; xx++)
-                {
-                    foreach (short yy in new List<short>() { 0, 1, 6, 7 })
-                    {
-                        var pos = new Position(xx, yy);
-                        unmoved[pos] = true;
-                    }
-                }
-
-                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
-                {
-                    var move = board.ExecutedMoves[ii];
-                    unmoved[move.OriginalPosition] = false;
-                    unmoved[move.NewPosition] = false;
-                    board.Next();
-                }
-
-                var thisUnmovedCount = 0;
-                foreach (var k in unmoved.Keys)
-                {
-                    if (unmoved[k])
-                    {
-                        thisUnmovedCount++;
-                    }
-                }
-                unmovedCount += thisUnmovedCount;
-            }
-            var raw = 1 * unmovedCount;
-            var det = $"Total of {unmovedCount} unmoved pieces.";
-            var res = new NumericalEvaluationResult(raw, det);
-            return res;
-        }
-    }
-
     public class TenPercentPerResignationEvaluator : INumericalEvaluator
     {
         public string Name => nameof(TenPercentPerResignationEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var resignations = 0;
             foreach (var board in boards.Where(el => el.EndGame.EndgameType == EndgameType.Resigned))
@@ -161,7 +119,7 @@ namespace PawnCube
     public class TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator : INumericalEvaluator
     {
         public string Name => nameof(TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var indecisiveCount = 0;
             var decisiveCount = 0;
@@ -200,7 +158,7 @@ namespace PawnCube
     public class TenPercentForEachDrawEvaluator : INumericalEvaluator
     {
         public string Name => nameof(TenPercentForEachDrawEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var drawcount = 0;
             foreach (var board in boards)
@@ -226,7 +184,7 @@ namespace PawnCube
     public class SevenPercentForEachDrawEvaluator : INumericalEvaluator
     {
         public string Name => nameof(SevenPercentForEachDrawEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var drawcount = 0;
             foreach (var board in boards)
@@ -251,7 +209,7 @@ namespace PawnCube
     public class KnightDirectionNumerical3PercentVerticalMinus4PercentHorizontalEvaluator : INumericalEvaluator
     {
         public string Name => nameof(KnightDirectionNumerical3PercentVerticalMinus4PercentHorizontalEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var horizontalCount = 0;
             var verticalCount = 0;
@@ -296,7 +254,7 @@ namespace PawnCube
     {
         public string Name => nameof(ShortCastleTenPercentVsLongCastleMinusFivePercentEvaluator);
 
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var shortCount = 0;
             var longCount = 0;
@@ -331,7 +289,7 @@ namespace PawnCube
     {
         public string Name => nameof(CapturedBishopsFiveCapturedPawnsMinusOneEvaluator);
 
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var capturedBishops = 0;
             var capturedPawns = 0;
@@ -363,11 +321,61 @@ namespace PawnCube
         }
     }
 
+    public class SurvivingPawnsWorthOneSurvivingKnightBishopRookWorthNegativeTwoEvaluator : NumericalPerBoardEvaluator
+    {
+        public override string Name => nameof(SurvivingPawnsWorthOneSurvivingKnightBishopRookWorthNegativeTwoEvaluator);
+
+        public override int Aggregate(IEnumerable<int> results, out string det)
+        {
+            det = "";
+            return results.Sum();
+        }
+
+        public override int InnerEvaluate(ChessBoard board)
+        {
+
+            var all = new List<Piece>();
+            all.AddRange(board.CapturedWhite);
+            all.AddRange(board.CapturedBlack);
+            var promotionCount = 0;
+            //aand of course, if a piece is promoted, then we kill a pawn.
+            foreach (var move in board.ExecutedMoves)
+            {
+                if (move.Parameter != null && move.Parameter.ShortStr[0] == '=')
+                {
+                    promotionCount++;
+                }
+            }
+
+            var nonReal = all.Where(el => el.Id <= 0);
+            if (nonReal.Count() > 0)
+            {
+                Console.WriteLine(board.ToAscii());
+                foreach (var m in board.ExecutedMoves) { Console.Write(m);Console.Write(' '); }
+                var a = 3;
+            }
+
+            all = all.Where(el => el.Id > 0).ToList();
+
+            var survivingPawns = 16- all.Where(el => el.Type == PieceType.Pawn).Count() -1;
+            var survivingBishops = 4 - all.Where(el => el.Type == PieceType.Bishop).Count();
+            var survivingKnights= 4 - all.Where(el => el.Type == PieceType.Knight).Count();
+            var survivingRooks = 4 - all.Where(el => el.Type == PieceType.Rook).Count();
+
+            //Console.WriteLine(board.ToAscii());
+
+            var raw = survivingPawns + survivingKnights * -2 + survivingBishops * -2 + survivingRooks * -2;
+
+            return raw;
+
+        }
+    }
+
     //definitely not bug-free right now.
     public class SurvivingQueen5PercentEachEvaluator : INumericalEvaluator
     {
         public string Name => nameof(SurvivingQueen5PercentEachEvaluator);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             //wow it's a huge pain to actually track the individual queen from the beginning of the game?
             var origQueensKilled = 0;
@@ -422,14 +430,14 @@ namespace PawnCube
 
             var survivingOriginalQueens = queensSeen - origQueensKilled;
             var raw = 5 * survivingOriginalQueens;
-            var det = $"{boards.Count} games saw {queensSeen} queens; {origQueensKilled} original queens were killed, leaving {survivingOriginalQueens}.";
+            var det = $"{boards.Count()} games saw {queensSeen} queens; {origQueensKilled} original queens were killed, leaving {survivingOriginalQueens}.";
             return new NumericalEvaluationResult(raw, det);
         }
     }
     public class Black40VsWhiteMinus10WinEvalutor : INumericalEvaluator
     {
         public string Name => nameof(Black40VsWhiteMinus10WinEvalutor);
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var blackWins = 0;
             var whitewins = 0;
@@ -460,7 +468,7 @@ namespace PawnCube
     {
         public string Name => nameof(HalfPercentForEachMoveInLongestGameEvaluator);
 
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var max = 0;
             var det = "";
@@ -479,12 +487,11 @@ namespace PawnCube
             return res;
         }
     }
-
-    internal class OnePercentForEachMoveInLongestGameEvaluator : INumericalEvaluator
+    public class OnePercentForEachMoveInLongestGameEvaluator : INumericalEvaluator
     {
         public string Name => nameof(OnePercentForEachMoveInLongestGameEvaluator);
 
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var max = 0;
             var det = "";
@@ -503,40 +510,4 @@ namespace PawnCube
         }
     }
 
-    //public class TwentyPercentPerEnPassantCaptureEvaluator : INumericalEvaluator
-    //{
-    //}
-
-    public class TenPercentForeEachWinEvaluator : INumericalEvaluator
-    {
-        public string Name => nameof(TenPercentForeEachWinEvaluator);
-
-        public NumericalEvaluationResult Evaluate(List<ChessBoard> boards)
-        {
-            var winCount = 0;
-
-            foreach (var board in boards)
-            {
-                board.GoToStartingPosition();
-                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
-                {
-                    var move = board.ExecutedMoves[ii];
-                    if (move.Parameter != null)
-                    {
-                        if (board.EndGame.EndgameType == EndgameType.Timeout
-                            || board.EndGame.EndgameType == EndgameType.Checkmate
-                             || board.EndGame.EndgameType == EndgameType.Resigned)
-                        {
-                            winCount++;
-                        }
-                    }
-
-                }
-                
-            }
-            var raw = 10 * winCount;
-            var det = $"Total of {winCount} wins out of {boards.Count} games.";
-            return new NumericalEvaluationResult(raw, det);
-        }
-    }
 }

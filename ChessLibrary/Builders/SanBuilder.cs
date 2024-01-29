@@ -59,7 +59,7 @@ internal static class SanBuilder
         }
 
         // If piece is not specified => Pawn
-        moveOut.Piece ??= new Piece(board.Turn, PieceType.Pawn);
+        moveOut.Piece ??= new Piece(board.Turn, PieceType.Pawn, -1);
 
         if (isCapture && board[moveOut.NewPosition] is not null)
             moveOut.CapturedPiece = board[moveOut.NewPosition];

@@ -43,15 +43,17 @@
 #More knights survive than bishops, judging by the final position of each game
 #Bishop in a corner
 #10% for every piece which ends a game in its starting square after having moved, over all games
+#10% for each black win
+#10% for each point of material advantage in any game's final position
+#B is ever ahead on points (add up all points from B and W in these games, is B >0?)
 
-10% for each black win
 
 20% for each extra pawn held by the side with the greatest pawn advantage, in any position in any game
 We get to a bishop and knight endgame
 10% * n where n is the side length of the largest n x n empty square that appears in any final position in any game
-10% for each point of material advantage in any game's final position
 
-B is ever ahead on points (add up all points from B and W in these games, is B >0?)
+
+
 -TBD
 10% for every point of advantage W has in all the ending positions (including negative, when B is ahead)
 A King and a knight are in the center 4 squares

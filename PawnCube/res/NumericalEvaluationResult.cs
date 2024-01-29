@@ -16,6 +16,8 @@
         }
         public int RawResult { get; }
         public string Details { get; }
+        public int NumberOfBoardsEvaluated { get; set; } = 0;
+        public IEnumerable<BooleanExample> Examples { get; }
         public NumericalEvaluationResult(int res, string details)
         {
             RawResult = res;

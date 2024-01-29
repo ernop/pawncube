@@ -239,7 +239,6 @@ public partial class ChessBoard
         }
     }
 
-
     private static void GeneratePawnPositions(Position piecePosition, ChessBoard board, List<Position> positions)
     {
         //Console.WriteLine(board.ToAscii());

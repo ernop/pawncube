@@ -33,7 +33,17 @@ public class Piece
     public int Id { get; set; } = 0;
 
     /// <summary>
-    /// Initializes new Piece by given color and type
+    /// Initializes new Piece by given color and type, also added ID.
+    /// </summary>
+    public Piece(PieceColor color, PieceType type, int id)
+    {
+        Color = color;
+        Type = type;
+        Id = id;
+    }
+
+    /// <summary>
+    /// leftover method which supports old no-id-carrying boards.
     /// </summary>
     public Piece(PieceColor color, PieceType type)
     {

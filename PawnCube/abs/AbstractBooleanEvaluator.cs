@@ -1,5 +1,4 @@
 ﻿using Chess;
-
 using static PawnCube.Statics;
 
 namespace PawnCube
@@ -50,9 +49,9 @@ namespace PawnCube
 
                 if (doAll)
                 {
-                    
+
                 }
-                if (examples.Count >= Statics.NumberOfExamplesToCollect)
+                if (examples.Count >= NumberOfExamplesToCollect)
                 {
                     Console.WriteLine($"\t\thit limit.");
                     return ber;
