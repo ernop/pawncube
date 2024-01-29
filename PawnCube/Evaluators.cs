@@ -18,7 +18,7 @@ namespace PawnCube
 
     public class TwoBishopsVsTwoKnightsEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
-        public string Name => nameof(BishopVsKnightEndgameReachedEvaluator);
+        public string Name => nameof(TwoBishopsVsTwoKnightsEvaluator);
 
         public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
         {
@@ -1148,7 +1148,7 @@ namespace PawnCube
                     var pos = el.Item2;
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
-                        yield return new BooleanExample(board, "", ii);
+                        yield return new BooleanExample(board, "Queen in a corner", ii);
                         bad = true;
                         break;
                     }
@@ -1173,7 +1173,7 @@ namespace PawnCube
                     var pos = el.Item2;
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
-                        yield return new BooleanExample(board, "", ii);
+                        yield return new BooleanExample(board, "King in a corner", ii);
                         bad = true;
                         break;
                     }
@@ -1198,7 +1198,7 @@ namespace PawnCube
                     var pos = el.Item2;
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
-                        yield return new BooleanExample(board, "", ii);
+                        yield return new BooleanExample(board, "Bishop in corner", ii);
                         bad = true;
                         break;
                     }
@@ -1223,7 +1223,7 @@ namespace PawnCube
                     var pos = el.Item2;
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
-                        yield return new BooleanExample(board, "", ii);
+                        yield return new BooleanExample(board, "Knight in corner", ii);
                         bad = true;
                         break;
                     }
@@ -1254,7 +1254,7 @@ namespace PawnCube
                     }
                     if (ct >= 2)
                     {
-                        yield return new BooleanExample(board, "", ii);
+                        yield return new BooleanExample(board, "Two knights are on a side edge.", ii);
                         bad = true;
                         break;
                     }

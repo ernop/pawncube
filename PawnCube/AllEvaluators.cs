@@ -89,7 +89,6 @@ namespace PawnCube
                 new SurvivingQueen5PercentEachEvaluator(),
                 new TenPercentForEachDrawEvaluator(),
                 new TenPercentForEachPointOfMaterialAdvantageInFinalPositionEvaluator(),
-                new TenPercentForEachPointOfMaterialAdvantageInFinalPositionEvaluator(),
                 new TenPercentForeEachBlackWinEvaluator(),
                 new TenPercentForeEachWhiteWinEvaluator(),
                 new TenPercentForeEachWinEvaluator(),

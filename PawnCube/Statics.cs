@@ -14,14 +14,14 @@ namespace PawnCube
     internal static class Statics
     {
         public static int NumberOfExamplesToCollect = int.MaxValue;
-        public static int NumberOfExamplesToShow = 50;
+        public static int NumberOfExamplesToShow = 1;
         internal static Regex numberMatcher = new Regex(@"[\d]{1,1000}\.");
 
         public static List<ChessBoard> LoadBoards()
         {
             var boards = new List<ChessBoard>();
             var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn");
-            based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn");
+            //based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn");
             var maxGamesToProcess = 20000;
             //maxGamesToProcess = 200;
             var ct = 0;
