@@ -48,44 +48,45 @@
 #B is ever ahead on points (add up all points from B and W in these games, is B >0?)
 #+1% every surviving pawn, -2% every surviving knight, bishop, or rook
 #20% for each win in the longest consecutive win streak by one player
+#20% for each extra pawn held by the side with the greatest pawn advantage, in any position in any game
+#10% for every point of advantage W has in all the ending positions (including negative, when B is ahead)
+#We get to a bishop and knight endgame
+#A King and a knight are in the center 4 squares
+#At any point in a game, 2 bishops and 0 knights on one side oppose 2 knights and 0 bishops
+#10% for each nonpawn which never moves in a game
+#First piece captured of any kind in a game is a queen
+#A King reaches the opponents home edge
+#A pawn promotes to a non-queen and checkmates
+#The first piece to capture anything in a game is a queen
+#Someone wins while down >=4 pts of material on board
+#Both kings are on the wrong side of the board (the half they didn't start in)
+#Knight in a corner
+#10% for each white win
+#There will be a 3x3 square full of pieces
+#2 knights on the rim (of any color) at the same time
+Game where there are 7 or more pieces and all pieces are on the same color square
 
-20% for each extra pawn held by the side with the greatest pawn advantage, in any position in any game
-We get to a bishop and knight endgame
-10% * n where n is the side length of the largest n x n empty square that appears in any final position in any game
 
-
-
-10% for every point of advantage W has in all the ending positions (including negative, when B is ahead)
-A King and a knight are in the center 4 squares
-At any point in a game, 2 bishops and 0 knights on one side oppose 2 knights and 0 bishops
-
-
-10% for each nonpawn which never moves in a game
-If game were immediately switched to "self-capture chess", one side would have mate in 1
-
-
-
-First piece captured of any kind in a game is a queen
 A queen en prise for three moves in a row
-Someone wins while down >=4 pts of material on board
-Both kings are on the wrong side of the board (the half they didn't start in)
+
+
 All pawns lost and castling not possible. This means we can forget which side is which, now.
 Someone voluntarily or accidentally doesn't play a game resulting in a loss, but no honor violation
-Game where there are 7 or more pieces and all pieces are on the same color square
+
 Board Tilt - any half of the board has at least 10 pieces while the other half is empty. h/v only, no diagonal
-Knight in a corner
-The first piece to capture anything in a game is a queen
+
+
 A side has two queens at once
 At least three decisive games in a row
-10% for each white win
-A King reaches the opponents home edge
-2 knights on the rim (of any color) at the same time
+
+
+
 100% - (1% for each move in the shortest game)
 One side has 4 or more pawns than the other in a game
 Double check
 5% for every pawn promoted
 A player is fined by FIDE during the match
-There will be a 3x3 square full of pieces
+
 A player is more than 1m late to the board after a game starts
 Ding ties for lead at the end of 14
 No castling game
@@ -102,4 +103,6 @@ Center Pawn Cube
 10% for each checkmate played out on board
 
 En passant capture and double check
-A pawn promotes to a non-queen and checkmates
+
+10% * n where n is the side length of the largest n x n empty square that appears in any final position in any game
+If game were immediately switched to "self-capture chess", one side would have mate in 1

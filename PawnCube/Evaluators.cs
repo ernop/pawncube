@@ -15,6 +15,49 @@ using static PawnCube.Statics;
 
 namespace PawnCube
 {
+
+    public class TwoBishopsVsTwoKnightsEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(BishopVsKnightEndgameReachedEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var pieces = Statics.GetAllPieces(board);
+
+                var bishops = pieces.Where(el => el.Type == PieceType.Bishop);
+                if (bishops.Count() != 2)
+                {
+                    continue;
+                }
+                var knights = pieces.Where(el => el.Type == PieceType.Knight);
+                if (knights.Count() != 2)
+                {
+                    continue;
+                }
+                if (bishops.First().Color != bishops.Skip(1).First().Color)
+                {
+                    continue;
+                }
+                if (knights.First().Color != knights.Skip(1).First().Color)
+                {
+                    continue;
+                }
+                if (knights.First().Color == bishops.First().Color)
+                {
+                    continue;
+                }
+
+                var det = $"Bishops Vs Knight war initiated.";
+                yield return new BooleanExample(board, det, ii);
+                break;
+            }
+        }
+    }
+
     public class FullFileEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(FullFileEvaluator);
@@ -120,12 +163,96 @@ namespace PawnCube
             var raw = homecomingPieces * 10;
             var det = $"Total homecoming pieces: {homecomingPieces}.";
             var examples = new List<NumericalExample>();
-            if (bestBoard!=null)
+            if (bestBoard != null)
             {
                 examples.Add(new NumericalExample(bestBoard, $"This game had {bestPerboard} pieces return to their starting squares at end.", bestBoard.ExecutedMoves.Count() - 1, bestPerboard));
             }
-            
+
             return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
+    public class KnightAndKingInCenterFourSquaresEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(KnightAndKingInCenterFourSquaresEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            var centerSquares = new List<Position>() { new Position(3, 3), new Position(3, 4), new Position(4, 3), new Position(4, 4) };
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+
+                var hasKnight = false;
+                var hasKing = false;
+                foreach (var pos in centerSquares)
+                {
+                    var p = board[pos];
+                    if (p == null) { continue; }
+                    if (p.Type == PieceType.Knight)
+                    {
+                        hasKnight = true;
+                    }
+                    if (p.Type == PieceType.King)
+                    {
+                        hasKing = true;
+                    }
+                }
+
+                if (hasKing && hasKnight)
+                {
+                    var det = $"Knight and king in center.";
+                    yield return new BooleanExample(board, det, ii);
+                    break;
+                }
+            }
+        }
+    }
+
+    public class BishopVsKnightEndgameReachedEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(BishopVsKnightEndgameReachedEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var pieces = Statics.GetAllPieces(board);
+
+                var bishops = pieces.Where(el => el.Type == PieceType.Bishop);
+                if (bishops.Count() != 1)
+                {
+                    continue;
+                }
+                var knights = pieces.Where(el => el.Type == PieceType.Knight);
+                if (knights.Count() != 1)
+                {
+                    continue;
+                }
+                if (bishops.First().Color == knights.First().Color)
+                {
+                    continue;
+                }
+                if (pieces.Where(el => el.Type == PieceType.Rook).Count() > 0)
+                {
+                    continue;
+                }
+                if (pieces.Where(el => el.Type == PieceType.Queen).Count() > 0)
+                {
+                    continue;
+                }
+                if (pieces.Where(el => el.Type == PieceType.Pawn).Count() == 0)
+                {
+                    continue;
+                }
+
+                var det = $"Bishop vs Knight endgame reached.";
+                yield return new BooleanExample(board, det, ii);
+                break;
+            }
         }
     }
 
@@ -167,6 +294,90 @@ namespace PawnCube
                         yield return new BooleanExample(board, det, ii);
                     }
                     break;
+                }
+            }
+
+        }
+    }
+
+    public class Down4PtsOrMoreMaterialButWins : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(Down4PtsOrMoreMaterialButWins);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.Last();
+            var mat = Statics.GetMaterialDifference(board);
+            if ((mat >= 4 && board.EndGame.WonSide == PieceColor.Black) || (mat <= -4 && board.EndGame.WonSide == PieceColor.White))
+            {
+                yield return new BooleanExample(board, $"Down material by {mat} but wins.", board.ExecutedMoves.Count() - 1);
+            }
+        }
+    }
+
+    public class FirstCaptureIsQueen : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(FirstCaptureIsQueen);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                if (move.CapturedPiece != null)
+                {
+                    if (move.CapturedPiece.Type == PieceType.Queen)
+                    {
+                        var det = $"First piece captured was a queen.";
+                        yield return new BooleanExample(board, det, ii);
+                    }
+                    break;
+                }
+            }
+
+        }
+    }
+
+    public class FirstCaptureRIsQueen : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(FirstCaptureRIsQueen);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                if (move.CapturedPiece != null)
+                {
+                    if (move.Piece.Type == PieceType.Queen)
+                    {
+                        var det = $"First capture done by queen.";
+                        yield return new BooleanExample(board, det, ii);
+                    }
+                    break;
+                }
+            }
+
+        }
+    }
+
+    public class KingReachesOpponentsFarSideOfBoardEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(KingReachesOpponentsFarSideOfBoardEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                if (move.Piece.Type == PieceType.King)
+                {
+                    if ((move.NewPosition.Y == 7 && ii % 2 == 0) || (move.NewPosition.Y == 0 && ii % 2 == 1))
+                    {
+                        var det = $"King reaches opposite side.";
+                        yield return new BooleanExample(board, det, ii);
+                        break;
+                    }
+
                 }
             }
 
@@ -654,6 +865,62 @@ namespace PawnCube
         }
     }
 
+    public class PawnPromotionAndMateEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(PawnPromotionAndMateEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                board.Next();
+                if (move.Parameter != null)
+                {
+                    var l = move.Parameter.ShortStr;
+                    if (l == "=" || l == "=Q" || l == "=R" || l == "=B" || l == "=N")
+                    {
+                        if (move.IsMate && move.IsCheck)
+                        {
+                            //Also we have to check that this new piece attacks the king?
+                            var det = $"Pawn promoted with mate (not necessarily the pawn actually mating)";
+                            yield return new BooleanExample(board, det, ii);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class PawnUnderpromotionAndMateEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(PawnPromotionAndMateEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                board.Next();
+                if (move.Parameter != null)
+                {
+                    var l = move.Parameter.ShortStr;
+                    if (l == "=R" || l == "=B" || l == "=N")
+                    {
+                        if (move.IsMate && move.IsCheck)
+                        {
+                            //Also we have to check that this new piece attacks the king?
+                            var det = $"Pawn underpromoted with mate (not necessarily the pawn actually mating)";
+                            yield return new BooleanExample(board, det, ii);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public class TwoPawnPromotionsInOneGameEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(TwoPawnPromotionsInOneGameEvaluator);
@@ -794,7 +1061,7 @@ namespace PawnCube
         }
     }
 
-    internal class RookTakesAQueenEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    public class RookTakesAQueenEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(RookTakesAQueenEvaluator);
 
@@ -814,7 +1081,7 @@ namespace PawnCube
         }
     }
 
-    internal class PawnTakesAQueenEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    public class PawnTakesAQueenEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(PawnTakesAQueenEvaluator);
 
@@ -829,6 +1096,189 @@ namespace PawnCube
                     var det = $"";
                     yield return new BooleanExample(board, det, ii);
                 }
+            }
+        }
+    }
+
+    public class BothKingsWrongSideEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(BothKingsWrongSideEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var bad = false;
+                foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.King))
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    if (piece.Color == PieceColor.White && pos.Y < 4)
+                    {
+                        bad = true;
+                    }
+                    if (piece.Color == PieceColor.Black && pos.Y >= 4)
+                    {
+                        bad = true;
+                    }
+
+                }
+                if (bad)
+                {
+                    continue;
+                }
+
+                yield return new BooleanExample(board, "Both kings on wrong side.", ii);
+                break;
+            }
+        }
+    }
+
+    public class QueenInACornerEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(QueenInACornerEvaluator);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.Queen))
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
+                    {
+                        yield return new BooleanExample(board, "", ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class KingInACornerEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(KingInACornerEvaluator);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.King))
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
+                    {
+                        yield return new BooleanExample(board, "", ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class BishopInACornerEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(BishopInACornerEvaluator);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.Bishop))
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
+                    {
+                        yield return new BooleanExample(board, "", ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class KnightInACornerEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(KnightInACornerEvaluator);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.Knight))
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
+                    {
+                        yield return new BooleanExample(board, "", ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class TwoKnightsOnSideEdgeEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(TwoKnightsOnSideEdgeEvaluator);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var ct = 0;
+                var bad = false;
+                var allPieces = GetAllPiecesAndPositions(board);
+                foreach (var el in allPieces.Where(el=>el.Item1.Type==PieceType.Knight))
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    if (pos.X == 0 || pos.X == 7)
+                    {
+                        ct++;
+                    }
+                    if (ct >= 2)
+                    {
+                        yield return new BooleanExample(board, "", ii);
+                        bad = true;
+                        break;
+                    }
+                }
+                if (bad) { break; }
+            }
+        }
+    }
+
+    public class AllPiecesOnSameBoardColorWithAtLeastSevenTotal : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(AllPiecesOnSameBoardColorWithAtLeastSevenTotal);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var bad = false;
+                var allPieces = GetAllPiecesAndPositions(board);
+                if (allPieces.Count() < 7) { continue; }
+                var requiredSquareColor = (allPieces.First().Item2.X + allPieces.First().Item2.Y) % 2;
+                foreach (var el in allPieces)
+                {
+                    var mySquareColor = (el.Item2.X + el.Item2.Y) % 2;
+                    if (mySquareColor != requiredSquareColor)
+                    {
+                        //Console.WriteLine(board.ToAscii());
+                        bad = true; 
+                        break;
+                    }
+                }
+                if (bad) { continue; }
+                yield return new BooleanExample(board, "All pieces were on the same color.", ii);
+                break;
             }
         }
     }

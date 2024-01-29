@@ -24,7 +24,8 @@ namespace PawnCube
             var det = $"Total {tot}. At the end of the game, B ahead: {examples.Select(el => el.Value).Where(el => el < 0).Count()} times." +
                 $"W ahead: {examples.Select(el => el.Value).Where(el => el == 0).Count()} times." +
                 $"Same: {examples.Select(el => el.Value).Where(el => el > 0).Count()} times.";
-            return new NumericalEvaluationResult(tot * 10, det, examples.Where(el=>el.Value!=0));
+            var raw = tot * 10;
+            return new NumericalEvaluationResult(raw, det, examples.Where(el=>el.Value!=0));
         }
 
         public override NumericalExample InnerEvaluate(ChessBoard board)
@@ -35,26 +36,52 @@ namespace PawnCube
         }
     }
 
+    /// <summary>
+    /// note that this uses + and - material advantages, so it's a measure of how far ahead W is.
+    /// </summary>
+    public class OverallWhiteGameEndPointAdvantageTenPercentPerEvaluator: NumericalPerBoardEvaluator
+    {
+        public override string Name => nameof(OverallWhiteGameEndPointAdvantageTenPercentPerEvaluator);
+
+        public override NumericalEvaluationResult Aggregate(IEnumerable<NumericalExample> examples)
+        {
+            var tot = examples.Select(el => el.Value).Sum();
+            var det = $"Total w point advantage in all games: {tot}. At the end of the game, B ahead: {examples.Select(el => el.Value).Where(el => el < 0).Count()} times." +
+                $"W ahead: {examples.Select(el => el.Value).Where(el => el == 0).Count()} times." +
+                $"Same: {examples.Select(el => el.Value).Where(el => el > 0).Count()} times.";
+            var raw = tot * 10;
+            return new NumericalEvaluationResult(raw, det, examples.Where(el => el.Value != 0));
+        }
+
+        public override NumericalExample InnerEvaluate(ChessBoard board)
+        {
+            board.Last();
+            var d = GetMaterialDifference(board);
+            return new NumericalExample(board, $"Advantage: {d}", board.ExecutedMoves.Count() - 1, d);
+        }
+    }
+
     public class BiggestPawnMaterialLeadInAnyGameTwentyPercentPerPawnLeadOnBoardEvaluator : NumericalPerBoardEvaluator
     {
         public override string Name => nameof(BiggestPawnMaterialLeadInAnyGameTwentyPercentPerPawnLeadOnBoardEvaluator);
 
         public override NumericalEvaluationResult Aggregate(IEnumerable<NumericalExample> examples)
         {
-            var mx = 0;
+            var materialLead = 0;
             ChessBoard bestGame = null;
             NumericalExample bestExample = null;
             foreach (var example in examples)
             {
-                if (example.Value > mx)
+                if (example.Value > materialLead)
                 {
-                    mx = example.Value;
+                    materialLead = example.Value;
                     bestGame = example.Board;
                     bestExample = example;
                 }
             }
-            var det = $"The biggest on-board pawn lead was:{mx}";
-            return new NumericalEvaluationResult(mx * 20, det, new List<NumericalExample>() { bestExample });
+            var det = $"The biggest on-board pawn lead was:{materialLead}";
+            var raw = materialLead * 20;
+            return new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { bestExample });
         }
 
         public override NumericalExample InnerEvaluate(ChessBoard board)

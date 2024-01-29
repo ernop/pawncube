@@ -103,6 +103,20 @@ namespace PawnCube
         }
     }
 
+    public class TenPercentForeEachWhiteWinEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TenPercentForeEachWhiteWinEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var wwins = boards.Where(board => board.EndGame.EndgameType == EndgameType.Timeout || board.EndGame.EndgameType == EndgameType.Checkmate || board.EndGame.EndgameType == EndgameType.Resigned)
+                .Where(el => el.EndGame.WonSide == PieceColor.White);
+            var raw = wwins.Count() * 10;
+            var det = $"Total: {wwins.Count()} w wins.";
+            return new NumericalEvaluationResult(raw, det, new List<NumericalExample>());
+        }
+    }
+
     /// <summary>
     /// This one is a bit tricky since it introduces a new requirement - that the games be evaluated in the right order.
     /// The other new thing about it is that it uses state within the aggregator.
@@ -200,6 +214,44 @@ namespace PawnCube
             }
             var raw = 1 * unmovedCount;
             var det = $"In the game with the most unmoved pieces, there were {mostUnmovedCount}, and overall there were {unmovedCount} unmoved pieces;";
+            var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { bestExample });
+            return res;
+        }
+    }
+
+    public class UnmovedNonPawnTenPercentEachEvaluator: INumericalEvaluator
+    {
+        //1% for every piece on its starting square in the final position of every game
+        public string Name => nameof(UnmovedNonPawnTenPercentEachEvaluator);
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var unmovedCount = 0;
+            var mostUnmovedCount = 0;
+            ChessBoard mostUnmovedGame = null;
+            NumericalExample bestExample = null;
+
+            foreach (var board in boards)
+            {
+                //a piece must both not have moved and not be killed.
+                board.Last();
+                var survivingPieceIds = Statics.GetAllPieces(board)
+                    .Where(el => el.Id > 0 && el.Id < 32)
+                    .Where(el => el.Type != PieceType.Pawn)
+                    .Select(el => el.Id);
+                var movedIds = board.ExecutedMoves.Select(el => el.Piece.Id).Distinct();
+                var deadIds = Statics.GetAllCaptures(board).Select(el => el.Id).ToList();
+                var guys = survivingPieceIds.Where(el => !deadIds.Contains(el)).Where(el => !movedIds.Contains(el));
+                var ct = guys.Count();
+                if (ct > mostUnmovedCount)
+                {
+                    mostUnmovedCount = ct;
+                    mostUnmovedGame = board;
+                    bestExample = new NumericalExample(board, "", board.ExecutedMoves.Count() - 1, ct);
+                }
+                unmovedCount += guys.Count();
+            }
+            var raw = 10 * unmovedCount;
+            var det = $"In the game with the most unmoved nonpawns, there were {mostUnmovedCount}, and overall there were {unmovedCount} unmoved pieces;";
             var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { bestExample });
             return res;
         }

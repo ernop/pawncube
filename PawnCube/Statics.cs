@@ -173,6 +173,21 @@ namespace PawnCube
             return res;
         }
 
+        public static List<Tuple<Piece,Position>> GetAllPiecesAndPositions(ChessBoard board)
+        {
+            var res = new List<Tuple<Piece,Position>>();
+            for (short xx = 0; xx < 8; xx++)
+            {
+                for (short yy = 0; yy < 8; yy++)
+                {
+                    var piece = board[xx, yy];
+                    if (piece == null) { continue; }
+                    res.Add(new Tuple<Piece,Position>(piece, new Position(xx,yy)));
+                }
+            }
+            return res;
+        }
+
         public static List<Piece> GetAllCaptures(ChessBoard board)
         {
             var res = new List<Piece>();

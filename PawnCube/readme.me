@@ -1,1005 +1,1495 @@
-Evaluating 2010 games for 29 boolean evaluators, 16 numerical evaluators
+** here is the status for the evaluators which have been made so far, for Ding's games in 2024 Tata Steel: **
 
-Boolean evaluators: 29
+Loading PGNStrings. 13
+Evaluating 13 games for 48 boolean evaluators, 27 numerical evaluators
+
+Boolean evaluators: 48
+        AllPiecesOnSameBoardColorWithAtLeastSevenTotal  Manifold:   0%
         AnyOppositeSideCastlingGameEvaluator            Manifold: 100%
-        1       W9:O-O-O of Wang Chaoran-Ding Liren-2001.03.27-1-0      Opposite Side Castled
-   ┌────────────────────────┐
- 8 │ r  .  b  q  .  r  k  . │
- 7 │ p  p  .  n  .  p  b  p │
- 6 │ .  .  p  p  .  n  p  . │
- 5 │ .  .  .  .  p  .  .  . │
- 4 │ .  .  P  P  P  .  .  . │
- 3 │ .  .  N  .  B  P  .  . │
- 2 │ P  P  .  Q  N  .  P  P │
- 1 │ .  .  K  R  .  B  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B10:Qc7 of Wang Chaoran-Ding Liren-2001.03.27-1-0       Opposite Side Castled
+Example:1       W13:O-O-O       D Gukesh-Ding Liren 2024.01.15  Opposite Side Castled                                           Black - Resigned
    ┌────────────────────────┐
  8 │ r  .  b  .  .  r  k  . │
- 7 │ p  p  q  n  .  p  b  p │
- 6 │ .  .  p  p  .  n  p  . │
- 5 │ .  .  .  .  p  .  .  . │
- 4 │ .  .  P  P  P  .  .  . │
- 3 │ .  .  N  .  B  P  .  . │
- 2 │ P  P  .  Q  N  .  P  P │
- 1 │ .  .  K  R  .  B  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W10:g4 of Wang Chaoran-Ding Liren-2001.03.27-1-0        Opposite Side Castled
-   ┌────────────────────────┐
- 8 │ r  .  b  .  .  r  k  . │
- 7 │ p  p  q  n  .  p  b  p │
- 6 │ .  .  p  p  .  n  p  . │
- 5 │ .  .  .  .  p  .  .  . │
- 4 │ .  .  P  P  P  .  P  . │
- 3 │ .  .  N  .  B  P  .  . │
- 2 │ P  P  .  Q  N  .  .  P │
- 1 │ .  .  K  R  .  B  .  R │
+ 7 │ .  p  p  .  q  p  .  . │
+ 6 │ .  b  n  p  .  n  .  p │
+ 5 │ p  N  .  .  p  .  p  . │
+ 4 │ P  .  B  .  P  .  .  . │
+ 3 │ .  Q  P  P  .  N  B  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  .  K  R  .  .  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
         AnyPawnPromotionEvaluator                       Manifold: 100%
-        1       B52:a1=Q of Ding Liren-Wu Wenjin-2001.03.26-0-1 Promotion: =Q
+Example:1       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27     Promotion: =Q                                                   Black - Resigned
    ┌────────────────────────┐
  8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  p  .  P  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  P  B  .  .  .  . │
- 3 │ b  .  .  K  .  .  .  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ q  k  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B62:b1=Q of Liu Renhui-Ding Liren-2001.04.02-1/2-1/2    Promotion: =Q
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  B │
+ 7 │ .  .  .  .  .  .  R  . │
  6 │ .  .  .  .  .  .  .  . │
- 5 │ .  .  .  .  k  .  .  . │
- 4 │ .  .  .  .  .  .  P  . │
- 3 │ .  .  n  .  .  P  K  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ .  q  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B41:f1=Q+ of Li Shilong-Ding Liren-2008.06.03-0-1       Promotion: =Q
-   ┌────────────────────────┐
- 8 │ R  .  b  .  r  q  .  k │
- 7 │ .  .  R  .  .  .  .  . │
- 6 │ .  p  .  p  .  .  .  . │
- 5 │ .  P  .  B  p  .  .  n │
- 4 │ .  N  P  .  .  .  .  . │
- 3 │ .  .  .  P  b  .  .  . │
- 2 │ .  .  .  .  P  .  K  . │
- 1 │ .  .  .  .  .  q  .  Q │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
         AnyTimeOutEvaluator                             Manifold:   0%
+        BishopInACornerEvaluator                        Manifold:   0%
         BishopManualUndoEvaluator                       Manifold: 100%
-        1       W35:Bb2 of Ding Liren-Wu Wenjin-2001.03.26-0-1  Bishop moved back to: b2 from c1
+Example:1       W24:Be2 Ding Liren-Van Foreest, Jorden 2024.01.26       Bishop moved back to: e2 from h5                                DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  p  .  b  p  .  . │
- 6 │ .  .  k  .  .  .  p  . │
- 5 │ .  p  .  .  P  b  .  p │
- 4 │ p  .  .  K  N  P  .  . │
- 3 │ P  .  .  .  .  .  .  P │
- 2 │ .  B  P  .  .  .  P  . │
- 1 │ .  .  .  .  .  .  .  . │
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  k  .  .  . │
+ 6 │ .  p  .  p  b  p  .  r │
+ 5 │ n  .  p  .  .  .  p  . │
+ 4 │ P  .  P  .  P  .  .  p │
+ 3 │ .  .  P  P  P  .  .  P │
+ 2 │ .  .  .  .  B  R  P  K │
+ 1 │ R  .  .  .  B  .  .  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       W27:Bg5 of Wen Yang-Ding Liren-2001.03.31-1-0   Bishop moved back to: g5 from h4
+Example:2       W25:Bh5 Ding Liren-Van Foreest, Jorden 2024.01.26       Bishop moved back to: h5 from e2                                DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  .  n  .  k  . │
- 7 │ .  q  .  .  .  .  .  p │
- 6 │ .  .  n  r  p  .  p  P │
- 5 │ .  p  .  .  p  .  B  . │
- 4 │ .  .  p  .  P  .  .  . │
- 3 │ .  .  P  .  .  .  P  B │
- 2 │ .  P  .  .  Q  P  .  . │
- 1 │ R  .  .  .  .  .  K  . │
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  k  .  .  . │
+ 6 │ .  p  .  p  b  p  r  . │
+ 5 │ n  .  p  .  .  .  p  B │
+ 4 │ P  .  P  .  P  .  .  p │
+ 3 │ .  .  P  P  P  .  .  P │
+ 2 │ .  .  .  .  .  R  P  K │
+ 1 │ R  .  .  .  B  .  .  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        3       W48:Bf2 of Ding Liren-Qiu Tong-2001.04.04-1-0   Bishop moved back to: f2 from e1
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ p  .  .  .  .  b  p  . │
- 5 │ .  .  p  .  .  p  .  p │
- 4 │ k  .  P  .  .  P  .  P │
- 3 │ .  .  P  .  .  .  .  . │
- 2 │ P  .  P  K  .  B  .  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        BishopMovesSevenSquaresEvaluator                Manifold: 100%
-        1       B36:Bxa8 of Ding Liren-Yu Yangyi-2019.04.24-1/2-1/2     Moved 7 squares to: Bxa8
-   ┌────────────────────────┐
- 8 │ b  .  .  .  .  .  k  . │
- 7 │ .  .  p  .  .  .  p  . │
- 6 │ .  .  .  .  .  .  .  p │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  .  .  .  P  .  . │
- 3 │ .  .  B  .  .  .  P  . │
- 2 │ .  .  .  .  .  K  .  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        BishopMovesSixSquaresEvaluator                  Manifold: 100%
-        1       W62:Bxb1 of Liu Renhui-Ding Liren-2001.04.02-1/2-1/2    6 square moveBxb1 from h7
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  .  .  .  .  .  . │
- 5 │ .  .  .  .  k  .  .  . │
- 4 │ .  .  .  .  .  .  P  . │
- 3 │ .  .  n  .  .  P  K  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ .  B  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W27:Bxa8 of Ding Liren-Timofeev,Arty-2009.08.21-1/2-1/2 6 square moveBxa8 from g2
-   ┌────────────────────────┐
- 8 │ B  .  .  .  .  .  .  . │
- 7 │ p  .  .  .  .  p  .  k │
- 6 │ .  .  .  .  q  b  p  . │
- 5 │ .  p  .  .  B  n  .  p │
- 4 │ .  P  r  .  .  .  .  . │
- 3 │ P  .  .  .  .  .  P  . │
- 2 │ .  .  .  .  Q  P  .  P │
- 1 │ .  .  .  .  R  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B13:Bxa1 of Wang Hao-Ding Liren-2010.05.24-1-0  6 square moveBxa1 from g7
-   ┌────────────────────────┐
- 8 │ .  r  b  q  .  r  k  . │
- 7 │ .  p  p  .  .  p  .  p │
- 6 │ p  .  n  p  p  .  p  . │
- 5 │ .  .  P  .  .  .  .  . │
- 4 │ .  .  P  .  P  .  .  . │
- 3 │ .  P  .  .  N  N  P  . │
- 2 │ P  .  .  .  .  P  B  P │
- 1 │ b  .  B  Q  .  R  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        CastleAfterMove20Evaluator                      Manifold: 100%
-        1       W22:O-O-O of Ding Liren-Xiu Deshun-2007.05.05-1-0
-   ┌────────────────────────┐
- 8 │ r  .  .  .  .  k  .  r │
- 7 │ .  p  .  q  b  p  .  P │
- 6 │ p  .  p  .  .  n  .  . │
- 5 │ .  .  P  p  .  n  p  . │
- 4 │ .  P  .  P  p  .  p  . │
- 3 │ P  .  N  .  P  .  P  . │
- 2 │ .  B  .  .  Q  P  B  . │
- 1 │ .  .  K  R  .  .  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W21:O-O-O of Ding Liren-Wang Yue-2008.06.06-1/2-1/2
-   ┌────────────────────────┐
- 8 │ r  .  .  q  k  .  r  . │
- 7 │ .  .  .  n  .  .  .  p │
- 6 │ .  .  p  .  p  n  .  . │
- 5 │ p  .  P  p  .  p  b  . │
- 4 │ P  p  .  P  .  .  .  . │
- 3 │ .  P  .  B  P  P  .  P │
- 2 │ .  B  .  Q  N  .  .  . │
- 1 │ .  .  K  R  .  .  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B23:O-O of Ding Liren-Li Shilong-2009.04.26-1/2-1/2
-   ┌────────────────────────┐
- 8 │ .  .  r  .  .  r  k  . │
- 7 │ p  p  .  .  .  p  b  . │
- 6 │ .  q  .  .  .  n  .  p │
- 5 │ .  P  .  .  p  P  p  . │
- 4 │ .  .  B  .  P  .  .  . │
- 3 │ .  N  .  .  .  .  P  . │
- 2 │ P  P  Q  .  .  .  P  . │
- 1 │ .  K  .  R  .  .  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
+        BishopMovesSevenSquaresEvaluator                Manifold:   0%
+        BishopMovesSixSquaresEvaluator                  Manifold:   0%
+        BishopVsKnightEndgameReachedEvaluator           Manifold:   0%
+        BishopVsKnightEndgameReachedEvaluator           Manifold:   0%
+        BothKingsWrongSideEvaluator                     Manifold:   0%
+        CastleAfterMove20Evaluator                      Manifold:   0%
         CastleAfterMove40Evaluator                      Manifold:   0%
-Error: pawn mate where the pawn promoted first detected. HMM LIBRARY>?
-Error: mate without check detected. HMMMM
-Error: mate without check detected. HMMMM
-        CheckmateWithAPawnEvaluator                     Manifold: 100%
-        1       W59:c7# of Ding Liren-Zhang Jianhua-2001.03.28-1-0
-   ┌────────────────────────┐
- 8 │ .  k  .  B  .  .  .  . │
- 7 │ .  B  P  .  .  .  .  . │
- 6 │ K  .  .  .  .  .  .  . │
- 5 │ .  .  .  .  p  p  p  . │
- 4 │ .  .  .  .  P  .  P  p │
- 3 │ .  .  .  .  .  P  .  P │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
+        CheckmateWithAPawnEvaluator                     Manifold:   0%
         Connect3Evaluator                               Manifold: 100%
-        1       B18:a5 of Ding Liren-Wu Wenjin-2001.03.26-0-1   Pattern shows up: 1,5 1,5 2,6
+Example:1       B4: ..d5        Vidit, Santosh Gujrathi-Ding Liren 2024.01.13   Pattern shows up: 3,4 4,5 5,6                                   DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  .  r  b  .  r │
- 7 │ .  k  p  .  n  p  p  . │
- 6 │ .  p  .  .  b  .  .  p │
- 5 │ p  .  p  .  P  .  .  . │
- 4 │ .  .  .  .  N  .  .  . │
- 3 │ P  P  .  .  .  N  .  P │
- 2 │ .  .  P  .  .  P  P  . │
- 1 │ .  .  B  R  R  .  K  . │
+ 8 │ r  n  b  q  k  .  .  r │
+ 7 │ p  p  p  .  .  p  p  p │
+ 6 │ .  .  .  .  p  n  .  . │
+ 5 │ .  .  .  p  .  .  .  . │
+ 4 │ .  b  P  P  .  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  .  .  P  .  P  P │
+ 1 │ R  .  B  Q  K  B  N  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       W18:Nc3 of Ding Liren-Wu Wenjin-2001.03.26-0-1  Pattern shows up: 1,5 1,5 2,6
+Example:2       W4:d3   D Gukesh-Ding Liren 2024.01.15  Pattern shows up: 2,1 3,2 4,3                                   Black - Resigned
    ┌────────────────────────┐
- 8 │ .  .  .  .  r  b  .  r │
- 7 │ .  k  p  .  n  p  p  . │
- 6 │ .  p  .  .  b  .  .  p │
- 5 │ p  .  p  .  P  .  .  . │
- 4 │ .  .  .  .  .  .  .  . │
- 3 │ P  P  N  .  .  N  .  P │
- 2 │ .  .  P  .  .  P  P  . │
- 1 │ .  .  B  R  R  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B19:Nc6 of Ding Liren-Wu Wenjin-2001.03.26-0-1  Pattern shows up: 1,5 1,5 2,6
-   ┌────────────────────────┐
- 8 │ .  .  .  .  r  b  .  r │
- 7 │ .  k  p  .  .  p  p  . │
- 6 │ .  p  n  .  b  .  .  p │
- 5 │ p  .  p  .  P  .  .  . │
- 4 │ .  .  .  .  .  .  .  . │
- 3 │ P  P  N  .  .  N  .  P │
- 2 │ .  .  P  .  .  P  P  . │
- 1 │ .  .  B  R  R  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        Connect4Evaluator                               Manifold: 100%
-        1       W5:c3 of Ding Liren-Xu Yang-2001.03.30-1/2-1/2  Pattern shows up: 2,2 2,2 3,3 4,4
-   ┌────────────────────────┐
- 8 │ r  n  .  q  k  b  n  r │
- 7 │ p  p  .  .  .  p  p  p │
- 6 │ .  .  p  .  p  .  .  . │
- 5 │ .  .  .  p  P  b  .  . │
- 4 │ .  .  .  P  .  .  .  . │
- 3 │ .  .  P  .  .  N  .  . │
- 2 │ P  P  .  .  .  P  P  P │
- 1 │ R  N  B  Q  K  B  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B6:Nd7 of Ding Liren-Xu Yang-2001.03.30-1/2-1/2 Pattern shows up: 2,2 2,2 3,3 4,4
-   ┌────────────────────────┐
- 8 │ r  .  .  q  k  b  n  r │
- 7 │ p  p  .  n  .  p  p  p │
- 6 │ .  .  p  .  p  .  .  . │
- 5 │ .  .  .  p  P  b  .  . │
- 4 │ .  .  .  P  .  .  .  . │
- 3 │ .  .  P  .  .  N  .  . │
- 2 │ P  P  .  .  .  P  P  P │
- 1 │ R  N  B  Q  K  B  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W6:Bd3 of Ding Liren-Xu Yang-2001.03.30-1/2-1/2 Pattern shows up: 2,2 2,2 3,3 4,4
-   ┌────────────────────────┐
- 8 │ r  .  .  q  k  b  n  r │
- 7 │ p  p  .  n  .  p  p  p │
- 6 │ .  .  p  .  p  .  .  . │
- 5 │ .  .  .  p  P  b  .  . │
- 4 │ .  .  .  P  .  .  .  . │
- 3 │ .  .  P  B  .  N  .  . │
- 2 │ P  P  .  .  .  P  P  P │
+ 8 │ r  .  b  q  k  b  .  r │
+ 7 │ p  p  p  p  .  p  p  p │
+ 6 │ .  .  n  .  .  n  .  . │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  B  .  P  .  .  . │
+ 3 │ .  .  .  P  .  N  .  . │
+ 2 │ P  P  P  .  .  P  P  P │
  1 │ R  N  B  Q  K  .  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        Connect5Evaluator                               Manifold: 100%
-        1       W36:b3 of Ding Liren-Jobava,Ba-2012.12.16-0-1   Pattern shows up:  1,2 2,3 3,4 4,5
+Example:3       W5:d3   Ding Liren-R Praggnanandhaa 2024.01.16  Pattern shows up: 2,1 3,2 4,3                                   Black - Resigned
    ┌────────────────────────┐
- 8 │ .  r  .  .  .  .  .  . │
- 7 │ .  .  p  .  .  .  k  . │
- 6 │ .  .  .  p  P  .  .  . │
- 5 │ p  .  p  P  p  .  p  . │
- 4 │ .  .  P  .  .  .  .  . │
- 3 │ .  P  .  B  .  P  .  . │
- 2 │ P  .  .  .  .  .  .  . │
- 1 │ .  .  .  .  .  K  .  . │
+ 8 │ r  .  b  q  k  b  .  r │
+ 7 │ .  p  p  p  .  p  p  p │
+ 6 │ p  .  n  .  .  n  .  . │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ B  .  .  .  P  .  .  . │
+ 3 │ .  .  .  P  .  N  .  . │
+ 2 │ P  P  P  .  .  P  P  P │
+ 1 │ R  N  B  Q  K  .  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       B37:Kf6 of Ding Liren-Jobava,Ba-2012.12.16-0-1  Pattern shows up:  1,2 2,3 3,4 4,5
+Example:4       W4:d3   Parham Maghsoodloo-Ding Liren 2024.01.18        Pattern shows up: 2,1 3,2 4,3                                   DrawDeclared
    ┌────────────────────────┐
- 8 │ .  r  .  .  .  .  .  . │
- 7 │ .  .  p  .  .  .  .  . │
- 6 │ .  .  .  p  P  k  .  . │
- 5 │ p  .  p  P  p  .  p  . │
- 4 │ .  .  P  .  .  .  .  . │
- 3 │ .  P  .  B  .  P  .  . │
- 2 │ P  .  .  .  .  .  .  . │
- 1 │ .  .  .  .  .  K  .  . │
+ 8 │ r  .  b  q  k  b  .  r │
+ 7 │ p  p  p  p  .  p  p  p │
+ 6 │ .  .  n  .  .  n  .  . │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  B  .  P  .  .  . │
+ 3 │ .  .  .  P  .  N  .  . │
+ 2 │ P  P  P  .  .  P  P  P │
+ 1 │ R  N  B  Q  K  .  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        3       W37:Kg2 of Ding Liren-Jobava,Ba-2012.12.16-0-1  Pattern shows up:  1,2 2,3 3,4 4,5
+Example:5       B3: ..d5        Firouzja, Alireza-Ding Liren 2024.01.21 Pattern shows up: 3,4 4,5 5,6                                   White - Resigned
    ┌────────────────────────┐
- 8 │ .  r  .  .  .  .  .  . │
- 7 │ .  .  p  .  .  .  .  . │
- 6 │ .  .  .  p  P  k  .  . │
- 5 │ p  .  p  P  p  .  p  . │
+ 8 │ r  n  b  q  k  b  .  r │
+ 7 │ p  p  p  .  .  p  p  p │
+ 6 │ .  .  .  .  p  n  .  . │
+ 5 │ .  .  .  p  .  .  .  . │
+ 4 │ .  .  P  P  .  .  .  . │
+ 3 │ .  .  .  .  .  N  .  . │
+ 2 │ P  P  .  .  P  P  P  P │
+ 1 │ R  N  B  Q  K  B  .  R │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:6       B2: ..d5        Ding Liren-Giri, Anish 2024.01.23       Pattern shows up: 3,4 4,5 5,6                                   DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  n  b  q  k  b  n  r │
+ 7 │ p  p  p  .  .  p  p  p │
+ 6 │ .  .  .  .  p  .  .  . │
+ 5 │ .  .  .  p  .  .  .  . │
  4 │ .  .  P  .  .  .  .  . │
- 3 │ .  P  .  B  .  P  .  . │
- 2 │ P  .  .  .  .  .  K  . │
+ 3 │ .  .  N  .  .  .  .  . │
+ 2 │ P  P  .  P  P  P  P  P │
+ 1 │ R  .  B  Q  K  B  N  R │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:7       W6:d3   Ian Nepomniachtchi-Ding Liren 2024.01.24        Pattern shows up: 2,1 3,2 4,3                                   White - Resigned
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  k  .  .  r │
+ 7 │ .  p  p  p  b  p  p  p │
+ 6 │ p  .  n  .  .  n  .  . │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ B  .  .  .  P  .  .  . │
+ 3 │ .  .  .  P  .  N  .  . │
+ 2 │ P  P  P  .  .  P  P  P │
+ 1 │ R  N  B  Q  .  R  K  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:8       W22:b3  Max Warmerdam-Ding Liren 2024.01.27     Pattern shows up: 0,1 1,2 2,3                                   Black - Resigned
+   ┌────────────────────────┐
+ 8 │ r  .  .  .  .  k  .  . │
+ 7 │ .  .  .  n  .  p  p  . │
+ 6 │ .  p  .  R  p  n  .  p │
+ 5 │ .  .  p  .  .  .  .  . │
+ 4 │ .  .  P  .  .  .  .  . │
+ 3 │ .  P  N  .  .  .  .  . │
+ 2 │ P  .  .  .  P  P  K  P │
+ 1 │ .  .  .  .  N  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:9       W4:d3   Ding Liren-Wenjun Ju 2024.01.28 Pattern shows up: 2,1 3,2 4,3                                   DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  k  b  .  r │
+ 7 │ p  p  p  p  .  p  p  p │
+ 6 │ .  .  n  .  .  n  .  . │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  B  .  P  .  .  . │
+ 3 │ .  .  .  P  .  N  .  . │
+ 2 │ P  P  P  .  .  P  P  P │
+ 1 │ R  N  B  Q  K  .  .  R │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        Connect4Evaluator                               Manifold:   0%
+        Connect5Evaluator                               Manifold:   0%
+        Down4PtsOrMoreMaterialButWins                   Manifold:   0%
+        EnPassantCaptureHappensEvaluator                Manifold:   0%
+        EnPassantRefusedEvaluator                       Manifold:   0%
+        EverQvsRREndgameEvaluator                       Manifold:   0%
+        FirstCaptureIsQueen                             Manifold:   0%
+        FirstCaptureIsRook                              Manifold:   0%
+        FirstCaptureRIsQueen                            Manifold:   0%
+        FourteenPieceGameEndEvaluator                   Manifold: 100%
+Example:1       B32: ..Ke5      Yi Wei-Ding Liren 2024.01.20    game ended by DrawDeclared with 14 pieces                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  .  p  .  . │
+ 6 │ .  .  p  b  .  .  .  R │
+ 5 │ .  .  .  p  k  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  P  .  B  .  K  P  . │
+ 2 │ P  .  P  .  .  .  .  . │
  1 │ .  .  .  .  .  .  .  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        EnPassantEvaluator                              Manifold: 100%
-        1       B14:f5 of Ding Liren-Xu Yang-2001.03.30-1/2-1/2 Player subsequently En Passants with exf6
+        FullComplimentOfMinorPiecesSurvivesEvaluator    Manifold:   0%
+        FullFileEvaluator                               Manifold:   0%
+        FullRankEvaluator                               Manifold:   0%
+        KingInACornerEvaluator                          Manifold: 100%
+Example:1       W11:Kh1 Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
    ┌────────────────────────┐
- 8 │ r  .  .  q  .  r  k  . │
- 7 │ p  p  .  n  b  .  p  p │
- 6 │ .  .  n  .  p  .  .  . │
- 5 │ .  .  .  p  P  p  .  . │
- 4 │ .  P  p  P  .  .  .  . │
- 3 │ P  .  P  .  B  N  .  . │
- 2 │ .  .  Q  N  .  P  P  P │
- 1 │ R  .  .  .  .  R  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W17:c4 of Yu Yangyi-Ding Liren-2009.04.19-1/2-1/2       Player subsequently En Passants with bxc3
-   ┌────────────────────────┐
- 8 │ r  .  .  .  k  .  .  r │
- 7 │ .  .  p  .  b  p  .  p │
- 6 │ p  .  n  .  p  .  .  . │
- 5 │ .  .  .  q  .  p  .  . │
- 4 │ N  p  P  P  .  .  .  . │
- 3 │ .  P  .  .  .  N  .  . │
- 2 │ P  .  .  .  Q  P  P  P │
- 1 │ .  .  K  R  R  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B17:c5 of Zhou Jianchao-Ding Liren-2009.05.13-1/2-1/2   Player subsequently En Passants with dxc6
-   ┌────────────────────────┐
- 8 │ r  .  b  .  n  r  k  . │
- 7 │ .  p  .  n  q  .  .  p │
- 6 │ p  .  .  p  .  b  p  . │
- 5 │ .  .  p  P  p  .  .  . │
- 4 │ .  .  P  .  P  p  P  . │
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  p │
+ 6 │ n  .  p  p  .  n  p  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  P  .  P  .  .  . │
  3 │ .  .  N  .  .  P  .  . │
- 2 │ P  P  .  .  B  B  .  P │
- 1 │ .  K  .  R  Q  .  N  R │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  B  Q  .  R  .  K │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        EnPassantRefusedEvaluator                       Manifold: 100%
-        1       W18:h4 of Ding Liren-Xiu Deshun-2007.05.05-1-0  e.p. refused. could have done: gxh3 but actually did: g5
+Example:2       B11: ..h6       Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
    ┌────────────────────────┐
- 8 │ r  .  .  .  k  .  .  r │
- 7 │ .  p  .  q  b  p  p  . │
- 6 │ p  .  p  .  n  n  .  . │
- 5 │ .  .  P  p  .  .  .  . │
- 4 │ .  P  .  P  p  .  p  P │
- 3 │ P  .  N  .  P  .  P  . │
- 2 │ .  B  .  .  Q  P  B  . │
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  p  p  .  n  p  p │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  P  .  P  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  B  Q  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:3       W12:Be3 Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  p  p  .  n  p  p │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  P  .  P  .  .  . │
+ 3 │ .  .  N  .  B  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  .  Q  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:4       B12: ..d5       Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  p  .  .  n  p  p │
+ 5 │ .  .  .  p  .  .  .  . │
+ 4 │ .  .  P  .  P  .  .  . │
+ 3 │ .  .  N  .  B  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  .  Q  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:5       W13:cxd5        Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  p  .  .  n  p  p │
+ 5 │ .  .  .  P  .  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  N  .  B  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  .  Q  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:6       B13: ..cxd5     Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  .  .  .  n  p  p │
+ 5 │ .  .  .  p  .  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  N  .  B  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  .  Q  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:7       W14:Qc1 Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  .  .  .  n  p  p │
+ 5 │ .  .  .  p  .  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  N  .  B  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  Q  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:8       B14: ..dxe4     Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  .  .  .  n  p  p │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  .  .  . │
+ 3 │ .  .  N  .  B  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  Q  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:9       W15:Bxh6        Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ n  .  .  .  .  n  p  B │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  Q  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:10      B15: ..Nc5      Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  b  . │
+ 6 │ .  .  .  .  .  n  p  B │
+ 5 │ .  .  n  .  .  .  .  . │
+ 4 │ .  .  .  .  p  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  Q  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:11      W16:Bxg7        Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  k  . │
+ 7 │ p  p  .  .  .  p  B  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  n  .  .  .  .  . │
+ 4 │ .  .  .  .  p  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  Q  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:12      B16: ..Kxg7     Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  .  . │
+ 7 │ p  p  .  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  n  .  .  .  .  . │
+ 4 │ .  .  .  .  p  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  Q  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:13      W17:Qg5 Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  .  . │
+ 7 │ p  p  .  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  n  .  .  .  Q  . │
+ 4 │ .  .  .  .  p  .  .  . │
+ 3 │ .  .  N  .  .  P  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:14      B17: ..exf3     Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  .  . │
+ 7 │ p  p  .  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  n  .  .  .  Q  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  p  .  . │
+ 2 │ P  P  N  .  B  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:15      W18:Bxf3        Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  .  . │
+ 7 │ p  p  .  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  n  .  .  .  Q  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:16      B18: ..Ne6      Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  .  . │
+ 7 │ p  p  .  .  .  p  k  . │
+ 6 │ .  .  .  .  n  n  p  . │
+ 5 │ .  .  .  .  .  .  Q  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:17      W19:Qe5 Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  q  r  .  .  . │
+ 7 │ p  p  .  .  .  p  k  . │
+ 6 │ .  .  .  .  n  n  p  . │
+ 5 │ .  .  .  .  Q  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:18      B19: ..Qc7      Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  .  r  .  .  . │
+ 7 │ p  p  q  .  .  p  k  . │
+ 6 │ .  .  .  .  n  n  p  . │
+ 5 │ .  .  .  .  Q  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:19      W20:Qxc7        Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  .  r  .  .  . │
+ 7 │ p  p  Q  .  .  p  k  . │
+ 6 │ .  .  .  .  n  n  p  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:20      B20: ..Nxc7     Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  .  r  .  .  . │
+ 7 │ p  p  n  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:21      W21:Rad1        Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ r  .  b  .  r  .  .  . │
+ 7 │ p  p  n  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ .  .  .  R  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:22      B21: ..Rb8      Ding Liren-Alexander Donchenko 2024.01.14                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  r  b  .  r  .  .  . │
+ 7 │ p  p  n  .  .  p  k  . │
+ 6 │ .  .  .  .  .  n  p  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  N  .  .  B  .  . │
+ 2 │ P  P  N  .  .  .  P  P │
+ 1 │ .  .  .  R  .  R  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:23      W18:Kh1 Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  k  . │
+ 6 │ .  .  n  p  .  n  .  p │
+ 5 │ p  .  .  .  p  .  .  . │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  N  Q  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:24      B18: ..h5       Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  k  . │
+ 6 │ .  .  n  p  .  n  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  N  Q  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:25      W19:Qg3+        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  k  . │
+ 6 │ .  .  n  p  .  n  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  N  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:26      B19: ..Kh7      Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  .  k │
+ 6 │ .  .  n  p  .  n  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  N  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:27      W20:Nd5 Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  .  k │
+ 6 │ .  .  n  p  .  n  .  . │
+ 5 │ p  .  .  N  p  .  .  p │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:28      B20: ..Nxd5     Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  .  k │
+ 6 │ .  .  n  p  .  .  .  . │
+ 5 │ p  .  .  n  p  .  .  p │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:29      W21:exd5        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  p  .  k │
+ 6 │ .  .  n  p  .  .  .  . │
+ 5 │ p  .  .  P  p  .  .  p │
+ 4 │ P  .  B  .  .  .  .  B │
+ 3 │ .  .  P  P  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:30      B21: ..f6       Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  .  .  k │
+ 6 │ .  .  n  p  .  p  .  . │
+ 5 │ p  .  .  P  p  .  .  p │
+ 4 │ P  .  B  .  .  .  .  B │
+ 3 │ .  .  P  P  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:31      W22:dxc6        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  b  q  .  .  k │
+ 6 │ .  .  P  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  .  .  .  .  B │
+ 3 │ .  .  P  P  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:32      B22: ..Bxc6     Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  q  .  .  k │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  .  .  .  .  B │
+ 3 │ .  .  P  P  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:33      W23:d4  Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  q  .  .  k │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  P  .  .  .  B │
+ 3 │ .  .  P  .  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:34      B23: ..Qg7      Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  .  .  q  k │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  B  P  .  .  .  B │
+ 3 │ .  .  P  .  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:35      W24:Bd3+        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  .  .  q  k │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  .  P  .  .  .  B │
+ 3 │ .  .  P  B  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:36      B24: ..Kg8      Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  k  r │
+ 7 │ b  p  p  .  .  .  q  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  .  P  .  .  .  B │
+ 3 │ .  .  P  B  .  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  R  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:37      W25:Re3 Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  k  r │
+ 7 │ b  p  p  .  .  .  q  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  p  .  .  p │
+ 4 │ P  .  .  P  .  .  .  B │
+ 3 │ .  .  P  B  R  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:38      B25: ..exd4     Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  k  r │
+ 7 │ b  p  p  .  .  .  q  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  R  .  Q  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:39      W26:Qxg7+       Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  k  r │
+ 7 │ b  p  p  .  .  .  Q  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  R  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:40      B26: ..Kxg7     Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  .  .  k  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  R  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:41      W27:Rg3+        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  .  .  k  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  R  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:42      B27: ..Kf7      Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  p  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  R  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:43      W28:Rg6 Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  .  r │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  p  R  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:44      B28: ..Rhg8     Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  p  R  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:45      W29:Rxf6+       Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  R  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:46      B29: ..Kg7      Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  .  k  . │
+ 6 │ .  .  b  p  .  R  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:47      W30:Rg6+        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  .  k  . │
+ 6 │ .  .  b  p  .  .  R  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:48      B30: ..Kf7      Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  .  R  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:49      W31:Rf6+        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  R  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        KingReachesOpponentsFarSideOfBoardEvaluator     Manifold:   0%
+        KnightAndKingInCenterFourSquaresEvaluator       Manifold:   0%
+        KnightInACornerEvaluator                        Manifold:   0%
+        NoCapturesBeforeMove10Evaluator                 Manifold: 100%
+Example:1       B11: ..g5       D Gukesh-Ding Liren 2024.01.15  Game with no captures through move W11;                         Black - Resigned
+   ┌────────────────────────┐
+ 8 │ r  .  b  .  k  .  .  r │
+ 7 │ .  p  p  .  q  p  .  . │
+ 6 │ .  b  n  p  .  n  .  p │
+ 5 │ p  N  .  .  p  .  p  . │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  Q  P  P  .  N  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
  1 │ R  .  .  .  K  .  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       W14:g4 of Zhou Jianchao-Ding Liren-2009.05.13-1/2-1/2   e.p. refused. could have done: fxg3 but actually did: Ng7
-   ┌────────────────────────┐
- 8 │ r  .  b  .  .  r  k  . │
- 7 │ .  p  p  n  q  .  .  p │
- 6 │ p  .  .  p  .  b  p  . │
- 5 │ .  .  .  P  p  .  .  n │
- 4 │ .  .  P  .  P  p  P  . │
- 3 │ .  .  N  .  .  P  .  N │
- 2 │ P  P  .  Q  B  B  .  P │
- 1 │ .  K  .  R  .  .  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W33:g4 of Ding Liren-Nepomniachtchi,I-2009.08.23-0-1    e.p. refused. could have done: fxg3 but actually did: h5
-   ┌────────────────────────┐
- 8 │ .  .  .  .  r  b  .  k │
- 7 │ .  .  R  .  .  .  .  p │
- 6 │ .  .  .  .  .  p  .  . │
- 5 │ .  .  .  .  .  N  p  . │
- 4 │ .  .  .  P  .  p  P  . │
- 3 │ .  .  B  b  .  .  .  . │
- 2 │ .  P  .  .  .  .  .  P │
- 1 │ .  .  .  .  .  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        EverQvsRREndgameEvaluator                       Manifold: 100%
-        1       B30:Rxc4 of Ding Liren-Ji Dan-2008.10.21-1-0    has RR vs Q
-   ┌────────────────────────┐
- 8 │ r  .  .  .  .  b  k  . │
- 7 │ .  .  .  .  .  p  p  p │
- 6 │ .  p  .  .  p  .  .  . │
- 5 │ .  N  .  n  .  .  .  . │
- 4 │ P  .  r  .  .  .  .  . │
- 3 │ .  .  .  .  P  P  .  . │
- 2 │ .  .  .  .  .  P  .  P │
- 1 │ .  .  .  .  .  Q  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W39:Rxb8+ of Ding Liren-Bu Xiangzhi-2009.09.19-1-0      has RR vs Q
-   ┌────────────────────────┐
- 8 │ .  R  .  .  .  .  k  . │
- 7 │ .  .  .  .  .  p  p  . │
- 6 │ .  .  .  .  .  b  .  . │
- 5 │ N  .  .  .  .  q  .  . │
- 4 │ .  .  R  .  .  .  .  . │
- 3 │ .  .  .  .  P  .  .  P │
- 2 │ .  .  .  .  .  P  P  . │
- 1 │ .  .  .  .  .  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B40:Kh7 of Ding Liren-Bu Xiangzhi-2009.09.19-1-0        has RR vs Q
-   ┌────────────────────────┐
- 8 │ .  R  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  p  p  k │
- 6 │ .  .  .  .  .  b  .  . │
- 5 │ N  .  .  .  .  q  .  . │
- 4 │ .  .  R  .  .  .  .  . │
- 3 │ .  .  .  .  P  .  .  P │
- 2 │ .  .  .  .  .  P  P  . │
- 1 │ .  .  .  .  .  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        FourteenPieceGameEndEvaluator                   Manifold: 100%
-        1       B48:Ne7 of Ding Liren-Ji Dan-2008.10.21-1-0     game ended by Resigned with 14 pieces
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  Q  n  p  k  . │
- 6 │ .  .  .  b  p  .  .  p │
- 5 │ .  .  .  .  .  .  .  p │
- 4 │ .  .  .  .  P  P  .  . │
- 3 │ .  .  r  .  .  N  K  . │
- 2 │ .  .  .  .  .  P  .  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B61:Qg7 of Ding Liren-Liang Chong-2009.05.29-1/2-1/2    game ended by DrawDeclared with 14 pieces
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  k  . │
- 7 │ .  .  .  .  .  p  q  . │
- 6 │ .  .  .  .  p  .  .  p │
- 5 │ .  .  .  .  .  .  .  P │
- 4 │ .  .  .  .  Q  .  .  . │
- 3 │ .  .  .  .  .  N  P  . │
- 2 │ .  p  .  .  .  P  K  . │
- 1 │ .  B  .  r  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W33:Nxb5 of Malakhov,V-Ding Liren-2009.08.21-1/2-1/2    game ended by DrawDeclared with 14 pieces
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  k  . │
- 6 │ .  .  .  .  .  .  p  p │
- 5 │ .  N  .  .  n  p  .  . │
- 4 │ .  .  b  .  .  .  .  . │
- 3 │ .  .  .  r  .  .  P  P │
- 2 │ .  .  .  .  .  P  B  . │
- 1 │ .  R  .  .  .  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        KingInACornerEvaluator                          Manifold: 100%
-        1       B53:Kxa1 of Ding Liren-Wu Wenjin-2001.03.26-0-1 Pattern shows up: at: 1,1
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  p  .  P  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  P  .  .  .  .  . │
- 3 │ b  .  .  K  .  .  .  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ k  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W53:Kd4 of Ding Liren-Wu Wenjin-2001.03.26-0-1  Pattern shows up: at: 1,1
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  p  .  P  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  P  K  .  .  .  . │
- 3 │ b  .  .  .  .  .  .  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ k  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B54:Be7 of Ding Liren-Wu Wenjin-2001.03.26-0-1  Pattern shows up: at: 1,1
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  b  .  .  . │
- 6 │ .  .  p  .  P  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  P  K  .  .  .  . │
- 3 │ .  .  .  .  .  .  .  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ k  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        NoCapturesBeforeMove10Evaluator                 Manifold: 100%
-        1       B12:b5 of Wang Chaoran-Ding Liren-2001.03.27-1-0        Game with no captures through move 10; The first capture was: B14 dxe5 taking a bp
-   ┌────────────────────────┐
- 8 │ r  .  b  .  .  r  k  . │
- 7 │ .  .  q  n  .  p  b  p │
- 6 │ p  .  p  p  .  n  p  . │
- 5 │ .  p  .  .  p  .  .  . │
- 4 │ .  .  P  P  P  .  P  P │
- 3 │ .  .  N  .  B  P  .  . │
- 2 │ P  P  .  Q  N  .  .  . │
- 1 │ .  .  K  R  .  B  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B12:g5 of Tang Zijian-Ding Liren-2001.03.29-1-0 Game with no captures through move 10; The first capture was: W15 Nxg3 taking a wb
-   ┌────────────────────────┐
- 8 │ .  .  r  q  .  r  k  . │
- 7 │ p  p  .  n  p  p  b  . │
- 6 │ .  .  p  .  b  n  .  p │
- 5 │ .  .  P  p  .  .  p  . │
- 4 │ .  .  .  P  .  .  .  B │
- 3 │ .  .  .  B  P  N  .  . │
- 2 │ P  P  Q  N  .  P  P  P │
- 1 │ R  .  .  .  .  R  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B12:Qe7 of Zhou Jianchao-Ding Liren-2007.04.28-1/2-1/2  Game with no captures through move 10; The first capture was: W15 exd4 taking a wp
-   ┌────────────────────────┐
- 8 │ r  .  b  .  .  r  k  . │
- 7 │ .  p  .  .  q  p  b  p │
- 6 │ n  .  p  p  .  n  p  . │
- 5 │ p  .  .  .  p  .  .  . │
- 4 │ P  .  P  P  P  .  .  . │
- 3 │ .  .  N  B  B  P  .  . │
- 2 │ .  P  .  Q  N  .  P  P │
- 1 │ .  .  .  R  K  .  .  R │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        NoCapturesBeforeMove20Evaluator                 Manifold: 100%
-        1       B22:Bc8 of Sethuraman,S-Ding Liren-2015.03.10-0-1       Game with no captures through move 20; The first capture was: W22 axb4 taking a wp
-   ┌────────────────────────┐
- 8 │ r  .  b  .  r  .  k  . │
- 7 │ .  .  q  .  .  p  b  p │
- 6 │ .  .  p  p  n  n  p  B │
- 5 │ p  p  .  .  p  .  .  . │
- 4 │ .  P  .  P  P  .  .  . │
- 3 │ .  B  P  .  .  N  N  P │
- 2 │ P  .  .  Q  .  P  P  . │
- 1 │ .  .  .  R  R  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B22:h6 of Lu Shanglei-Ding Liren-2015.11.25-1-0 Game with no captures through move 20; The first capture was: W26 Bxe3 taking a wb
+Example:2       B11: ..Ne7      Ding Liren-R Praggnanandhaa 2024.01.16  Game with no captures through move W11;                         Black - Resigned
    ┌────────────────────────┐
  8 │ r  .  b  q  .  r  k  . │
- 7 │ .  .  .  .  b  p  p  . │
- 6 │ .  .  .  p  .  n  n  p │
- 5 │ p  .  p  P  p  .  .  . │
- 4 │ N  p  P  .  P  .  .  . │
- 3 │ P  P  .  .  B  .  .  P │
- 2 │ .  .  B  .  .  P  P  N │
- 1 │ R  .  .  Q  R  .  K  . │
+ 7 │ .  .  p  .  n  p  p  . │
+ 6 │ p  b  .  p  .  n  .  p │
+ 5 │ .  p  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  B  P  P  .  N  .  . │
+ 2 │ P  P  .  .  .  P  P  P │
+ 1 │ R  .  B  Q  R  N  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        3       B22:Kh7 of Ding Liren-Aronian,L-2019.12.04-1/2-1/2      Game with no captures through move 20; The first capture was: W28 gxf5 taking a wp
+Example:3       B11: ..g5       Parham Maghsoodloo-Ding Liren 2024.01.18        Game with no captures through move W11;                         DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  q  .  .  .  r │
- 7 │ .  r  n  b  .  p  b  k │
- 6 │ p  p  .  p  .  n  p  . │
- 5 │ .  .  p  P  p  .  .  p │
- 4 │ P  .  P  .  P  .  .  P │
- 3 │ .  P  N  B  B  P  P  . │
- 2 │ .  .  K  Q  .  N  .  . │
- 1 │ R  R  .  .  .  .  .  . │
+ 8 │ r  .  .  .  k  .  .  r │
+ 7 │ b  p  p  b  q  p  .  . │
+ 6 │ .  .  n  p  .  n  .  p │
+ 5 │ p  .  .  .  p  .  p  . │
+ 4 │ P  .  B  .  P  .  .  B │
+ 3 │ .  .  P  P  .  N  .  . │
+ 2 │ .  P  .  N  .  P  P  P │
+ 1 │ .  R  .  Q  .  R  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
+Example:4       B11: ..Re8      Ian Nepomniachtchi-Ding Liren 2024.01.24        Game with no captures through move W11;                         White - Resigned
+   ┌────────────────────────┐
+ 8 │ r  .  .  q  r  .  k  . │
+ 7 │ .  .  p  b  b  p  p  . │
+ 6 │ p  .  n  p  .  n  .  p │
+ 5 │ .  p  .  .  p  .  .  . │
+ 4 │ P  .  .  .  P  .  .  . │
+ 3 │ .  .  P  P  .  N  .  P │
+ 2 │ B  P  .  .  .  P  P  . │
+ 1 │ R  N  B  Q  .  R  K  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        NoCapturesBeforeMove20Evaluator                 Manifold:   0%
         NoCapturesBeforeMove30Evaluator                 Manifold:   0%
-        NonQueenPromotionEvaluator                      Manifold: 100%
-        1       W47:b8=N of Lin Chen-Ding Liren-2015.05.28-1/2-1/2      Promoted to =N
-   ┌────────────────────────┐
- 8 │ .  N  .  .  .  .  .  . │
- 7 │ .  .  k  .  .  .  .  . │
- 6 │ .  .  .  .  .  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ p  .  .  .  .  .  .  . │
- 3 │ P  .  .  .  .  .  .  . │
- 2 │ .  .  b  .  .  .  .  . │
- 1 │ K  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W32:gxf8=R+ of Navara,D-Ding Liren-2016.02.26-0-1       Promoted to =R
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  R  k  . │
- 7 │ p  .  .  .  .  p  .  . │
- 6 │ .  p  .  .  .  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  .  p  .  .  .  Q │
- 3 │ .  P  .  .  .  .  .  q │
- 2 │ P  .  .  .  n  K  b  P │
- 1 │ .  .  .  .  .  R  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       B111:a1=N# of Kravtsiv,M-Ding Liren-2017.09.08-0-1      Promoted to =N
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  R │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  .  .  .  .  .  . │
- 5 │ k  .  .  .  .  .  .  . │
- 4 │ .  p  .  .  .  .  .  . │
- 3 │ .  K  .  .  .  .  .  . │
- 2 │ .  .  r  .  .  .  .  . │
- 1 │ n  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
+        NonQueenPromotionEvaluator                      Manifold:   0%
+        PawnPromotionAndMateEvaluator                   Manifold:   0%
+        PawnPromotionAndMateEvaluator                   Manifold:   0%
         PawnTakesAQueenEvaluator                        Manifold: 100%
-        1       B39:exd5 of Motylev,A-Ding Liren-2008.05.19-1-0
+Example:1       B15: ..gxf6     Yi Wei-Ding Liren 2024.01.20                                                                    DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  p  .  .  k  p  .  . │
- 6 │ p  .  .  .  .  .  .  . │
- 5 │ .  .  P  p  .  .  p  . │
- 4 │ .  P  R  .  .  r  .  p │
- 3 │ .  .  .  .  .  .  .  P │
- 2 │ P  .  .  .  .  P  P  . │
- 1 │ .  .  .  .  .  .  K  . │
+ 8 │ .  r  b  .  .  r  k  . │
+ 7 │ p  .  .  .  .  p  .  . │
+ 6 │ .  .  p  b  .  p  .  p │
+ 5 │ .  .  .  p  .  .  .  . │
+ 4 │ .  .  .  .  .  .  .  . │
+ 3 │ .  .  .  B  .  .  .  . │
+ 2 │ P  P  P  .  .  P  P  P │
+ 1 │ .  .  .  N  R  R  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       W27:dxc5 of Yu Yangyi-Ding Liren-2009.04.19-1/2-1/2
+Example:2       W11:fxe4        Ding Liren-Van Foreest, Jorden 2024.01.26                                                                       DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  r  .  r  k  . │
- 7 │ .  .  p  .  .  p  b  p │
- 6 │ p  .  .  .  p  .  .  . │
- 5 │ .  .  P  .  .  .  .  . │
- 4 │ .  .  .  .  .  p  P  . │
- 3 │ .  P  N  R  .  .  .  . │
- 2 │ P  .  .  .  .  P  .  P │
- 1 │ .  K  .  R  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W21:gxf4 of Zhou Weiqi-Ding Liren-2009.04.20-0-1
-   ┌────────────────────────┐
- 8 │ .  .  b  .  .  r  .  k │
- 7 │ .  .  r  .  .  p  .  p │
- 6 │ p  .  .  .  p  .  .  . │
- 5 │ .  p  b  .  N  .  .  . │
- 4 │ .  .  .  .  .  P  .  . │
- 3 │ .  .  P  .  .  .  .  . │
- 2 │ P  P  .  .  .  P  B  P │
- 1 │ R  .  .  R  .  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        PromoteAndCheckEvaluator                        Manifold: 100%                  Promoted: =Q and Check.
-        1       B41:f1=Q+ of Li Shilong-Ding Liren-2008.06.03-0-1       Promoted: =Q and Check.
-   ┌────────────────────────┐
- 8 │ R  .  b  .  r  q  .  k │
- 7 │ .  .  R  .  .  .  .  . │
- 6 │ .  p  .  p  .  .  .  . │
- 5 │ .  P  .  B  p  .  .  n │
- 4 │ .  N  P  .  .  .  .  . │
- 3 │ .  .  .  P  b  .  .  . │
- 2 │ .  .  .  .  P  .  K  . │
- 1 │ .  .  .  .  .  q  .  Q │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B43:e1=Q+ of Wang Hao-Ding Liren-2010.06.15-0-1 Promoted: =Q and Check.
-   ┌────────────────────────┐
- 8 │ .  .  .  .  R  .  .  . │
- 7 │ .  .  .  .  .  .  p  k │
- 6 │ .  .  .  .  .  .  .  p │
+ 8 │ r  .  b  .  k  .  .  r │
+ 7 │ p  p  p  .  .  p  p  p │
+ 6 │ .  .  n  p  .  .  .  . │
  5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  .  .  .  P  .  . │
- 3 │ p  .  K  .  .  .  P  . │
- 2 │ .  r  .  .  .  .  .  P │
- 1 │ .  .  .  .  q  .  .  . │
+ 4 │ .  .  P  .  P  .  .  . │
+ 3 │ .  .  P  .  P  .  .  . │
+ 2 │ P  .  .  P  .  .  P  P │
+ 1 │ R  .  B  .  K  B  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        3       B50:c1=Q+ of Ding Liren-Matlakov,M-2012.07.07-1/2-1/2   Promoted: =Q and Check.
+Example:3       B16: ..axb6     Max Warmerdam-Ding Liren 2024.01.27                                                                     Black - Resigned
+   ┌────────────────────────┐
+ 8 │ r  n  .  r  .  .  k  . │
+ 7 │ .  b  .  .  b  p  p  . │
+ 6 │ .  p  .  p  p  n  .  p │
+ 5 │ .  .  p  .  .  .  .  . │
+ 4 │ .  .  P  .  .  B  .  . │
+ 3 │ .  .  N  .  .  N  .  . │
+ 2 │ P  P  .  R  P  P  B  P │
+ 1 │ .  .  .  R  .  .  K  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        PieceCubeEvaluator                              Manifold:   0%
+        PromoteAndCheckEvaluator                        Manifold: 100%
+Example:1       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27     Promoted: =Q and Check.                                         Black - Resigned
    ┌────────────────────────┐
  8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  .  .  .  .  P  . │
- 5 │ .  .  p  .  .  .  .  . │
- 4 │ .  .  .  .  p  .  N  . │
- 3 │ .  .  .  p  .  k  .  . │
- 2 │ .  .  .  K  .  .  .  . │
- 1 │ .  .  q  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  R  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
         QuadrupledPawnEvaluator                         Manifold:   0%
         QueenInACornerEvaluator                         Manifold: 100%
-        1       B52:a1=Q of Ding Liren-Wu Wenjin-2001.03.26-0-1 Pattern shows up: at: 1,1
+Example:1       W29:Qa1 Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
    ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  .  p  .  P  .  .  . │
- 5 │ .  .  .  .  .  .  .  . │
- 4 │ .  .  P  B  .  .  .  . │
- 3 │ b  .  .  K  .  .  .  . │
- 2 │ .  .  .  .  .  .  .  . │
- 1 │ q  k  .  .  .  .  .  . │
+ 8 │ .  r  .  .  n  .  k  . │
+ 7 │ .  .  q  .  .  p  p  . │
+ 6 │ .  .  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  r  .  .  .  .  N  P │
+ 2 │ .  P  .  R  .  P  P  N │
+ 1 │ Q  .  .  .  R  .  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       W40:Qh1 of Li Shilong-Ding Liren-2008.06.03-0-1 Pattern shows up: at: 1,1
+Example:2       B29: ..Qb6      Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
    ┌────────────────────────┐
- 8 │ R  .  b  .  r  q  .  k │
- 7 │ .  .  R  .  .  .  .  . │
- 6 │ .  p  .  p  .  .  .  . │
- 5 │ .  P  .  B  p  .  .  n │
- 4 │ .  N  P  .  .  .  .  . │
- 3 │ .  .  .  P  b  .  .  . │
- 2 │ .  .  .  .  P  p  K  . │
- 1 │ .  .  .  .  .  .  .  Q │
+ 8 │ .  r  .  .  n  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  q  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  r  .  .  .  .  N  P │
+ 2 │ .  P  .  R  .  P  P  N │
+ 1 │ Q  .  .  .  R  .  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        3       B41:f1=Q+ of Li Shilong-Ding Liren-2008.06.03-0-1       Pattern shows up: at: 1,1
+Example:3       W30:Nhf1        Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
    ┌────────────────────────┐
- 8 │ R  .  b  .  r  q  .  k │
- 7 │ .  .  R  .  .  .  .  . │
- 6 │ .  p  .  p  .  .  .  . │
- 5 │ .  P  .  B  p  .  .  n │
- 4 │ .  N  P  .  .  .  .  . │
- 3 │ .  .  .  P  b  .  .  . │
- 2 │ .  .  .  .  P  .  K  . │
- 1 │ .  .  .  .  .  q  .  Q │
+ 8 │ .  r  .  .  n  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  q  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  r  .  .  .  .  N  P │
+ 2 │ .  P  .  R  .  P  P  . │
+ 1 │ Q  .  .  .  R  N  K  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:4       B30: ..Rxb2     Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  r  .  .  n  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  q  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  .  .  .  .  N  P │
+ 2 │ .  r  .  R  .  P  P  . │
+ 1 │ Q  .  .  .  R  N  K  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:5       W31:Rxb2        Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  r  .  .  n  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  q  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  .  .  .  .  N  P │
+ 2 │ .  R  .  .  .  P  P  . │
+ 1 │ Q  .  .  .  R  N  K  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+Example:6       B31: ..Qxb2     Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  r  .  .  n  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  .  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  .  .  .  .  N  P │
+ 2 │ .  q  .  .  .  P  P  . │
+ 1 │ Q  .  .  .  R  N  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
         RookTakesAQueenEvaluator                        Manifold: 100%
-        1       W59:Rxe4 of Ding Liren-Xu Yang-2001.03.30-1/2-1/2
+Example:1       B26: ..Rxb8     Vidit, Santosh Gujrathi-Ding Liren 2024.01.13                                                                   DrawDeclared
    ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  p  k │
- 6 │ .  p  .  .  .  .  .  p │
- 5 │ .  r  .  .  .  .  .  . │
- 4 │ .  .  p  .  R  .  .  . │
- 3 │ .  .  P  .  .  .  P  P │
- 2 │ .  .  .  .  .  P  K  . │
- 1 │ .  .  .  .  .  .  .  . │
+ 8 │ .  r  .  .  .  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  .  .  .  .  n  .  p │
+ 5 │ .  N  p  r  .  .  .  . │
+ 4 │ P  .  .  .  .  .  .  . │
+ 3 │ .  .  .  .  .  .  .  . │
+ 2 │ .  P  .  .  .  .  P  P │
+ 1 │ R  .  .  .  .  R  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        2       W29:Rxg5 of Liu Renhui-Ding Liren-2001.04.02-1/2-1/2
+Example:2       B32: ..Rxb2     Ding Liren-R Praggnanandhaa 2024.01.16                                                                  Black - Resigned
    ┌────────────────────────┐
- 8 │ .  .  .  .  .  r  .  k │
- 7 │ .  .  .  .  .  .  .  p │
- 6 │ .  p  .  .  .  n  p  . │
- 5 │ p  .  .  .  .  .  R  . │
- 4 │ .  .  .  p  .  .  .  . │
- 3 │ .  .  .  B  .  .  .  P │
- 2 │ P  P  .  .  .  P  P  K │
- 1 │ .  .  .  .  .  .  .  . │
+ 8 │ .  .  .  .  n  .  k  . │
+ 7 │ .  .  .  .  .  p  p  . │
+ 6 │ .  .  .  p  b  .  .  p │
+ 5 │ .  .  .  .  p  .  .  . │
+ 4 │ .  .  .  .  P  .  .  . │
+ 3 │ .  .  .  .  .  .  N  P │
+ 2 │ .  r  .  .  .  P  P  . │
+ 1 │ .  .  .  .  R  N  K  . │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
-        3       W27:Rxf3 of Ding Liren-Huang Yicheng-2001.04.03-1-0
+        SamePieceMovesEightTimesInARowEvaluator         Manifold:   0%
+        TripledPawnEvaluator                            Manifold:   0%
+        TwoKnightsOnSideEdgeEvaluator                   Manifold: 100%
+Example:1       W16:Nh4 D Gukesh-Ding Liren 2024.01.15                                                                  Black - Resigned
    ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  r │
- 7 │ .  p  p  k  .  p  .  p │
- 6 │ .  .  .  .  .  .  p  . │
- 5 │ .  n  Q  .  P  .  .  . │
- 4 │ .  .  .  .  .  P  b  . │
- 3 │ .  .  P  .  .  R  P  . │
- 2 │ P  .  P  .  .  .  .  P │
- 1 │ .  .  .  .  .  .  K  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        SamePieceMovesEightTimesInARowEvaluator         Manifold: 100%
-        1       W57:Kg7 of Wen Yang-Ding Liren-2001.03.31-1-0   wk moved 8 times in a row: e4,e6,Qe2,Be7,g3,d5,d3,Nf6,h4,c5,Bg2,Nc6,Nf3,O-O,h5,dxe4,dxe4,e5,h6,g6,c3,Qc7,O-O,Bg4,Na3,a6,Nc2,Rad8,Ne3,Bc8,Ng5,b5,a4,c4,axb5,axb5,Nd5,Qb7,Rd1,Be6,Nxe6,fxe6,Nxe7+,Nxe7,Rxd8,Rxd8,Bg5,Ne8,Bh3,Rd6,Bh4,Nc6,Bg5,Qc8,Qe3,Nc7,Qc5,Qd7,Bg4,Kf7,Rf1,Kg8,Kg2,Rd3,Be2,Rd6,Kg1,Na5,Qxe5,Nc6,Qf4,e5,Qh4,Ne6,Be3,Qe7,Qxe7,Nxe7,Ra1,Nc6,Ra8+,Rd8,Ra6,Rc8,Bg4,Kf7,Rb6,Rc7,Rxb5,Kf6,Bxe6,Kxe6,Rc5,Kd6,Rxc4,Na5,Rxc7,Kxc7,Kg2,Kc6,Kf3,Kb5,Kg4,Kc4,Kg5,Kd3,Kf6,Kxe4,Kg7,Nc4,Kxh7,Kf5
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  K  . │
- 6 │ .  .  .  .  .  .  p  P │
- 5 │ .  .  .  .  p  k  .  . │
- 4 │ .  .  n  .  .  .  .  . │
- 3 │ .  .  P  .  B  .  P  . │
- 2 │ .  P  .  .  .  P  .  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       W49:Rxh5 of Liu Renhui-Ding Liren-2001.04.02-1/2-1/2    wr moved 8 times in a row: e4,e6,d4,d5,exd5,exd5,Bd3,Bd6,Ne2,Nf6,Bf4,O-O,O-O,c6,Nd2,Bxf4,Nxf4,Qd6,Qf3,Be6,c3,Nbd7,Nxe6,fxe6,Qh3,e5,dxe5,Nxe5,Bc2,Rae8,Rae1,c5,Nf3,Nxf3+,Qxf3,Rxe1,Rxe1,b6,Qh3,d4,cxd4,cxd4,Qf5,Qb4,Re2,Kh8,Bd3,a5,h3,Qc5,Re5,Qc1+,Kh2,g6,Qg5,Qxg5,Rxg5,Nh5,Kg1,Nf4,Rg3,Rc8,Rf3,g5,a4,Rc1+,Kh2,Rd1,Bc4,h6,g3,Ng6,Rf5,Rb1,b3,d3,Bxd3,Rxb3,Bb5,Kg7,Kg2,Ne7,Re5,Kf6,Re4,Rb4,Re2,Nd5,Rc2,Ke5,Rc6,h5,Rg6,g4,Rg5+,Kd6
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  p  .  k  .  .  .  . │
- 5 │ p  B  .  n  .  .  .  R │
- 4 │ P  r  .  .  .  .  p  . │
- 3 │ .  .  .  .  .  .  P  P │
- 2 │ .  .  .  .  .  P  K  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W50:Rxh3 of Liu Renhui-Ding Liren-2001.04.02-1/2-1/2    wr moved 8 times in a row: e4,e6,d4,d5,exd5,exd5,Bd3,Bd6,Ne2,Nf6,Bf4,O-O,O-O,c6,Nd2,Bxf4,Nxf4,Qd6,Qf3,Be6,c3,Nbd7,Nxe6,fxe6,Qh3,e5,dxe5,Nxe5,Bc2,Rae8,Rae1,c5,Nf3,Nxf3+,Qxf3,Rxe1,Rxe1,b6,Qh3,d4,cxd4,cxd4,Qf5,Qb4,Re2,Kh8,Bd3,a5,h3,Qc5,Re5,Qc1+,Kh2,g6,Qg5,Qxg5,Rxg5,Nh5,Kg1,Nf4,Rg3,Rc8,Rf3,g5,a4,Rc1+,Kh2,Rd1,Bc4,h6,g3,Ng6,Rf5,Rb1,b3,d3,Bxd3,Rxb3,Bb5,Kg7,Kg2,Ne7,Re5,Kf6,Re4,Rb4,Re2,Nd5,Rc2,Ke5,Rc6,h5,Rg6,g4,Rg5+,Kd6,Rxh5,gxh3+
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ .  .  .  .  .  .  .  . │
- 6 │ .  p  .  k  .  .  .  . │
- 5 │ p  B  .  n  .  .  .  . │
- 4 │ P  r  .  .  .  .  .  . │
- 3 │ .  .  .  .  .  .  P  R │
- 2 │ .  .  .  .  .  P  K  . │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        TripledPawnEvaluator                            Manifold: 100%
-        1       W21:bxc4 of Ding Liren-Qiu Tong-2001.04.04-1-0  Pattern shows up: at: 3,2 3,3 3,4
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ p  .  .  .  b  .  p  p │
- 6 │ .  .  k  .  p  .  .  . │
- 5 │ .  .  p  .  .  p  .  . │
- 4 │ .  .  P  .  .  P  .  . │
- 3 │ .  .  P  .  B  .  P  . │
- 2 │ P  .  P  K  .  .  .  P │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        2       B22:Kb6 of Ding Liren-Qiu Tong-2001.04.04-1-0   Pattern shows up: at: 3,2 3,3 3,4
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ p  .  .  .  b  .  p  p │
- 6 │ .  k  .  .  p  .  .  . │
- 5 │ .  .  p  .  .  p  .  . │
- 4 │ .  .  P  .  .  P  .  . │
- 3 │ .  .  P  .  B  .  P  . │
- 2 │ P  .  P  K  .  .  .  P │
- 1 │ .  .  .  .  .  .  .  . │
-   └────────────────────────┘
-     a  b  c  d  e  f  g  h
-
-
-        3       W22:Kc1 of Ding Liren-Qiu Tong-2001.04.04-1-0   Pattern shows up: at: 3,2 3,3 3,4
-   ┌────────────────────────┐
- 8 │ .  .  .  .  .  .  .  . │
- 7 │ p  .  .  .  b  .  p  p │
- 6 │ .  k  .  .  p  .  .  . │
- 5 │ .  .  p  .  .  p  .  . │
- 4 │ .  .  P  .  .  P  .  . │
- 3 │ .  .  P  .  B  .  P  . │
- 2 │ P  .  P  .  .  .  .  P │
- 1 │ .  .  K  .  .  .  .  . │
+ 8 │ r  .  b  .  .  r  k  . │
+ 7 │ .  p  p  .  q  p  .  . │
+ 6 │ .  b  n  p  .  .  .  p │
+ 5 │ p  .  .  .  .  .  .  n │
+ 4 │ P  .  B  N  P  .  p  N │
+ 3 │ .  Q  P  .  .  .  B  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  .  K  R  .  .  .  R │
    └────────────────────────┘
      a  b  c  d  e  f  g  h
 
 
         TwoPawnPromotionsInOneGameEvaluator             Manifold:   0%
 
-Numerical evaluators: 16
-        Black40VsWhiteMinus10WinEvalutor                Manifold: 100%  (raw: 11250)    Total of 431 black wins, 599 white wins
-        CapturedBishopsFiveCapturedPawnsMinusOneEvaluator       Manifold: 100%  (raw: 11478)    Captured pawns:17492 Captured Bishops5794
-        HalfPercentForEachMoveInLongestGameEvaluator    Manifold: 100%  (raw: 171)      Longest game is Ding Liren-Giri,A-2015.10.28-1/2-1/2, with 343 moves.
-        KnightDirectionNumerical3PercentVerticalMinus4PercentHorizontalEvaluator        Manifold:   0%  (raw: -3346)   Total horizontal knight moves in games: 13546, total vertical: 16946
-        OnePercentForEachMoveInLongestGameEvaluator     Manifold: 100%  (raw: 343)      Longest game is Ding Liren-Giri,A-2015.10.28-1/2-1/2, with 343 moves.
-        OnePercentPerUnmovedPieceEvaluator              Manifold: 100%  (raw: 5180)     Total of 5180 unmoved pieces.
-        OnePercentPerUnmovedPieceEvaluator              Manifold: 100%  (raw: 90791021) Total of 12233 two space jumps, 12103 one space jumps, and 1644 first move captures.
-        Pawn10VsKnightMinus10FirstMoveEvaluator         Manifold: 100%  (raw: 15040)    Total of 1757 pawn first moves, 253 knight first moves, so result is: 15040
-        SevenPercentForEachDrawEvaluator                Manifold: 100%  (raw: 6783)     Total draws: 969
-        ShortCastleTenPercentVsLongCastleMinusFivePercentEvaluator      Manifold: 100%  (raw: 33225)
-        SurvivingQueen5PercentEachEvaluator             Manifold: 100%  (raw: 7355)     2010 games saw 4020 queens; 2549 original queens were killed, leaving 1471.
-        TenPercentForEachDrawEvaluator                  Manifold: 100%  (raw: 9690)     Total draws: 969
-        TenPercentForeEachWinEvaluator                  Manifold: 100%  (raw: 10410)    Total of 1041 wins out of 2010 games.
-        TenPercentPerResignationEvaluator               Manifold: 100%  (raw: 10300)    Total of 1030 resignations
-        TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator   Manifold: 100%  (raw: 11130)    Decisive: 1041, indecisive: 969
-        TwentyPercentPerEnPassantCaptureEvaluator       Manifold: 100%  (raw: 2700)     total of 135 en passant captures in 2010 games.
+Numerical evaluators: 27
+        BiggestPawnMaterialLeadInAnyGameTwentyPercentPerPawnLeadOnBoardEvaluator        Manifold:  60%  (raw:  60)      The biggest on-board pawn lead was:3
+        1       B52: ..Rxh2     Max Warmerdam-Ding Liren 2024.01.27     game Max Warmerdam-Ding Liren 2024.01.27 at move 103 Rxh2 one side had a pawn advantage of 3   Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  k  p  .  .  . │
+ 4 │ R  .  .  .  p  .  p  . │
+ 3 │ .  .  .  .  K  .  .  . │
+ 2 │ .  .  .  .  .  .  .  r │
+ 1 │ .  .  .  .  .  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        Black40VsWhiteMinus10WinEvalutor                Manifold: 100%  (raw: 100)      Total of 3 black wins, 2 white wins
+        BlackPlayerEverAheadOnPointsInGameSeriesEvaluator       Manifold: 100%  (raw: 100)      Black was ahead at some point.
+        1       B37: ..Re4+     D Gukesh-Ding Liren 2024.01.15                                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  p  .  .  p  k  . │
+ 6 │ .  .  .  p  .  .  .  p │
+ 5 │ p  Q  .  P  .  .  .  . │
+ 4 │ P  n  K  .  r  B  p  . │
+ 3 │ .  .  R  .  P  .  .  . │
+ 2 │ .  P  .  q  .  .  P  P │
+ 1 │ .  .  .  .  .  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        CapturedBishopsFiveCapturedPawnsMinusOneEvaluator       Manifold:  91%  (raw:  91)
+        HalfPercentForEachMoveInLongestGameEvaluator    Manifold:  32%  (raw:  32)      Max Warmerdam-Ding Liren 2024.01.27 had 128 plies which rolls up to 64 moves including partials, worth 32%
+        1       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27                                                                     Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  R  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        HomecomingPiecesTenPercentEachEvaluator         Manifold:  30%  (raw:  30)      Total homecoming pieces: 3.
+        1       B62: ..Ne4      Ding Liren-R Praggnanandhaa 2024.01.16  This game had 1 pieces return to their starting squares at end. Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  n  k  .  p │
+ 3 │ .  .  .  .  .  p  .  . │
+ 2 │ .  .  .  .  .  N  .  . │
+ 1 │ .  .  .  .  .  K  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        KnightDirectionNumerical3PercentVerticalMinus4PercentHorizontalEvaluator        Manifold:  59%  (raw:  59)      Total horizontal knight moves in games: 67, total vertical: 109
+        LongestWinstreakByPlayerTwentyPercentEachEvaluator      Manifold:  20%  (raw:  20)      Total longest streak was 1.
+        MoreKnightsSurviveThanBishopsEvaluator          Manifold:   0%  (raw:   0)      Total surviving knights;12, total surviving bishops: 13
+        OnePercentForEachMoveInLongestGameEvaluator     Manifold:  64%  (raw:  64)      Max Warmerdam-Ding Liren 2024.01.27 had 128 plies which rolls up to 64 moves including partials, worth 64%
+        1       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27                                                                     Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  R  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        OnePercentPerUnmovedPieceEvaluator              Manifold:  41%  (raw:  41)      In the game with the most unmoved pieces, there were 6, and overall there were 41 unmoved pieces;
+        1       W31:Rf6+        Parham Maghsoodloo-Ding Liren 2024.01.18                                                                        DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  R  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        OverallWhiteGameEndPointAdvantageTenPercentPerEvaluator Manifold:   0%  (raw: -90)      Total w point advantage in all games: -9. At the end of the game, B ahead: 2 times.W ahead: 9 times.Same: 2 times.
+        1       B62: ..Ne4      Ding Liren-R Praggnanandhaa 2024.01.16  Advantage: -2                                                   Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  n  k  .  p │
+ 3 │ .  .  .  .  .  p  .  . │
+ 2 │ .  .  .  .  .  N  .  . │
+ 1 │ .  .  .  .  .  K  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        2       W43:Kf4 Firouzja, Alireza-Ding Liren 2024.01.21 Advantage: 2                                                    White - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  k  p  . │
+ 5 │ R  .  .  .  .  .  .  . │
+ 4 │ P  .  .  .  .  K  p  . │
+ 3 │ .  .  .  B  .  .  .  . │
+ 2 │ .  .  .  .  .  .  .  r │
+ 1 │ .  .  .  .  .  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        3       B25: ..Rh6      Ding Liren-Van Foreest, Jorden 2024.01.26       Advantage: 1                                                    DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  k  .  .  . │
+ 6 │ .  p  .  p  b  p  .  r │
+ 5 │ n  .  p  .  .  .  p  B │
+ 4 │ P  .  P  .  P  .  .  p │
+ 3 │ .  .  P  P  P  .  .  P │
+ 2 │ .  .  .  .  .  R  P  K │
+ 1 │ R  .  .  .  B  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        4       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27     Advantage: -10                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  R  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        Pawn10VsKnightMinus10FirstMoveEvaluator         Manifold: 100%  (raw: 110)      Total of 12 pawn first moves, 1 knight first moves, so result is: 110
+        PawnMoveTypesFiveForTwoJumpMinusFiveForOtherFirstMove   Manifold:   0%  (raw: -105)     Total of 70 two space jumps, 82 one space jumps, and 9 first move captures.
+        SevenPercentForEachDrawEvaluator                Manifold:  56%  (raw:  56)      Total draws: 8
+        ShortCastleTenPercentVsLongCastleMinusFivePercentEvaluator      Manifold: 100%  (raw: 210)      Total short castles: 22, total long castles: 2
+        SurvivingPawnsWorthOneSurvivingKnightBishopRookWorthNegativeTwoEvaluator        Manifold:   0%  (raw:  -7)      Total of 103 pawns, 12 knights, 13 bishops, 30 rooks survived.
+        1       B30: ..Ke7      Ding Liren-Wenjun Ju 2024.01.28 Best Pawn example: Total of 12 pawns, 0 knights, 2 bishops, 0 rooks survived in this one, total points: 8.      DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  p  .  .  k  p  .  . │
+ 6 │ .  .  p  .  .  .  p  . │
+ 5 │ p  .  b  .  .  .  .  p │
+ 4 │ P  .  B  .  .  .  .  P │
+ 3 │ .  .  P  .  .  K  P  . │
+ 2 │ .  P  .  .  .  P  .  . │
+ 1 │ .  .  .  .  .  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        2       W31:Rf6+        Parham Maghsoodloo-Ding Liren 2024.01.18        Best non-pawn example: Total of 12 pawns, 0 knights, 4 bishops, 4 rooks survived in this one, total points: -4. DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  r  r  . │
+ 7 │ b  p  p  .  .  k  .  . │
+ 6 │ .  .  b  p  .  R  .  . │
+ 5 │ p  .  .  .  .  .  .  p │
+ 4 │ P  .  .  p  .  .  .  B │
+ 3 │ .  .  P  B  .  .  .  . │
+ 2 │ .  P  .  .  .  P  P  P │
+ 1 │ .  R  .  .  .  .  .  K │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        SurvivingQueen5PercentEachEvaluator             Manifold:  30%  (raw:  30)      Total of 6 surviving queens.
+        TenPercentForEachDrawEvaluator                  Manifold:  80%  (raw:  80)      Total draws: 8
+        TenPercentForEachPointOfMaterialAdvantageInFinalPositionEvaluator       Manifold:   0%  (raw: -90)      Total -9. At the end of the game, B ahead: 2 times.W ahead: 9 times.Same: 2 times.
+        1       B62: ..Ne4      Ding Liren-R Praggnanandhaa 2024.01.16  Advantage: -2                                                   Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  n  k  .  p │
+ 3 │ .  .  .  .  .  p  .  . │
+ 2 │ .  .  .  .  .  N  .  . │
+ 1 │ .  .  .  .  .  K  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        2       W43:Kf4 Firouzja, Alireza-Ding Liren 2024.01.21 Advantage: 2                                                    White - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  k  p  . │
+ 5 │ R  .  .  .  .  .  .  . │
+ 4 │ P  .  .  .  .  K  p  . │
+ 3 │ .  .  .  B  .  .  .  . │
+ 2 │ .  .  .  .  .  .  .  r │
+ 1 │ .  .  .  .  .  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        3       B25: ..Rh6      Ding Liren-Van Foreest, Jorden 2024.01.26       Advantage: 1                                                    DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  k  .  .  . │
+ 6 │ .  p  .  p  b  p  .  r │
+ 5 │ n  .  p  .  .  .  p  B │
+ 4 │ P  .  P  .  P  .  .  p │
+ 3 │ .  .  P  P  P  .  .  P │
+ 2 │ .  .  .  .  .  R  P  K │
+ 1 │ R  .  .  .  B  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        4       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27     Advantage: -10                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  R  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        TenPercentForEachPointOfMaterialAdvantageInFinalPositionEvaluator       Manifold:   0%  (raw: -90)      Total -9. At the end of the game, B ahead: 2 times.W ahead: 9 times.Same: 2 times.
+        1       B62: ..Ne4      Ding Liren-R Praggnanandhaa 2024.01.16  Advantage: -2                                                   Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  n  k  .  p │
+ 3 │ .  .  .  .  .  p  .  . │
+ 2 │ .  .  .  .  .  N  .  . │
+ 1 │ .  .  .  .  .  K  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        2       W43:Kf4 Firouzja, Alireza-Ding Liren 2024.01.21 Advantage: 2                                                    White - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  .  . │
+ 6 │ .  .  .  .  .  k  p  . │
+ 5 │ R  .  .  .  .  .  .  . │
+ 4 │ P  .  .  .  .  K  p  . │
+ 3 │ .  .  .  B  .  .  .  . │
+ 2 │ .  .  .  .  .  .  .  r │
+ 1 │ .  .  .  .  .  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        3       B25: ..Rh6      Ding Liren-Van Foreest, Jorden 2024.01.26       Advantage: 1                                                    DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  k  .  .  . │
+ 6 │ .  p  .  p  b  p  .  r │
+ 5 │ n  .  p  .  .  .  p  B │
+ 4 │ P  .  P  .  P  .  .  p │
+ 3 │ .  .  P  P  P  .  .  P │
+ 2 │ .  .  .  .  .  R  P  K │
+ 1 │ R  .  .  .  B  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        4       B64: ..g1=Q+    Max Warmerdam-Ding Liren 2024.01.27     Advantage: -10                                                  Black - Resigned
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  .  . │
+ 7 │ .  .  .  .  .  .  R  . │
+ 6 │ .  .  .  .  .  .  .  . │
+ 5 │ .  .  .  .  .  .  .  . │
+ 4 │ .  .  .  .  p  k  .  . │
+ 3 │ r  .  .  .  .  .  .  . │
+ 2 │ .  .  .  .  .  K  .  . │
+ 1 │ .  .  .  .  .  .  q  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
+
+
+        TenPercentForeEachBlackWinEvaluator             Manifold:  30%  (raw:  30)      Total: 3 b wins.
+        TenPercentForeEachWhiteWinEvaluator             Manifold:  20%  (raw:  20)      Total: 2 w wins.
+        TenPercentForeEachWinEvaluator                  Manifold:  50%  (raw:  50)      Total: 5 wins.
+        TenPercentPerResignationEvaluator               Manifold:  50%  (raw:  50)      Total of 5 resignations
+        TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator   Manifold:  20%  (raw:  20)      Decisive: 5, indecisive: 8
+        UnmovedNonPawnTenPercentEachEvaluator           Manifold:  10%  (raw:  10)      In the game with the most unmoved nonpawns, there were 1, and overall there were 1 unmoved pieces;
+        1       B25: ..Rh6      Ding Liren-Van Foreest, Jorden 2024.01.26                                                                       DrawDeclared
+   ┌────────────────────────┐
+ 8 │ .  .  .  .  .  .  r  . │
+ 7 │ p  .  .  .  k  .  .  . │
+ 6 │ .  p  .  p  b  p  .  r │
+ 5 │ n  .  p  .  .  .  p  B │
+ 4 │ P  .  P  .  P  .  .  p │
+ 3 │ .  .  P  P  P  .  .  P │
+ 2 │ .  .  .  .  .  R  P  K │
+ 1 │ R  .  .  .  B  .  .  . │
+   └────────────────────────┘
+     a  b  c  d  e  f  g  h
