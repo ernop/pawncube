@@ -56,7 +56,10 @@ namespace PawnCube
 
             var numericalEvaluators = new List<INumericalEvaluator>() {
                 //new TwentyPercentPerEnPassantCaptureEvaluator(),
-                new BEverAheadOnPointsEvaluator(),
+                new LongestWinstreakByPlayerTwentyPercentEachEvaluator(),
+                new BiggestPawnMaterialLeadInAnyGameTwentyPercentPerPawnLeadOnBoardEvaluator(),
+                new BlackPlayerEverAheadOnPointsInGameSeriesEvaluator(),
+                //new PerEn
                 new Black40VsWhiteMinus10WinEvalutor(),
                 new CapturedBishopsFiveCapturedPawnsMinusOneEvaluator(),
                 new HalfPercentForEachMoveInLongestGameEvaluator(),

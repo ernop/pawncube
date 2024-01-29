@@ -30,7 +30,8 @@ foreach (var be in booleanEvaluators.OrderBy(el => el.Name))
     {
         ii++;
         var genericDetails = MakeGenericDetails(qq);
-        Console.WriteLine($"\t{ii,-3}\t{genericDetails}\t{qq.Details,-60}\r\n{qq.Board.ToAscii()}\r\n");
+        qq.Board.MoveIndex = qq.ExampleMoveIndex;
+        Console.WriteLine($"Example:{ii,-3}\t{genericDetails}\t{qq.Details,-60}\t{getResult(qq.Board)}\r\n{qq.Board.ToAscii()}\r\n");
     }
 }
 
@@ -39,6 +40,14 @@ foreach (var ne in numericalEvaluators.OrderBy(el => el.Name))
 {
     var res = ne.Evaluate(boards);
     Console.WriteLine($"\t{ne.Name,-40}\tManifold: {res.ManifoldResult(),3}%\t(raw: {res.RawResult,3})\t{res.Details,-40}");
+    var ii = 0;
+    foreach (var qq in res.Examples.Take(Statics.NumberOfExamplesToShow))
+    {
+        ii++;
+        qq.Board.MoveIndex = qq.ExampleMoveIndex;
+
+        Console.WriteLine($"\t{ii,-3}\t{MakeGenericDetails(qq)}\t{qq.Details,-60}\t{getResult(qq.Board)}\r\n{qq.Board.ToAscii()}\r\n");
+    }
 }
 
 if (boards.Count < 5)
@@ -50,11 +59,24 @@ if (boards.Count < 5)
     }
 }
 
-static string MakeGenericDetails(BooleanExample be)
+static string getResult(ChessBoard board)
+{
+    var winarar = "";
+    if (board.EndGame.WonSide != null)
+    {
+        winarar = board.EndGame.WonSide == PieceColor.Black ? "Black - " : "White - ";
+    }
+
+    var result = $"{winarar}{board.EndGame.EndgameType}";
+    return result;
+}
+
+static string MakeGenericDetails(IChessBoardExample be)
 {
     var ply = be.ExampleMoveIndex;
-    var NormalMoveNumber = Statics.MakeNormalMoveNumberDescriptor(ply);
+    var extraDots = ply % 2 == 0 ? "" : " ..";
+    var normalMoveNumber = Statics.MakeNormalMoveNumberDescriptor(ply);
 
-    var res = $"{NormalMoveNumber}:{be.Board.ExecutedMoves[ply]} of {Statics.DescribeChessBoard(be.Board)}";
+    var res = $"{normalMoveNumber}:{extraDots}{be.Board.ExecutedMoves[ply]}\t{Statics.DescribeChessBoard(be.Board)}";
     return res;
 }

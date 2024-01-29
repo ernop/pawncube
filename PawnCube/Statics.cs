@@ -14,13 +14,14 @@ namespace PawnCube
     internal static class Statics
     {
         public static int NumberOfExamplesToCollect = int.MaxValue;
-        public static int NumberOfExamplesToShow = 1;
+        public static int NumberOfExamplesToShow = 50;
         internal static Regex numberMatcher = new Regex(@"[\d]{1,1000}\.");
 
         public static List<ChessBoard> LoadBoards()
         {
             var boards = new List<ChessBoard>();
             var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn");
+            based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn");
             var maxGamesToProcess = 20000;
             //maxGamesToProcess = 200;
             var ct = 0;
@@ -50,7 +51,9 @@ namespace PawnCube
         {
             var usep = pgnStr;
             var parts = usep.Split("\r\n\r\n");
-            var result = parts[1].Split("  ")[1].Trim();
+            var moveParts = parts[1].Split(" ");
+            //the result is magically the last item in the space-split list of moves. ugh.
+            var result = moveParts[moveParts.Count() - 1].Trim();
 
             var moves = parts[1].Replace(result, "").Replace("  ", "");
             var joined = string.Join('\n', moves).Replace("\r\n", " ");
@@ -68,6 +71,7 @@ namespace PawnCube
 
             foreach (var m in joined.Split(' '))
             {
+                if (string.IsNullOrEmpty(m)) { continue; }
                 //if the EP is from the b file, is it confused by bishop vs b pawn doing EP? both error cases were from that file.
                 try
                 {
@@ -117,11 +121,11 @@ namespace PawnCube
         {
 
             var lines = System.IO.File.ReadAllText(fp);
-            var parts = lines.Split("[Event");
+            var parts = lines.Split("[Event ");
             foreach (var p in parts)
             {
                 if (string.IsNullOrEmpty(p)) { continue; }
-                yield return "[Event" + p;
+                yield return "[Event " + p;
             }
 
         }
@@ -130,7 +134,7 @@ namespace PawnCube
         {
 
             var h = board.Headers;
-            var res = $"{h.GetValueOrDefault("White")}-{h.GetValueOrDefault("Black")}-{h.GetValueOrDefault("Date")}-{h.GetValueOrDefault("Result")}";
+            var res = $"{h.GetValueOrDefault("White")}-{h.GetValueOrDefault("Black")} {h.GetValueOrDefault("Date")}";
             return res;
         }
 
@@ -152,6 +156,29 @@ namespace PawnCube
                 return $"B{Math.Floor(s) + 1}";
             }
             return $"W{Math.Floor(s) + 1}";
+        }
+
+        public static List<Piece> GetAllPieces(ChessBoard board)
+        {
+            var res = new List<Piece>();
+            for (short xx = 0; xx < 8; xx++)
+            {
+                for (short yy = 0; yy < 8; yy++)
+                {
+                    var p = board[xx, yy];
+                    if (p == null) { continue; }
+                    res.Add(p);
+                }
+            }
+            return res;
+        }
+
+        public static List<Piece> GetAllCaptures(ChessBoard board)
+        {
+            var res = new List<Piece>();
+            res.AddRange(board.CapturedBlack);
+            res.AddRange(board.CapturedWhite);
+            return res;
         }
 
         /// <summary>
@@ -177,9 +204,6 @@ namespace PawnCube
                     count += mult;
                 }
             }
-            //Console.WriteLine(board.ToAscii());
-            
-            //Console.WriteLine(count);
             return count;
         }
 

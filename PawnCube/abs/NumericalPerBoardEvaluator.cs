@@ -10,18 +10,16 @@ namespace PawnCube
         public abstract string Name { get; }
         public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            var results = new List<int>() { };
+            var results = new List<NumericalExample>();
             foreach (var board in boards)
             {
-                results.Add(this.InnerEvaluate(board));
+                var exa = InnerEvaluate(board);
+                results.Add(exa);
             }
-            var raw = this.Aggregate(results, out var det);
-
-            //var det = $"Total of {results.Where(el => el != 0).Count()} nonzero returns of {boards.Count()} games resulting in manifold result: {raw}";
-            return new NumericalEvaluationResult(raw, det);
+            return Aggregate(results);
         }
 
-        public abstract int InnerEvaluate(ChessBoard board);
-        public abstract int Aggregate(IEnumerable<int> results, out string det);
+        public abstract NumericalExample InnerEvaluate(ChessBoard board);
+        public abstract NumericalEvaluationResult Aggregate(IEnumerable<NumericalExample> examples);
     }
 }

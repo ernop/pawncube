@@ -46,7 +46,8 @@
 #10% for each black win
 #10% for each point of material advantage in any game's final position
 #B is ever ahead on points (add up all points from B and W in these games, is B >0?)
-
+#+1% every surviving pawn, -2% every surviving knight, bishop, or rook
+#20% for each win in the longest consecutive win streak by one player
 
 20% for each extra pawn held by the side with the greatest pawn advantage, in any position in any game
 We get to a bishop and knight endgame
@@ -54,20 +55,15 @@ We get to a bishop and knight endgame
 
 
 
--TBD
 10% for every point of advantage W has in all the ending positions (including negative, when B is ahead)
 A King and a knight are in the center 4 squares
 At any point in a game, 2 bishops and 0 knights on one side oppose 2 knights and 0 bishops
-- TBD
-+1% every surviving pawn, -2% every surviving knight, bishop, or rook
+
 
 10% for each nonpawn which never moves in a game
 If game were immediately switched to "self-capture chess", one side would have mate in 1
-20% for each win in the longest consecutive win streak by one player
 
 
-
-A full file
 
 First piece captured of any kind in a game is a queen
 A queen en prise for three moves in a row

@@ -60,11 +60,14 @@ namespace PawnCube
             //which are on their home squares,
             //minus the pieces who moved. Then give 10% for each.
             var homecomingPieces = 0;
+            var bestPerboard = 0;
+            ChessBoard bestBoard = null;
 
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
                 board.Last();
+                var thisHomecomingCount = 0;
 
                 var moved = new Dictionary<int, bool>();
                 for (var ii = 0; ii < 32; ii++)
@@ -89,7 +92,7 @@ namespace PawnCube
                     for (short xx = 0; xx < 8; xx++)
                     {
                         id++;
-                        if (!moved[id-1])
+                        if (!moved[id - 1])
                         {
                             continue;
                         }
@@ -98,20 +101,31 @@ namespace PawnCube
                         {
                             if (piece != null)
                             {
-                                if (piece.Id == id-1)
+                                if (piece.Id == id - 1)
                                 {
                                     homecomingPieces++;
+                                    thisHomecomingCount++;
                                 }
                             }
                         }
                     }
                 }
+                if (thisHomecomingCount > bestPerboard)
+                {
+                    bestPerboard = thisHomecomingCount;
+                    bestBoard = board;
+                }
             }
 
-            var det = $"Total homecoming pieces: {homecomingPieces}";
             var raw = homecomingPieces * 10;
-            return new NumericalEvaluationResult(raw, det);
-
+            var det = $"Total homecoming pieces: {homecomingPieces}.";
+            var examples = new List<NumericalExample>();
+            if (bestBoard!=null)
+            {
+                examples.Add(new NumericalExample(bestBoard, $"This game had {bestPerboard} pieces return to their starting squares at end.", bestBoard.ExecutedMoves.Count() - 1, bestPerboard));
+            }
+            
+            return new NumericalEvaluationResult(raw, det, examples);
         }
     }
 
@@ -485,7 +499,6 @@ namespace PawnCube
                 {
                     continue;
                 }
-                //var color = ii % 2 == 0 ? "White" : "Black";
                 if (move.Parameter != null)
                 {
                     var ss = move.Parameter.ShortStr;
@@ -511,7 +524,6 @@ namespace PawnCube
                 var move = board.ExecutedMoves[ii];
                 board.Next();
                 var normalMoveNumber = ii / 2 + 1;
-                var color = ii % 2 == 0 ? "White" : "Black";
                 if (normalMoveNumber <= 20)
                 {
                     continue;

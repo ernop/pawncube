@@ -16,22 +16,7 @@ namespace PawnCube
         public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
         {
             board.Last();
-            //have played out the whole game now.
-            //coords are zero indexed.
-            var count = 0;
-            for (short xx = 0; xx < 8; xx++)
-            {
-                for (short yy = 0; yy < 8; yy++)
-                {
-                    var p = board[xx, yy];
-                    if (p != null)
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            if (count == 14)
+            if (Statics.GetAllPieces(board).Count() == 14)
             {
                 var det = $"game ended by {board.EndGame.EndgameType} with 14 pieces";
                 yield return new BooleanExample(board, det, board.ExecutedMoves.Count - 1);

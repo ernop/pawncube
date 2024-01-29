@@ -339,7 +339,7 @@ public class Connect3Evaluator : PatternMatcherChecker
                 break;
             }
 
-            details = $"{xx + 1},{yy + 1}";
+            details = $"{xx},{yy}";
             //we got through a whole vector without dying.
             foreach (var pos in vector)
             {

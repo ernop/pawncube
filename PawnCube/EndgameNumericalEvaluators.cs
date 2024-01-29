@@ -1,62 +1,105 @@
 ﻿using Chess;
 
+using PawnCube;
+
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PawnCube
 {
-    public class TenPercentForeEachWinEvaluator : NumericalPerBoardEvaluator
+    public class TenPercentForeEachWinEvaluator : INumericalEvaluator
     {
-        public override string Name => nameof(TenPercentForeEachWinEvaluator);
+        public string Name => nameof(TenPercentForeEachWinEvaluator);
 
-        public override int Aggregate(IEnumerable<int> results, out string det)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            det = $"Total: {results.Sum()} wins.";
-            return results.Sum() * 10;
-        }
-
-        public override int InnerEvaluate(ChessBoard board)
-        {
-            if (board.EndGame == null)
+            var winCount = 0;
+            foreach (var board in boards)
             {
-                throw new Exception("null endgame although game ended?");
+                if (board.EndGame == null)
+                {
+                    throw new Exception("null endgame although game ended?");
+                }
+                if (board.EndGame.WonSide != null)
+                {
+                    winCount++;
+                }
             }
-            if (board.EndGame.EndgameType == EndgameType.Timeout
-                || board.EndGame.EndgameType == EndgameType.Checkmate
-                 || board.EndGame.EndgameType == EndgameType.Resigned)
-            {
-                return 1;
-            }
-            return 0;
+            return new NumericalEvaluationResult(winCount * 10, $"Total: {winCount} wins.", new List<NumericalExample>());
         }
     }
 
-    public class TenPercentForeEachBlackWinEvaluator : NumericalPerBoardEvaluator
+    public class LongestWinstreakByPlayerTwentyPercentEachEvaluator : INumericalEvaluator
     {
-        public override string Name => nameof(TenPercentForeEachBlackWinEvaluator);
-
-        public override int InnerEvaluate(ChessBoard board)
+        public string Name => nameof(LongestWinstreakByPlayerTwentyPercentEachEvaluator);
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            if (board.EndGame.EndgameType == EndgameType.Timeout
-                || board.EndGame.EndgameType == EndgameType.Checkmate
-                 || board.EndGame.EndgameType == EndgameType.Resigned)
+            var runningTotal = 0;
+            var maxSeen = 0;
+            var lastWinner = "";
+
+            foreach (var board in boards)
             {
-                if (board.ExecutedMoves.Last().Piece.Color == PieceColor.Black)
+                if (board.EndGame == null)
                 {
-                    return 1;
+                    throw new Exception("null endgame although game ended?");
+                }
+                if (board.EndGame.WonSide == null)
+                {
+                    runningTotal = 0;
+                }
+                else
+                {
+                    var winner = "";
+                    if (board.EndGame.WonSide == PieceColor.White)
+                    {
+                        winner = board.Headers["White"];
+                    }
+                    else if (board.EndGame.WonSide == PieceColor.Black)
+                    {
+                        winner = board.Headers["Black"];
+                    }
+                    else
+                    {
+                        throw new Exception("no winner?");
+                    }
+
+                    if (lastWinner == winner)
+                    {
+                        runningTotal += 1;
+                    }
+                    else
+                    {
+                        runningTotal = 1;
+                    }
+                    maxSeen = Math.Max(maxSeen, runningTotal);
+                    lastWinner = winner;
                 }
             }
-            return 0;
-        }
 
-        public override int Aggregate(IEnumerable<int> results, out string det)
+            var raw = maxSeen * 20;
+            var det = $"Total longest streak was {maxSeen}.";
+            var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>());
+            return res;
+        }
+    }
+
+    public class TenPercentForeEachBlackWinEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TenPercentForeEachBlackWinEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            var tot = results.Sum();
-            det = $"Total: {tot} b wins.";
-            return tot * 10;
+            var bwins = boards.Where(board => board.EndGame.EndgameType == EndgameType.Timeout || board.EndGame.EndgameType == EndgameType.Checkmate || board.EndGame.EndgameType == EndgameType.Resigned)
+                .Where(el => el.EndGame.WonSide == PieceColor.Black);
+            var raw = bwins.Count() * 10;
+            var det = $"Total: {bwins.Count()} b wins.";
+            return new NumericalEvaluationResult(raw, det, new List<NumericalExample>());
         }
     }
 
@@ -64,55 +107,66 @@ namespace PawnCube
     /// This one is a bit tricky since it introduces a new requirement - that the games be evaluated in the right order.
     /// The other new thing about it is that it uses state within the aggregator.
     /// </summary>
-    public class BEverAheadOnPointsEvaluator : NumericalPerBoardEvaluator
+    public class BlackPlayerEverAheadOnPointsInGameSeriesEvaluator : INumericalEvaluator
     {
-        public override string Name => nameof(BEverAheadOnPointsEvaluator);
+        public string Name => nameof(BlackPlayerEverAheadOnPointsInGameSeriesEvaluator);
 
-        public override int Aggregate(IEnumerable<int> results, out string det)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            //calculate w's raw total score, semi useful at least.
-            double wRunningTotal = 0;
-            var gameNumber = 1;
-            foreach (var el in results)
+            var bRunningTotal = 0.0;
+            var allDrawTotal = 0.0;
+            foreach (var board in boards)
             {
-                if (el == 0)
+                allDrawTotal += 0.5;
+                if (board.EndGame != null && board.EndGame.WonSide == PieceColor.Black)
                 {
-                    wRunningTotal += 0.5;
+                    bRunningTotal += 1;
                 }
-                else if (el == 1)
+                else if (board.EndGame != null && board.EndGame.WonSide == null)
                 {
-                    wRunningTotal += 1;
+                    bRunningTotal += 0.5;
                 }
-                else if (el == -1)
+                else
                 {
-                    wRunningTotal += 0;
+                    var a = 4;
                 }
-
-                if (wRunningTotal - 0.5 * gameNumber < 0)
+                if (bRunningTotal > allDrawTotal)
                 {
-                    det = $"B got the lead in game {gameNumber} in {results.Count()} with {gameNumber - wRunningTotal} and the final in standard notation with W positive was: {results.Sum()}.";
-                    return 100;
+                    var exa = new NumericalExample(board, "", board.ExecutedMoves.Count()-1, 100);
+                    return new NumericalEvaluationResult(100, "Black was ahead at some point.", new List<NumericalExample>() { exa });
                 }
-                gameNumber++;
-
             }
-            det = $"B never got the lead in {results.Count()} games, and the final was: {results.Sum()}.";
-            return 0;
+            return new NumericalEvaluationResult(0, "Black was never ahead", null);
         }
+    }
 
-        public override int InnerEvaluate(ChessBoard board)
+    public class Black40VsWhiteMinus10WinEvalutor : INumericalEvaluator
+    {
+        public string Name => nameof(Black40VsWhiteMinus10WinEvalutor);
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            if (board.EndGame.WonSide == PieceColor.Black)
+            var blackWins = 0;
+            var whitewins = 0;
+            foreach (var board in boards)
             {
-                return -1;
-
+                board.GoToStartingPosition();
+                var e = board.EndGame;
+                if (e.EndgameType == EndgameType.Resigned)
+                {
+                    if (e.WonSide == PieceColor.White)
+                    {
+                        whitewins++;
+                    }
+                    if (e.WonSide == PieceColor.Black)
+                    {
+                        blackWins++;
+                    }
+                }
             }
-            if (board.EndGame.WonSide == PieceColor.White)
-            {
-                return 1;
-
-            }
-            return 0;
+            var raw = 40 * blackWins + -10 * whitewins;
+            var det = $"Total of {blackWins} black wins, {whitewins} white wins";
+            var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>());
+            return res;
         }
     }
 
@@ -123,40 +177,30 @@ namespace PawnCube
         public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var unmovedCount = 0;
+            var mostUnmovedCount = 0;
+            ChessBoard mostUnmovedGame = null;
+            NumericalExample bestExample = null;
+
             foreach (var board in boards)
             {
-                board.GoToStartingPosition();
-                var unmoved = new Dictionary<Position, bool>();
-                for (short xx = 0; xx < 8; xx++)
+                //a piece must both not have moved and not be killed.
+                board.Last();
+                var survivingPieceIds = Statics.GetAllPieces(board).Where(el => el.Id > 0 && el.Id < 32).Select(el=>el.Id);
+                var movedIds = board.ExecutedMoves.Select(el => el.Piece.Id).Distinct();
+                var deadIds = Statics.GetAllCaptures(board).Select(el => el.Id).ToList();
+                var guys = survivingPieceIds.Where(el => !deadIds.Contains(el)).Where(el => !movedIds.Contains(el));
+                var ct = guys.Count();
+                if (ct > mostUnmovedCount)
                 {
-                    foreach (short yy in new List<short>() { 0, 1, 6, 7 })
-                    {
-                        var pos = new Position(xx, yy);
-                        unmoved[pos] = true;
-                    }
+                    mostUnmovedCount = ct;
+                    mostUnmovedGame = board;
+                    bestExample = new NumericalExample(board, "", board.ExecutedMoves.Count()-1, ct);
                 }
-
-                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
-                {
-                    var move = board.ExecutedMoves[ii];
-                    unmoved[move.OriginalPosition] = false;
-                    unmoved[move.NewPosition] = false;
-                    board.Next();
-                }
-
-                var thisUnmovedCount = 0;
-                foreach (var k in unmoved.Keys)
-                {
-                    if (unmoved[k])
-                    {
-                        thisUnmovedCount++;
-                    }
-                }
-                unmovedCount += thisUnmovedCount;
+                unmovedCount += guys.Count();
             }
             var raw = 1 * unmovedCount;
-            var det = $"Total of {unmovedCount} unmoved pieces.";
-            var res = new NumericalEvaluationResult(raw, det);
+            var det = $"In the game with the most unmoved pieces, there were {mostUnmovedCount}, and overall there were {unmovedCount} unmoved pieces;";
+            var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { bestExample });
             return res;
         }
     }

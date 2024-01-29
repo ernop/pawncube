@@ -36,9 +36,6 @@ namespace PawnCube
                         }
                         else
                         {
-                            //Console.WriteLine(board.ToAscii());
-                            //Console.WriteLine(board.ExecutedMoves);
-                            //var a = 54;
                         }
 
                     }
@@ -50,17 +47,6 @@ namespace PawnCube
                         }
                         else
                         {
-                            //foreach (var m in board.Moves())
-                            //{
-                            //    Console.WriteLine(m);
-                            //}
-                            //foreach (var m in board.ExecutedMoves)
-                            //{
-                            //    Console.WriteLine(m);
-                            //}
-                            //Console.WriteLine(board.ToAscii());
-                            //var a = 54;
-                            //Console.WriteLine(board.ExecutedMoves);
                         }
                     }
                 }
@@ -101,23 +87,12 @@ namespace PawnCube
                             {
                                 originalKnights++;
                             }
-                            else
-                            {
-                                //Console.WriteLine(board.ExecutedMoves);
-                                var a = 54;
-                            }
-
                         }
                         if (p.Type == PieceType.Bishop)
                         {
                             if (p.Id > 0)
                             {
                                 originalBishops++;
-                            }
-                            else
-                            {
-                                //Console.WriteLine(board.ToAscii());
-                                var a = 54;
                             }
                         }
                     }
@@ -126,9 +101,8 @@ namespace PawnCube
 
             var det = $"Total surviving knights;{originalKnights}, total surviving bishops: {originalBishops}";
             var raw = (originalKnights - originalBishops > 0) ? 100 : 0;
-            return new NumericalEvaluationResult(raw, det);
+            return new NumericalEvaluationResult(raw, det, null);
         }
-
     }
 
 }

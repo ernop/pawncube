@@ -416,6 +416,8 @@ public partial class ChessBoard
     /// Displaying first move(if possible)
     /// UPDATE hmmmm not ideal AT ALL that this doesn't go back to the initial position
     /// but rather the first move. like, who cares about that move in particular? 
+    /// 
+    /// WARNING: you probably don't want this. You probably actually want GoToStartingPosition.
     /// </summary>
     public void First() => MoveIndex = 0;
 
