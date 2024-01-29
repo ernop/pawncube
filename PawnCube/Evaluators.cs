@@ -1029,7 +1029,6 @@ namespace PawnCube
 
         public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
         {
-
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 var move = board.ExecutedMoves[ii];
@@ -1067,7 +1066,6 @@ namespace PawnCube
 
         public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
         {
-
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 var move = board.ExecutedMoves[ii];
@@ -1143,6 +1141,7 @@ namespace PawnCube
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 board.Next();
+                var bad = false;
                 foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.Queen))
                 {
                     var piece = el.Item1;
@@ -1150,9 +1149,11 @@ namespace PawnCube
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
                         yield return new BooleanExample(board, "", ii);
+                        bad = true;
                         break;
                     }
                 }
+                if (bad) { break; }
             }
         }
     }
@@ -1164,6 +1165,7 @@ namespace PawnCube
         {
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
+                var bad = false;
                 board.Next();
                 foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.King))
                 {
@@ -1172,9 +1174,11 @@ namespace PawnCube
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
                         yield return new BooleanExample(board, "", ii);
+                        bad = true;
                         break;
                     }
                 }
+                if (bad) { break; }
             }
         }
     }
@@ -1186,6 +1190,7 @@ namespace PawnCube
         {
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
+                var bad = false;
                 board.Next();
                 foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.Bishop))
                 {
@@ -1194,9 +1199,11 @@ namespace PawnCube
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
                         yield return new BooleanExample(board, "", ii);
+                        bad = true;
                         break;
                     }
                 }
+                if (bad) { break; }
             }
         }
     }
@@ -1208,6 +1215,7 @@ namespace PawnCube
         {
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
+                var bad = false;
                 board.Next();
                 foreach (var el in GetAllPiecesAndPositions(board).Where(el => el.Item1.Type == PieceType.Knight))
                 {
@@ -1216,9 +1224,11 @@ namespace PawnCube
                     if ((pos.Y == 0 || pos.Y == 7) && (pos.X == 0 || pos.X == 7))
                     {
                         yield return new BooleanExample(board, "", ii);
+                        bad = true;
                         break;
                     }
                 }
+                if (bad) { break; }
             }
         }
     }
