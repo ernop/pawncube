@@ -11,33 +11,46 @@ using System.Threading.Tasks;
 
 namespace PawnCube
 {
-    internal static class Statics
+    internal static partial class Statics
     {
         public static int NumberOfExamplesToCollect = int.MaxValue;
-        public static int NumberOfExamplesToShow = 1;
+        public static int NumberOfExamplesToShow = 20;
+
+        /// <summary>
+        /// The point of all this is to judge these two prediction markets
+        /// </summary>
+        static string RelatedMarket1 = "https://manifold.markets/Ernie/rosen-score-of-weird-thing-that-wil";
+        static string RelatedMarket2 = "https://manifold.markets/Ernie/what-will-happen-during-ding-lirens";
         internal static Regex numberMatcher = new Regex(@"[\d]{1,1000}\.");
 
-        public static List<ChessBoard> LoadBoards()
+        public static IEnumerable<BoardSet> LoadBoardSets()
         {
-            var boards = new List<ChessBoard>();
-            var based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn");
-            //based = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn");
-            var maxGamesToProcess = 20000;
-            //maxGamesToProcess = 200;
-            var ct = 0;
-            var pgnStrings = Statics.SplitPgns(based);
-            Console.WriteLine($"Loading PGNStrings. {pgnStrings.Count()}");
-            foreach (var pgnStr in pgnStrings)
-            {
-                boards.Add(Statics.Pgn2Board(pgnStr.Trim()));
-                ct++;
-                if (ct >= maxGamesToProcess)
-                {
-                    break;
-                }
-            }
             
-            return boards;
+            var paths = new List<string>();
+            paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn"));
+            paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn"));
+            var maxGamesToProcess = 20000;
+            var ct = 0;
+            foreach (var path in paths)
+            {
+
+                var boards = new List<ChessBoard>();
+                var pgnStrings = Statics.SplitPgns(path);
+                Console.WriteLine($"Loading PGNStrings. {pgnStrings.Count()}");
+
+                foreach (var pgnStr in pgnStrings)
+                {
+                    boards.Add(Statics.Pgn2Board(pgnStr.Trim()));
+                    ct++;
+                    if (ct >= maxGamesToProcess)
+                    {
+                        break;
+                    }
+                }
+                var boardSet = new BoardSet(path, boards);
+
+                yield return boardSet;
+            }
         }
 
         /// <summary>
@@ -127,7 +140,6 @@ namespace PawnCube
                 if (string.IsNullOrEmpty(p)) { continue; }
                 yield return "[Event " + p;
             }
-
         }
 
         public static string DescribeChessBoard(ChessBoard board)
@@ -222,12 +234,43 @@ namespace PawnCube
             return count;
         }
 
-        /// <summary>
-        /// The point of all this is to judge these two prediction markets
-        /// </summary>
-        static string RelatedMarket1 = "https://manifold.markets/Ernie/rosen-score-of-weird-thing-that-wil";
-        static string RelatedMarket2 = "https://manifold.markets/Ernie/what-will-happen-during-ding-lirens";
-        static string items = @"Daniel Naroditsky is one of the live commentators
+        public static string getResult(ChessBoard board)
+        {
+            var winarar = "";
+            if (board.EndGame.WonSide != null)
+            {
+                winarar = board.EndGame.WonSide == PieceColor.Black ? "Black - " : "White - ";
+            }
+
+            var result = $"{winarar}{board.EndGame.EndgameType}";
+            return result;
+        }
+
+        public static string MakeGenericDetails(IChessBoardExample be)
+        {
+            var ply = be.ExampleMoveIndex;
+            var extraDots = ply % 2 == 0 ? "" : " ..";
+            var normalMoveNumber = Statics.MakeNormalMoveNumberDescriptor(ply);
+
+            var res = $"{normalMoveNumber}:{extraDots}{be.Board.ExecutedMoves[ply]}\t{Statics.DescribeChessBoard(be.Board)}";
+            return res;
+        }
+
+        public static void DisplayWholeGame(ChessBoard board)
+        {
+            var moves = board.ExecutedMoves;
+            board.GoToStartingPosition();
+            Console.WriteLine(Statics.DescribeChessBoard(board));
+            var ii = 0;
+            foreach (var m in moves)
+            {
+                ii++;
+                board.Next();
+                Console.WriteLine($"{board.ToAscii()}\r\nMoveNumber:{ii}, {m}");
+            }
+        }
+
+        public static string items = @"Daniel Naroditsky is one of the live commentators
 1% for each move in the longest game
 King in a corner
 We get to a bishop and knight endgame
@@ -330,4 +373,5 @@ A pawn promotion to a non-queen
 En passant capture and double check
 A pawn promotes to a non-queen and checkmates";
     }
+
 }

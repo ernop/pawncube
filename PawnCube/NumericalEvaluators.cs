@@ -17,6 +17,61 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PawnCube
 {
+    public class TotalPawnAdvantageSeen20PercentPerPawnEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TotalPawnAdvantageSeen20PercentPerPawnEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var highestPawnAdvantage = 0;
+            ChessBoard bestGame = null;
+            var bestMoveNumber = 0;
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                for (var ii=0;ii<board.ExecutedMoves.Count;ii++)
+                {
+                    var pieces = GetAllPieces(board);
+                    var bPawnCount = 0;
+                    var wPawnCount = 0;
+                    foreach (var piece in pieces)
+                    {
+                        if (piece.Type == PieceType.Pawn)
+                        {
+                            if (piece.Color == PieceColor.White)
+                            {
+                                wPawnCount++;
+                            }
+                            else
+                            {
+                                bPawnCount++;
+                            }
+                        }
+                    }
+                    var gap = Math.Abs(wPawnCount - bPawnCount);
+                    if (gap > highestPawnAdvantage)
+                    {
+                        highestPawnAdvantage = gap;
+                        bestGame = board;
+                        bestMoveNumber = ii;
+                    }
+                    board.Next();
+                }
+            }
+
+            if (bestGame != null)
+            {
+                var color = bestMoveNumber%2 == 0 ? "white" : "black";
+                var det = $"Highest pawn advantage seen was {highestPawnAdvantage} pawns, for {color}, in game {Statics.DescribeChessBoard(bestGame)} at move {bestMoveNumber}";
+                var examples = new List<NumericalExample>() { new NumericalExample(bestGame, det, bestMoveNumber, highestPawnAdvantage) };
+                return new NumericalEvaluationResult(highestPawnAdvantage, det, examples);
+            }
+            else
+            {
+                return new NumericalEvaluationResult(0, "No pawn advantage seen", new List<NumericalExample>());
+            }
+        }
+    }
 
     public class Pawn10VsKnightMinus10FirstMoveEvaluator : INumericalEvaluator
     {
@@ -354,26 +409,24 @@ namespace PawnCube
     }
 
     //definitely not bug-free right now.
-    public class SurvivingQueen5PercentEachEvaluator : NumericalPerBoardEvaluator
+    public class SurvivingQueen5PercentEachEvaluator : INumericalEvaluator
     {
-        public override string Name => nameof(SurvivingQueen5PercentEachEvaluator);
+        public string Name => nameof(SurvivingQueen5PercentEachEvaluator);
 
-        public override NumericalEvaluationResult Aggregate(IEnumerable<NumericalExample> examples)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            var val = examples.Select(el => el.Value).Sum();
-            var raw = val * 5;
-            return new NumericalEvaluationResult(raw, $"Total of {val} surviving queens.", null);
-        }
+            var totalQueensSurvived = 0;
+            foreach (var board in boards)
+            {
+                board.Last();
+                var pieces = Statics.GetAllPieces(board).Where(el => el.Id > 0);
+                var tq = pieces.Where(el => el.Type == PieceType.Queen).Count();
+                totalQueensSurvived += tq;
 
-        public override NumericalExample InnerEvaluate(ChessBoard board)
-        {
-            //exclude promoted pieces.
-            var survivingQueens = Statics.GetAllPieces(board)
-                .Where(el => el.Id > 0)
-                .Where(el => el.Type == PieceType.Queen).Count();
-
-            var raw = survivingQueens;
-            return new NumericalExample(board, "", 0, raw);
+            }
+            var raw = totalQueensSurvived * 5;
+            var det = $"Total of {totalQueensSurvived} queens survived.";
+            return new NumericalEvaluationResult(raw, det, new List<NumericalExample>());
         }
     }
 

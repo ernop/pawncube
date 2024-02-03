@@ -723,6 +723,32 @@ namespace PawnCube
         }
     }
 
+    public class CastleWithCheckEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(CastleWithCheckEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                board.Next();
+                if (move.Parameter != null)
+                {
+                    var ss = move.Parameter.ShortStr;
+                    if (ss == "O-O" || ss == "O-O-O")
+                    {
+                        var det = $"";
+                        if (move.IsCheck)
+                        {
+                            yield return new BooleanExample(board, det, ii);
+                        }
+                    }
+                }
+            }
+        }
+    }
     public class CastleAfterMove20Evaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(CastleAfterMove20Evaluator);
@@ -1244,7 +1270,7 @@ namespace PawnCube
                 var ct = 0;
                 var bad = false;
                 var allPieces = GetAllPiecesAndPositions(board);
-                foreach (var el in allPieces.Where(el=>el.Item1.Type==PieceType.Knight))
+                foreach (var el in allPieces.Where(el => el.Item1.Type == PieceType.Knight))
                 {
                     var piece = el.Item1;
                     var pos = el.Item2;
@@ -1282,7 +1308,7 @@ namespace PawnCube
                     if (mySquareColor != requiredSquareColor)
                     {
                         //Console.WriteLine(board.ToAscii());
-                        bad = true; 
+                        bad = true;
                         break;
                     }
                 }

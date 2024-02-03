@@ -12,27 +12,25 @@ using static PawnCube.Statics;
 namespace PawnCube
 {
     /// <summary>
-    /// note that this uses + and - material advantages, so it's a measure of how far ahead W is.
+    /// max(abs(advantage any player had at any end game))
     /// </summary>
-    public class TenPercentForEachPointOfMaterialAdvantageInFinalPositionEvaluator : NumericalPerBoardEvaluator
+    public class TenPercentForEachPointOfMaterialAdvantageInAnyFinalPositionEvaluator : NumericalPerBoardEvaluator
     {
-        public override string Name => nameof(TenPercentForEachPointOfMaterialAdvantageInFinalPositionEvaluator);
+        public override string Name => nameof(TenPercentForEachPointOfMaterialAdvantageInAnyFinalPositionEvaluator);
 
         public override NumericalEvaluationResult Aggregate(IEnumerable<NumericalExample> examples)
         {
-            var tot = examples.Select(el => el.Value).Sum();
-            var det = $"Total {tot}. At the end of the game, B ahead: {examples.Select(el => el.Value).Where(el => el < 0).Count()} times." +
-                $"W ahead: {examples.Select(el => el.Value).Where(el => el == 0).Count()} times." +
-                $"Same: {examples.Select(el => el.Value).Where(el => el > 0).Count()} times.";
-            var raw = tot * 10;
-            return new NumericalEvaluationResult(raw, det, examples.Where(el=>el.Value!=0));
+            var most = examples.OrderByDescending(el => Math.Abs(el.Value)).First();
+            var det = $"Most extreme game end advantage had by anyone was: {most.Details}. ";
+            var raw = most.Value * 10;
+            return new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { most});
         }
 
         public override NumericalExample InnerEvaluate(ChessBoard board)
         {
             board.Last();
-            var d = GetMaterialDifference(board);
-            return new NumericalExample(board, $"Advantage: {d}", board.ExecutedMoves.Count()-1, d);
+            var materialDifferenceOnBoard = GetMaterialDifference(board);
+            return new NumericalExample(board, $"Advantage: {materialDifferenceOnBoard}", board.ExecutedMoves.Count()-1, materialDifferenceOnBoard);
         }
     }
 
