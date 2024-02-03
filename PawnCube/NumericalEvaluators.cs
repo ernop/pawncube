@@ -17,6 +17,84 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PawnCube
 {
+    public class KingTakesQueenFivePercentEachEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(KingTakesQueenFivePercentEachEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var totalKingsTakingQueens = 0;
+            var examples = new List<NumericalExample>();
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    
+                    var move = board.ExecutedMoves[ii];
+                    var po = move.OriginalPosition;
+                    var exiPiece = board[po];
+                    if (exiPiece== null)
+                    {
+                        board.Next();
+                        continue;
+                    }
+                    if (exiPiece.Type != PieceType.King)
+                    {
+                        board.Next();
+                        continue;
+                    }
+                    if (move.CapturedPiece != null && move.CapturedPiece.Type == PieceType.Queen)
+                    {
+                        totalKingsTakingQueens++;
+                        examples.Add(new NumericalExample(board, $"King takes queen at move {ii}", ii, 5));
+                    }
+                    board.Next();
+                }
+            }
+            var raw = totalKingsTakingQueens * 5;
+            var det = $"Total of {totalKingsTakingQueens} kings taking queens";
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
+    public class PawnPromotionFivePercentEachEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(PawnPromotionFivePercentEachEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var totalPromotions = 0;
+            var examples = new List<NumericalExample>();
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                var promotionsThisGame = 0;
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    board.Next();
+                    if (move.Parameter != null)
+                    {
+                        var l = move.Parameter.ShortStr;
+                        if (l == "=" || l == "=Q" || l == "=R" || l == "=B" || l == "=N")
+                        {
+                            promotionsThisGame++;
+                        }
+                    }
+                }
+                totalPromotions += promotionsThisGame;
+                if (promotionsThisGame > 0)
+                {
+                    examples.Add(new NumericalExample(board, $"Game with {promotionsThisGame} promotions", 0, promotionsThisGame * 5));
+                }
+            }
+            var raw = totalPromotions * 5;
+            var det = $"Total of {totalPromotions} promotions";
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+    
     public class TotalPawnAdvantageSeen20PercentPerPawnEvaluator : INumericalEvaluator
     {
         public string Name => nameof(TotalPawnAdvantageSeen20PercentPerPawnEvaluator);

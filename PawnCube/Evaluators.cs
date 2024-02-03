@@ -15,6 +15,46 @@ using static PawnCube.Statics;
 
 namespace PawnCube
 {
+    /// <summary>
+    /// This is actually really rare.
+    /// </summary>
+    public class AllFourCornersOccupiedByNonRooksEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(AllFourCornersOccupiedByNonRooksEvaluator);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            var corners = new List<Position>() { new Position(0, 0), new Position(0, 7), new Position(7, 0), new Position(7, 7) };
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var bad = false;
+                var sawCt = 0;
+                foreach (var pos in corners)
+                {
+                    var p = board[pos];
+                    if (p == null)
+                    {
+                        bad = true;
+                        break;
+                    }
+                    if (p.Type == PieceType.Rook)
+                    {
+                        bad = true;
+                        break;
+                    }
+                    sawCt++;
+                }
+                if (bad)
+                {
+                    continue;
+                }
+                var det = $"All four corners occupied by non-rooks.";
+                yield return new BooleanExample(board, det, ii);
+                break;
+            }
+        }
+    }
 
     public class TwoBishopsVsTwoKnightsEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {

@@ -14,7 +14,7 @@ namespace PawnCube
     internal static partial class Statics
     {
         public static int NumberOfExamplesToCollect = int.MaxValue;
-        public static int NumberOfExamplesToShow = 20;
+        public static int NumberOfExamplesToShow = 1;
 
         /// <summary>
         /// The point of all this is to judge these two prediction markets
