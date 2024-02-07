@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PawnCube
 {
-    internal static partial class Statics
+    internal static class Statics
     {
         public static int NumberOfExamplesToCollect = int.MaxValue;
         public static int NumberOfExamplesToShow = 1;
@@ -25,7 +25,6 @@ namespace PawnCube
 
         public static IEnumerable<BoardSet> LoadBoardSets()
         {
-            
             var paths = new List<string>();
             paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn"));
             paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn"));

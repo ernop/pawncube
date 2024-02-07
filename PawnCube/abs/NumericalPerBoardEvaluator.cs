@@ -19,6 +19,10 @@ namespace PawnCube
             return Aggregate(results);
         }
 
+        /// <summary>
+        /// Convert the board into a numerical example or null if it doesn't match. That example's .Value will be used later on (possibly)
+        /// within the aggregate function which will be fed all the examples.
+        /// </summary>
         public abstract NumericalExample InnerEvaluate(ChessBoard board);
         public abstract NumericalEvaluationResult Aggregate(IEnumerable<NumericalExample> examples);
     }

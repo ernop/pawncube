@@ -15,6 +15,80 @@ using static PawnCube.Statics;
 
 namespace PawnCube
 {
+    public class LargestNxNSquareInAnyPositionInAnyGame : INumericalEvaluator
+    {
+        public string Name => nameof(LargestNxNSquareInAnyPositionInAnyGame);
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            //okay, optimizations are reasonable. if we've already found width 4, don't start in such a way that only 4 edge length or smaller things can be found, for example.
+
+            //find largest square.
+            // this will be hyper inefficient.
+            short bestBoardWidth = 1;
+            ChessBoard bestBoard = null;
+            foreach (var board in boards)
+            {
+                board.Last();
+                //Console.WriteLine(board.ToAscii());
+                //okay stop trying to optimize this. just look at all the ++ directional squares of edge length w.
+                for (short width = (short)(bestBoardWidth + 1); width < 8; width++)
+                {
+                    //okay since we're ++ checking, no need to ever start on the + side of the current best seen box
+                    var gotThisWidth = false;
+
+                    //these are just the starting points; so the most positive starting point we should do
+                    //butts right up against the edge. if width is N, then that means we start at 8-width.
+                    //For example: if we're checking width edges of 2 long, we should check up to 6,6, since such a
+                    //square would go from say 6,2 to 8,4.
+                    for (short xx = 0; xx <= 8 - width; xx++)
+                    {
+                        for (short yy = 0; yy <= 8 - width; yy++)
+                        {
+                            //Console.WriteLine($"BestSeen is: {bestBoardWidth}. Checking {xx},{yy} for width {width}");
+                            var res = CheckBoxPositive(board, xx, yy, width);
+                            if (res)
+                            {
+                                //Console.WriteLine($"Square size {width} fits at {xx},{yy}");
+                                gotThisWidth = true;
+                                bestBoardWidth = width;
+                                bestBoard = board;
+                                break;
+                            }
+                            //else
+                            //{
+                            //    Console.WriteLine($"Square size {width} NOT fit {xx},{yy}");
+                            //}
+
+                        }
+                        if (gotThisWidth) { break; }
+                    }
+                    //if you got through all that and still didn't get this width, then just bail, too.
+                    if (!gotThisWidth) { break; }
+                }
+            }
+            var raw = 10 * bestBoardWidth;
+            return new NumericalEvaluationResult(raw, $"Largest NxN square in any position in any position of this game was: {bestBoardWidth}.", new List<NumericalExample>() { new NumericalExample(bestBoard, $"Largest NxN square in any position in any position of this game was: {bestBoardWidth}.", bestBoard.ExecutedMoves.Count - 1, bestBoardWidth) });
+
+        }
+
+        private static bool CheckBoxPositive(ChessBoard board, short xx, short yy, short w)
+        {
+            for (short xg = 0; xg < w; xg++)
+            {
+                for (short yg = 0; yg < w; yg++)
+                {
+                    if ((xx + xg) > 7 || (yy + yg) > 7)
+                    {
+                        throw new Exception("Should not be.");
+                    }
+                    var p = board[new Position((short)(xx + xg), (short)(yy + yg))];
+                    if (p != null) { return false; }
+                }
+            }
+            return true;
+        }
+    }
+
     /// <summary>
     /// This is actually really rare.
     /// </summary>

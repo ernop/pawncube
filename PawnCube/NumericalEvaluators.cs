@@ -30,11 +30,11 @@ namespace PawnCube
                 board.GoToStartingPosition();
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
-                    
+
                     var move = board.ExecutedMoves[ii];
                     var po = move.OriginalPosition;
                     var exiPiece = board[po];
-                    if (exiPiece== null)
+                    if (exiPiece == null)
                     {
                         board.Next();
                         continue;
@@ -54,6 +54,137 @@ namespace PawnCube
             }
             var raw = totalKingsTakingQueens * 5;
             var det = $"Total of {totalKingsTakingQueens} kings taking queens";
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
+    public class PieceOnStartingSquareOnePercentEachEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(PieceOnStartingSquareOnePercentEachEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var totalPiecesOnStartingSquare = 0;
+            var examples = new List<NumericalExample>();
+            foreach (var board in boards)
+            {
+                var thisBoardPiecesOnStartingSquare = 0;
+                board.GoToStartingPosition();
+                var pieces_original = Statics.GetAllPiecesAndPositions(board);
+
+                board.Last();
+                var pieces_end = Statics.GetAllPiecesAndPositions(board);
+                foreach (var el in pieces_end)
+                {
+                    var piece = el.Item1;
+                    var pos = el.Item2;
+                    foreach (var orig in pieces_original)
+                    {
+                        if (orig.Item1.Id == piece.Id && orig.Item2 == pos)
+                        {
+                            totalPiecesOnStartingSquare++;
+                            thisBoardPiecesOnStartingSquare++;
+                            break;
+                        }
+                    }
+                }
+                if (thisBoardPiecesOnStartingSquare > 0)
+                {
+                    examples.Add(new NumericalExample(board, $"This board has: {thisBoardPiecesOnStartingSquare} pieces on starting square at the end", board.ExecutedMoves.Count() - 1, thisBoardPiecesOnStartingSquare));
+                }
+            }
+            var raw = totalPiecesOnStartingSquare;
+            var det = $"Total of {totalPiecesOnStartingSquare} pieces on starting square";
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
+    ///That is, only pick the game which had the most of these guys.    
+    public class NonpawnNonmoversWorthTenPercentEachInTheirBiggestGame : INumericalEvaluator
+    {
+        public string Name => nameof(NonpawnNonmoversWorthTenPercentEachInTheirBiggestGame);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+
+            var mostNonPawnNonMovers = 0;
+            ChessBoard bestGame = null;
+            var examples = new List<NumericalExample>();
+            foreach (var board in boards)
+            {
+                var pieceIds = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 25, 26, 27, 28, 29, 30, 31, 32 };
+                var moveNo = 0;
+                foreach (var move in board.ExecutedMoves)
+                {
+                    var color = moveNo % 2 == 0 ? PieceColor.White : PieceColor.Black;
+                    if (move.Parameter == null)
+                    {
+                        var ii = pieceIds.IndexOf(move.Piece.Id);
+                        if (ii >= 0)
+                        {
+                            pieceIds.RemoveAt(ii);
+                        }
+                    }
+                    else
+                    {
+                        if (move.Parameter.ShortStr == "O-O")
+                        {
+                            if (color == PieceColor.White)
+                            {
+                                var pp = pieceIds.Remove(5);
+                                var nn = pieceIds.Remove(8);
+                                if (!pp || !nn)
+                                {
+                                    throw new Exception("huh");
+                                }
+                            }
+                            else
+                            {
+                                var rr = pieceIds.Remove(29);
+                                var qq = pieceIds.Remove(32);
+                                if (!rr || !qq)
+                                {
+                                    throw new Exception("huh");
+                                }
+                            }
+                        }
+                        else if (move.Parameter.ShortStr == "O-O-O")
+                        {
+                            if (color == PieceColor.White)
+                            {
+                                var pp = pieceIds.Remove(5);
+                                var nn = pieceIds.Remove(1);
+                                if (!pp || !nn)
+                                {
+                                    throw new Exception("huh");
+                                }
+                            }
+                            else
+                            {
+                                var rr = pieceIds.Remove(25);
+                                var qq = pieceIds.Remove(29);
+                                if (!rr || !qq)
+                                {
+                                    throw new Exception("huh");
+                                }
+                            }
+                        }
+
+                    }
+                    moveNo++;
+                }
+                var thisNonPawnNonMovers = pieceIds.Count();
+                if (thisNonPawnNonMovers>mostNonPawnNonMovers)
+                {
+                    mostNonPawnNonMovers = thisNonPawnNonMovers;
+                    bestGame = board;
+                    
+                }
+            }
+
+            examples.Add(new NumericalExample(bestGame, $"This board has: {mostNonPawnNonMovers} non-pawn non-movers", bestGame.ExecutedMoves.Count() - 1, mostNonPawnNonMovers * 10));
+            var raw = mostNonPawnNonMovers * 10;
+            var det = $"Total of {mostNonPawnNonMovers} non-pawns didn't move in the game which had the biggest value of that number.";
             return new NumericalEvaluationResult(raw, det, examples);
         }
     }
@@ -94,7 +225,7 @@ namespace PawnCube
             return new NumericalEvaluationResult(raw, det, examples);
         }
     }
-    
+
     public class TotalPawnAdvantageSeen20PercentPerPawnEvaluator : INumericalEvaluator
     {
         public string Name => nameof(TotalPawnAdvantageSeen20PercentPerPawnEvaluator);
@@ -107,7 +238,7 @@ namespace PawnCube
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
-                for (var ii=0;ii<board.ExecutedMoves.Count;ii++)
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var pieces = GetAllPieces(board);
                     var bPawnCount = 0;
@@ -139,7 +270,7 @@ namespace PawnCube
 
             if (bestGame != null)
             {
-                var color = bestMoveNumber%2 == 0 ? "white" : "black";
+                var color = bestMoveNumber % 2 == 0 ? "white" : "black";
                 var det = $"Highest pawn advantage seen was {highestPawnAdvantage} pawns, for {color}, in game {Statics.DescribeChessBoard(bestGame)} at move {bestMoveNumber}";
                 var examples = new List<NumericalExample>() { new NumericalExample(bestGame, det, bestMoveNumber, highestPawnAdvantage) };
                 return new NumericalEvaluationResult(highestPawnAdvantage, det, examples);
@@ -473,9 +604,9 @@ namespace PawnCube
 
             if (mostBoard != null)
             {
-                examples.Add(new NumericalExample(mostBoard, mostDet , mostBoard.ExecutedMoves.Count()-1, most));
+                examples.Add(new NumericalExample(mostBoard, mostDet, mostBoard.ExecutedMoves.Count() - 1, most));
             }
-            if (leastBoard!= null)
+            if (leastBoard != null)
             {
                 examples.Add(new NumericalExample(leastBoard, leastDet, leastBoard.ExecutedMoves.Count() - 1, least));
             }

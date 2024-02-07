@@ -13,7 +13,7 @@ namespace PawnCube
         {
 
             var booleanEvaluators = new List<IBooleanEvaluator>() {
-                new AllFourCornersOccupiedByNonRooksEvaluator(),
+                //new AllFourCornersOccupiedByNonRooksEvaluator(),
                 //new CastleWithCheckEvaluator(),
                 //new AllPiecesOnSameBoardColorWithAtLeastSevenTotal(),
                 //new AnyOppositeSideCastlingGameEvaluator(),
@@ -71,9 +71,11 @@ namespace PawnCube
         {
 
             var numericalEvaluators = new List<INumericalEvaluator>() {
+                new LargestNxNSquareInAnyPositionInAnyGame(),
+                //new NonpawnNonmoversWorthTenPercentEachInTheirBiggestGame(),
                 //new PawnPromotionFivePercentEachEvaluator(),
                 //new KingTakesQueenFivePercentEachEvaluator(),
-                
+                //new PieceOnStartingSquareOnePercentEachEvaluator(),
                 //new TotalPawnAdvantageSeen20PercentPerPawnEvaluator(),
                 //new BiggestPawnMaterialLeadInAnyGameTwentyPercentPerPawnLeadOnBoardEvaluator(),
                 //new Black40VsWhiteMinus10WinEvalutor(),
