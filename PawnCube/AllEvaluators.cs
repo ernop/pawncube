@@ -63,6 +63,7 @@ namespace PawnCube
                 //new TwoBishopsVsTwoKnightsEvaluator(),
                 //new TwoKnightsOnSideEdgeEvaluator(),
                 //new TwoPawnPromotionsInOneGameEvaluator(),
+                new SinglePieceCaptures19PointsOfMaterialInAGame(),
             };
             return booleanEvaluators;
         }
@@ -71,7 +72,7 @@ namespace PawnCube
         {
 
             var numericalEvaluators = new List<INumericalEvaluator>() {
-                new LargestNxNSquareInAnyPositionInAnyGame(),
+                //new LargestNxNSquareInAnyPositionInAnyGame(),
                 //new NonpawnNonmoversWorthTenPercentEachInTheirBiggestGame(),
                 //new PawnPromotionFivePercentEachEvaluator(),
                 //new KingTakesQueenFivePercentEachEvaluator(),
@@ -103,6 +104,9 @@ namespace PawnCube
                 //new TenPercentPerResignationEvaluator(),
                 //new TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator(),
                 //new UnmovedNonPawnTenPercentEachEvaluator(),
+                new FivePercentDeadBishopMinusOnePercentPerDeadPawnFinalPositions(),
+                new TotalWhiteAdvantageAtLastPositionTenPercentForeEachMaterialPoint(),
+                
                 };
             return numericalEvaluators;
         }

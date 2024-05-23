@@ -130,6 +130,50 @@ namespace PawnCube
         }
     }
 
+    public class SinglePieceCaptures19PointsOfMaterialInAGame : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(SinglePieceCaptures19PointsOfMaterialInAGame);
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            var pieceId2totalMaterialCaptured = new Dictionary<int, int>();
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                
+                if (move.CapturedPiece != null)
+                {
+                    var capturer = move.Piece.Id;
+                    if (!pieceId2totalMaterialCaptured.ContainsKey(capturer))
+                    {
+                        pieceId2totalMaterialCaptured[capturer] = 0;
+                    }
+                    var cap = move.CapturedPiece;
+                    var val = 0;
+                    if (cap.Type == PieceType.Pawn) { val = 1; }
+                    else if (cap.Type == PieceType.Knight) { val = 3; }
+                    else if (cap.Type == PieceType.Bishop) { val = 3; }
+                    else if (cap.Type == PieceType.Rook) { val = 5; }
+                    else if (cap.Type == PieceType.Queen) { val = 9; }
+                    else
+                    {
+                        throw new Exception("BDS");
+                    }
+                    pieceId2totalMaterialCaptured[capturer] += val;
+                    foreach (var k in pieceId2totalMaterialCaptured.Keys)
+                    {
+                        
+                        if (pieceId2totalMaterialCaptured[k] >= 19)
+                        {
+                            var det = $"At this move, a certain piece actually captured 19 points of material (or more, :{pieceId2totalMaterialCaptured[k]}";
+                            yield return new BooleanExample(board, det, ii);
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
     public class TwoBishopsVsTwoKnightsEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(TwoBishopsVsTwoKnightsEvaluator);

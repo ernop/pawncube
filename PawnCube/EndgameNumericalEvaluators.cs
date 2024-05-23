@@ -10,6 +10,8 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
+using static PawnCube.Statics;
+
 namespace PawnCube
 {
     public class TenPercentForeEachWinEvaluator : INumericalEvaluator
@@ -146,7 +148,7 @@ namespace PawnCube
                 }
                 if (bRunningTotal > allDrawTotal)
                 {
-                    var exa = new NumericalExample(board, "", board.ExecutedMoves.Count()-1, 100);
+                    var exa = new NumericalExample(board, "", board.ExecutedMoves.Count() - 1, 100);
                     return new NumericalEvaluationResult(100, "Black was ahead at some point.", new List<NumericalExample>() { exa });
                 }
             }
@@ -184,6 +186,55 @@ namespace PawnCube
         }
     }
 
+    public class FivePercentDeadBishopMinusOnePercentPerDeadPawnFinalPositions : INumericalEvaluator
+    {
+        string INumericalEvaluator.Name => nameof(FivePercentDeadBishopMinusOnePercentPerDeadPawnFinalPositions);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var deadBishopCount = 0;
+            var deadPawnCount = 0;
+
+            NumericalExample bestExample = null;
+
+            foreach (var board in boards)
+            {
+                board.Last();
+                deadBishopCount += Statics.GetAllCaptures(board).Where(el => el.Type == PieceType.Bishop).Count();
+                deadPawnCount += Statics.GetAllCaptures(board).Where(el => el.Type == PieceType.Pawn).Count();
+            }
+
+            var raw = 5 * deadBishopCount - 1 * deadPawnCount;
+            var det = $"Totals: {deadBishopCount} dead bishops, and {deadPawnCount} dead pawns. ";
+            var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { });
+            return res;
+        }
+    }
+
+    public class TotalWhiteAdvantageAtLastPositionTenPercentForeEachMaterialPoint : INumericalEvaluator
+    {
+        string INumericalEvaluator.Name => nameof(TotalWhiteAdvantageAtLastPositionTenPercentForeEachMaterialPoint);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var tot = 0;
+            var diffs = new List<string>() { };
+
+            foreach (var board in boards)
+            {
+                board.Last();
+                var dif = Statics.GetMaterialDifference(board);
+                diffs.Add($"{DescribeChessBoard(board)}: {dif}");
+                tot += dif;
+            }
+
+            var raw = tot * 10;
+            var det = $"For all material differences at endgame: {string.Join(",", diffs)}, the total is: {tot} resulting in {raw}%";
+            var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { });
+            return res;
+        }
+    }
+
     public class OnePercentPerUnmovedPieceEvaluator : INumericalEvaluator
     {
         //1% for every piece on its starting square in the final position of every game
@@ -199,7 +250,7 @@ namespace PawnCube
             {
                 //a piece must both not have moved and not be killed.
                 board.Last();
-                var survivingPieceIds = Statics.GetAllPieces(board).Where(el => el.Id > 0 && el.Id < 32).Select(el=>el.Id);
+                var survivingPieceIds = Statics.GetAllPieces(board).Where(el => el.Id > 0 && el.Id < 32).Select(el => el.Id);
                 var movedIds = board.ExecutedMoves.Select(el => el.Piece.Id).Distinct();
                 var deadIds = Statics.GetAllCaptures(board).Select(el => el.Id).ToList();
                 var guys = survivingPieceIds.Where(el => !deadIds.Contains(el)).Where(el => !movedIds.Contains(el));
@@ -208,7 +259,7 @@ namespace PawnCube
                 {
                     mostUnmovedCount = ct;
                     mostUnmovedGame = board;
-                    bestExample = new NumericalExample(board, "", board.ExecutedMoves.Count()-1, ct);
+                    bestExample = new NumericalExample(board, "", board.ExecutedMoves.Count() - 1, ct);
                 }
                 unmovedCount += guys.Count();
             }
@@ -219,7 +270,7 @@ namespace PawnCube
         }
     }
 
-    public class UnmovedNonPawnTenPercentEachEvaluator: INumericalEvaluator
+    public class UnmovedNonPawnTenPercentEachEvaluator : INumericalEvaluator
     {
         //1% for every piece on its starting square in the final position of every game
         public string Name => nameof(UnmovedNonPawnTenPercentEachEvaluator);
