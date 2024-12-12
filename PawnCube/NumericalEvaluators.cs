@@ -668,4 +668,215 @@ namespace PawnCube
             return new NumericalEvaluationResult(raw, det, exa);
         }
     }
+
+    public class PieceTourEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(PieceTourEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            // Track both if visited and how many times visited
+            var visited = new bool[8, 8];
+            var visitCount = new int[8, 8];
+            var unvisitedCount = 64;
+            var examples = new List<NumericalExample>();
+
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                
+                // Mark initial positions
+                for (short x = 0; x < 8; x++)
+                {
+                    for (short y = 0; y < 8; y++)
+                    {
+                        var piece = board[new Position(x, y)];
+                        if (piece != null)
+                        {
+                            visitCount[x, y]++;
+                            if (!visited[x, y])
+                            {
+                                visited[x, y] = true;
+                                unvisitedCount--;
+                            }
+                        }
+                    }
+                }
+
+                // Track moves
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    board.Next();
+
+                    var newX = move.NewPosition.X;
+                    var newY = move.NewPosition.Y;
+
+                    visitCount[newX, newY]++;
+                    
+                    if (!visited[newX, newY])
+                    {
+                        visited[newX, newY] = true;
+                        unvisitedCount--;
+                        
+                        if (unvisitedCount == 0)
+                        {
+                            examples.Add(new NumericalExample(board, 
+                                "This move completed the tour of all squares", 
+                                ii, 
+                                100));
+                        }
+                    }
+                }
+            }
+
+            // Print visitation counts
+            Console.WriteLine("\nSquare visitation counts:");
+            for (int y = 7; y >= 0; y--)
+            {
+                Console.Write($"{y + 1} ");
+                for (int x = 0; x < 8; x++)
+                {
+                    Console.Write($"{visitCount[x, y],5}");
+                }
+                Console.WriteLine();
+            }
+            Console.Write("   ");
+            for (int x = 0; x < 8; x++)
+            {
+                Console.Write($"    {(char)('a' + x)}");
+            }
+            Console.WriteLine("\n");
+
+            var raw = unvisitedCount == 0 ? 100 : 0;
+            var unvisitedSquares = new List<string>();
+            
+            if (unvisitedCount > 0)
+            {
+                for (short x = 0; x < 8; x++)
+                {
+                    for (short y = 0; y < 8; y++)
+                    {
+                        if (!visited[x, y])
+                        {
+                            unvisitedSquares.Add($"{(char)('a' + x)}{y + 1}");
+                        }
+                    }
+                }
+            }
+
+            var det = unvisitedCount == 0 
+                ? "All squares were visited by at least one piece across all games" 
+                : $"Squares never visited: {string.Join(", ", unvisitedSquares)}";
+
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
+    public class KnightCoverageEvaluator : INumericalEvaluator
+{
+    public string Name => nameof(KnightCoverageEvaluator);
+
+    public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+    {
+        // Track both if visited and how many times visited
+        var visited = new bool[8, 8];
+        var visitCount = new int[8, 8];
+        var unvisitedCount = 64;
+        var examples = new List<NumericalExample>();
+
+        foreach (var board in boards)
+        {
+            board.GoToStartingPosition();
+            
+            // Mark initial positions
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null && piece.Type == PieceType.Knight)
+                    {
+                        visitCount[x, y]++;
+                        if (!visited[x, y])
+                        {
+                            visited[x, y] = true;
+                            unvisitedCount--;
+                        }
+                    }
+                }
+            }
+
+            // Track moves
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                board.Next();
+
+                if (move.Piece.Type == PieceType.Knight)
+                {
+                    var newX = move.NewPosition.X;
+                    var newY = move.NewPosition.Y;
+
+                    visitCount[newX, newY]++;
+                    
+                    if (!visited[newX, newY])
+                    {
+                        visited[newX, newY] = true;
+                        unvisitedCount--;
+                        
+                        if (unvisitedCount == 0)
+                        {
+                            examples.Add(new NumericalExample(board, 
+                                "This move completed the knight coverage of all squares", 
+                                ii, 
+                                100));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Print visitation counts
+        Console.WriteLine("\nSquare visitation counts:");
+        for (int y = 7; y >= 0; y--)
+        {
+            Console.Write($"{y + 1} ");
+            for (int x = 0; x < 8; x++)
+            {
+                Console.Write($"{visitCount[x, y],5}");
+            }
+            Console.WriteLine();
+        }
+        Console.Write("   ");
+        for (int x = 0; x < 8; x++)
+        {
+            Console.Write($"    {(char)('a' + x)}");
+        }
+        Console.WriteLine("\n");
+
+        var raw = unvisitedCount == 0 ? 100 : 0;
+        var unvisitedSquares = new List<string>();
+        
+        if (unvisitedCount > 0)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    if (!visited[x, y])
+                    {
+                        unvisitedSquares.Add($"{(char)('a' + x)}{y + 1}");
+                    }
+                }
+            }
+        }
+
+        var det = unvisitedCount == 0 
+            ? "All squares were visited by at least one knight across all games" 
+            : $"Squares never visited by knights: {string.Join(", ", unvisitedSquares)}";
+
+        return new NumericalEvaluationResult(raw, det, examples);
+    }
+}
 }

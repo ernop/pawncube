@@ -229,7 +229,7 @@ namespace PawnCube
             }
 
             var raw = tot * 10;
-            var det = $"For all material differences at endgame: {string.Join(",", diffs)}, the total is: {tot} resulting in {raw}%";
+            var det = $"For all material differences at endgame: {string.Join(", ", diffs)}, the total is: {tot} resulting in {raw}%";
             var res = new NumericalEvaluationResult(raw, det, new List<NumericalExample>() { });
             return res;
         }

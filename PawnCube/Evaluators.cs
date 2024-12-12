@@ -575,6 +575,47 @@ namespace PawnCube
         }
     }
 
+    public class ThanosSnapEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(ThanosSnapEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                var pieces = GetAllPieces(board);
+                
+                var whitePieces = pieces.Where(p => p.Color == PieceColor.White);
+                var blackPieces = pieces.Where(p => p.Color == PieceColor.Black);
+                
+                // Count each piece type for both sides
+                var whitePawns = whitePieces.Count(p => p.Type == PieceType.Pawn);
+                var whiteKnights = whitePieces.Count(p => p.Type == PieceType.Knight);
+                var whiteBishops = whitePieces.Count(p => p.Type == PieceType.Bishop);
+                var whiteRooks = whitePieces.Count(p => p.Type == PieceType.Rook);
+                var whiteHasQueen = whitePieces.Any(p => p.Type == PieceType.Queen);
+
+                var blackPawns = blackPieces.Count(p => p.Type == PieceType.Pawn);
+                var blackKnights = blackPieces.Count(p => p.Type == PieceType.Knight);
+                var blackBishops = blackPieces.Count(p => p.Type == PieceType.Bishop);
+                var blackRooks = blackPieces.Count(p => p.Type == PieceType.Rook);
+                var blackHasQueen = blackPieces.Any(p => p.Type == PieceType.Queen);
+                //Console.WriteLine($"Pawns: {whitePawns},{blackPawns}, bishops:{whiteBishops},{blackBishops}, rooks:{whiteRooks},{blackRooks}, knights:{whiteKnights},{blackKnights}, queens:{whiteHasQueen},{blackHasQueen}");
+                // Check if both sides have exactly half their army
+                if (whitePawns == 4 && whiteKnights == 1 && whiteBishops == 1 && whiteRooks == 1 &&
+                    blackPawns == 4 && blackKnights == 1 && blackBishops == 1 && blackRooks == 1 &&
+                    whiteHasQueen == blackHasQueen)
+                {
+                    var queenStatus = whiteHasQueen ? "both sides kept their queens" : "neither side has a queen";
+                    var det = $"Perfectly balanced: both sides have exactly half their army (4 pawns, 1 knight, 1 bishop, 1 rook), and {queenStatus}.";
+                    yield return new BooleanExample(board, det, ii);
+                    break;
+                }
+            }
+        }
+    }
+
     public class CheckmateWithAPawnEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(CheckmateWithAPawnEvaluator);
@@ -1160,7 +1201,7 @@ namespace PawnCube
                     //so, we know the piece moved here 2 plys ago, is the same piece
                     if (checkedCount == 7) //7 comparisons succeeding means 8 in a row.
                     {
-                        var joined = string.Join(',', board.ExecutedMoves.Select(el => el.San).Take(ii));
+                        var joined = string.Join(", ", board.ExecutedMoves.Select(el => el.San).Take(ii));
                         var det = $"{move.Piece} moved 8 times in a row: {joined}";
                         yield return new BooleanExample(board, det, ii);
                         break;
@@ -1474,6 +1515,235 @@ namespace PawnCube
                 yield return new BooleanExample(board, "All pieces were on the same color.", ii);
                 break;
             }
+        }
+    }
+
+    public class RingOfFireEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(RingOfFireEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                
+                // Find kings that aren't on edges
+                var kings = GetAllPiecesAndPositions(board)
+                    .Where(el => el.Item1.Type == PieceType.King)
+                    .Where(el => el.Item2.X > 0 && el.Item2.X < 7 && el.Item2.Y > 0 && el.Item2.Y < 7);
+
+                foreach (var kingData in kings)
+                {
+                    var kingPos = kingData.Item2;
+                    var surroundingSquares = new List<Position>
+                    {
+                        new Position((short)(kingPos.X-1), (short)(kingPos.Y-1)),
+                        new Position((short)(kingPos.X-1), (short)(kingPos.Y)),
+                        new Position((short)(kingPos.X-1), (short)(kingPos.Y+1)),
+                        new Position((short)(kingPos.X), (short)(kingPos.Y-1)),
+                        new Position((short)(kingPos.X), (short)(kingPos.Y+1)),
+                        new Position((short)(kingPos.X+1), (short)(kingPos.Y-1)),
+                        new Position((short)(kingPos.X+1), (short)(kingPos.Y)),
+                        new Position((short)(kingPos.X+1), (short)(kingPos.Y+1))
+                    };
+
+                    // Check if all surrounding squares are occupied
+                    var allOccupied = surroundingSquares.All(pos => board[pos] != null);
+                    
+                    if (allOccupied)
+                    {
+                        var color = kingData.Item1.Color;
+                        var det = $"{color} king surrounded by a ring of pieces at {kingPos}";
+                        yield return new BooleanExample(board, det, ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class NakedKingEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(NakedKingEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                
+                // Find kings that aren't on edges
+                var kings = GetAllPiecesAndPositions(board)
+                    .Where(el => el.Item1.Type == PieceType.King)
+                    .Where(el => el.Item2.X > 0 && el.Item2.X < 7 && el.Item2.Y > 0 && el.Item2.Y < 7);
+
+                foreach (var kingData in kings)
+                {
+                    var kingPos = kingData.Item2;
+                    var surroundingSquares = new List<Position>
+                    {
+                        new Position((short)(kingPos.X-1), (short)(kingPos.Y-1)),
+                        new Position((short)(kingPos.X-1), (short)(kingPos.Y)),
+                        new Position((short)(kingPos.X-1), (short)(kingPos.Y+1)),
+                        new Position((short)(kingPos.X), (short)(kingPos.Y-1)),
+                        new Position((short)(kingPos.X), (short)(kingPos.Y+1)),
+                        new Position((short)(kingPos.X+1), (short)(kingPos.Y-1)),
+                        new Position((short)(kingPos.X+1), (short)(kingPos.Y)),
+                        new Position((short)(kingPos.X+1), (short)(kingPos.Y+1))
+                    };
+
+                    // Check if all surrounding squares are occupied
+                    var noneOccupied = !surroundingSquares.Any(pos => board[pos] != null);
+                    
+                    if (noneOccupied)
+                    {
+                        var color = kingData.Item1.Color;
+                        var det = $"{color} king is completely alone at {kingPos}";
+                        yield return new BooleanExample(board, det, ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class ChainReactionCastlingEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(ChainReactionCastlingEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 1; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                var previousMove = board.ExecutedMoves[ii - 1];
+                board.Next();
+
+                // Check if both current and previous moves are castling
+                if (move.Parameter != null && previousMove.Parameter != null)
+                {
+                    var currentCastle = move.Parameter.ShortStr;
+                    var previousCastle = previousMove.Parameter.ShortStr;
+                    
+                    if ((currentCastle == "O-O" || currentCastle == "O-O-O") && 
+                        (previousCastle == "O-O" || previousCastle == "O-O-O"))
+                    {
+                        var det = $"Chain reaction castling: {previousCastle} followed by {currentCastle}";
+                        yield return new BooleanExample(board, det, ii);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public class RomeoAndJulietEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(RomeoAndJulietEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            // Go to start position and find original queen IDs
+            board.GoToStartingPosition();
+            var pieces = GetAllPiecesAndPositions(board);
+            var whiteQueenId = pieces.First(p => p.Item1.Type == PieceType.Queen && p.Item1.Color == PieceColor.White).Item1.Id;
+            var blackQueenId = pieces.First(p => p.Item1.Type == PieceType.Queen && p.Item1.Color == PieceColor.Black).Item1.Id;
+
+            bool whiteQueenTakenByPawn = false;
+            bool blackQueenTakenByPawn = false;
+            
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                var move = board.ExecutedMoves[ii];
+                if (move.CapturedPiece != null && 
+                    move.CapturedPiece.Type == PieceType.Queen && 
+                    move.Piece.Type == PieceType.Pawn)
+                {
+                    if (move.CapturedPiece.Id == whiteQueenId)
+                    {
+                        whiteQueenTakenByPawn = true;
+                        // Console.WriteLine($"White queen captured by {move.Piece.Color} pawn at {move.NewPosition}");
+                    }
+                    else if (move.CapturedPiece.Id == blackQueenId)
+                    {
+                        blackQueenTakenByPawn = true;
+                        // Console.WriteLine($"Black queen captured by {move.Piece.Color} pawn at {move.NewPosition}");
+                    }
+                    
+                    if (whiteQueenTakenByPawn && blackQueenTakenByPawn)
+                    {
+                        var det = "Romeo & Juliet: Both original queens were captured by pawns";
+                        yield return new BooleanExample(board, det, ii);
+                        break;
+                    }
+                }
+                board.Next();
+            }
+        }
+    }
+
+    public class FortKnoxEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(FortKnoxEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+                
+                var pieces = GetAllPiecesAndPositions(board);
+                var whitePieces = pieces.Where(p => p.Item1.Color == PieceColor.White).ToList();
+                var blackPieces = pieces.Where(p => p.Item1.Color == PieceColor.Black).ToList();
+
+                // Check white pieces
+                if (whitePieces.Count >= 4)
+                {
+                    var whiteKing = whitePieces.FirstOrDefault(p => p.Item1.Type == PieceType.King);
+                    if (whiteKing != null && IsInFortKnox(board, whiteKing.Item2, whitePieces))
+                    {
+                        yield return new BooleanExample(board, "White has formed Fort Knox: all pieces within king's attack range", ii);
+                        break;
+                    }
+                }
+
+                // Check black pieces
+                if (blackPieces.Count >= 4)
+                {
+                    var blackKing = blackPieces.FirstOrDefault(p => p.Item1.Type == PieceType.King);
+                    if (blackKing != null && IsInFortKnox(board, blackKing.Item2, blackPieces))
+                    {
+                        yield return new BooleanExample(board, "Black has formed Fort Knox: all pieces within king's attack range", ii);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private bool IsInFortKnox(ChessBoard board, Position kingPos, List<Tuple<Piece, Position>> pieces)
+        {
+            // Get all squares the king can attack (including diagonals)
+            var kingAttackSquares = new List<Position>
+            {
+                new Position((short)(kingPos.X-1), (short)(kingPos.Y-1)),
+                new Position((short)(kingPos.X-1), (short)(kingPos.Y)),
+                new Position((short)(kingPos.X-1), (short)(kingPos.Y+1)),
+                new Position((short)(kingPos.X), (short)(kingPos.Y-1)),
+                new Position((short)(kingPos.X), (short)(kingPos.Y+1)),
+                new Position((short)(kingPos.X+1), (short)(kingPos.Y-1)),
+                new Position((short)(kingPos.X+1), (short)(kingPos.Y)),
+                new Position((short)(kingPos.X+1), (short)(kingPos.Y+1)),
+                kingPos // Include king's own square
+            };
+
+            // Filter out invalid positions (off board)
+            kingAttackSquares = kingAttackSquares
+                .Where(pos => pos.X >= 0 && pos.X < 8 && pos.Y >= 0 && pos.Y < 8)
+                .ToList();
+
+            // Check if all pieces are within king's attack range
+            return pieces.All(piece => kingAttackSquares.Any(pos => pos.X == piece.Item2.X && pos.Y == piece.Item2.Y));
         }
     }
 }

@@ -28,7 +28,7 @@ namespace PawnCube
                 //new CastleAfterMove20Evaluator(),
                 //new CastleAfterMove40Evaluator(),
                 //new CheckmateWithAPawnEvaluator(),
-                //new Connect3Evaluator(),
+                ////new Connect3Evaluator(),
                 //new Connect4Evaluator(),
                 //new Connect5Evaluator(),
                 //new Down4PtsOrMoreMaterialButWins(),
@@ -63,14 +63,19 @@ namespace PawnCube
                 //new TwoBishopsVsTwoKnightsEvaluator(),
                 //new TwoKnightsOnSideEdgeEvaluator(),
                 //new TwoPawnPromotionsInOneGameEvaluator(),
-                new SinglePieceCaptures19PointsOfMaterialInAGame(),
+                //new SinglePieceCaptures19PointsOfMaterialInAGame(),
+                // new ThanosSnapEvaluator(),
+                // new RingOfFireEvaluator(),
+                // new NakedKingEvaluator(),
+                // new ChainReactionCastlingEvaluator(), 
+                // new RomeoAndJulietEvaluator(),
+                // new FortKnoxEvaluator(),
             };
             return booleanEvaluators;
         }
 
         public List<INumericalEvaluator> GetNumerical()
         {
-
             var numericalEvaluators = new List<INumericalEvaluator>() {
                 //new LargestNxNSquareInAnyPositionInAnyGame(),
                 //new NonpawnNonmoversWorthTenPercentEachInTheirBiggestGame(),
@@ -104,8 +109,10 @@ namespace PawnCube
                 //new TenPercentPerResignationEvaluator(),
                 //new TwentyPercentForDecisiveMinusTenForOtherwiseEvaluator(),
                 //new UnmovedNonPawnTenPercentEachEvaluator(),
-                new FivePercentDeadBishopMinusOnePercentPerDeadPawnFinalPositions(),
-                new TotalWhiteAdvantageAtLastPositionTenPercentForeEachMaterialPoint(),
+                //new FivePercentDeadBishopMinusOnePercentPerDeadPawnFinalPositions(),
+                //new TotalWhiteAdvantageAtLastPositionTenPercentForeEachMaterialPoint(),
+                // new PieceTourEvaluator(),
+                // new KnightCoverageEvaluator(),
                 
                 };
             return numericalEvaluators;

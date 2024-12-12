@@ -27,7 +27,8 @@ namespace PawnCube
         {
             var paths = new List<string>();
             paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn"));
-            paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn"));
+            //paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn"));
+            //paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-gukesh-2024-championship.pgn"));
             var maxGamesToProcess = 20000;
             var ct = 0;
             foreach (var path in paths)
@@ -63,9 +64,21 @@ namespace PawnCube
         {
             var usep = pgnStr;
             var parts = usep.Split("\r\n\r\n");
-            var moveParts = parts[1].Split(" ");
-            //the result is magically the last item in the space-split list of moves. ugh.
-            var result = moveParts[moveParts.Count() - 1].Trim();
+            var moveParts = parts[1].Replace("\r\n", " ");
+            while (true)
+            {
+                if (moveParts.Contains("  "))
+                {
+                    moveParts = moveParts.Replace("  ", " ");
+                }
+                else
+                {
+                    break;
+                }
+            }
+            var moveParts2 = moveParts.Split(" ");
+            ////the result is magically the last item in the space-split list of moves. ugh.
+            var result = moveParts2[moveParts2.Count() - 1].Trim();
 
             var moves = parts[1].Replace(result, "").Replace("  ", "");
             var joined = string.Join('\n', moves).Replace("\r\n", " ");
