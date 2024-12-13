@@ -17,42 +17,66 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PawnCube
 {
-    public class KingTakesQueenFivePercentEachEvaluator : INumericalEvaluator
+    public class KingTakesQueenTenPercentEachEvaluator : INumericalEvaluator
     {
-        public string Name => nameof(KingTakesQueenFivePercentEachEvaluator);
+        public string Name => nameof(KingTakesQueenTenPercentEachEvaluator);
 
         public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
             var totalKingsTakingQueens = 0;
             var examples = new List<NumericalExample>();
+            var allQueenCaptures = new List<string>();
+            
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
+                var gameName = Statics.DescribeChessBoard(board);
+                
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
-
                     var move = board.ExecutedMoves[ii];
-                    var po = move.OriginalPosition;
-                    var exiPiece = board[po];
-                    if (exiPiece == null)
-                    {
-                        board.Next();
-                        continue;
-                    }
-                    if (exiPiece.Type != PieceType.King)
-                    {
-                        board.Next();
-                        continue;
-                    }
+                    
+                    // Track all queen captures
                     if (move.CapturedPiece != null && move.CapturedPiece.Type == PieceType.Queen)
                     {
+                        var captureColor = move.Piece.Color == PieceColor.White ? "White" : "Black";
+                        allQueenCaptures.Add(
+                            $"Game {gameName}: {captureColor} {move.Piece.Type} takes queen at move {ii}"
+                        );
+                    }
+                    
+                    // Track king-specific captures for scoring
+                    if (move.Piece.Type == PieceType.King && 
+                        move.CapturedPiece != null && 
+                        move.CapturedPiece.Type == PieceType.Queen)
+                    {
                         totalKingsTakingQueens++;
-                        examples.Add(new NumericalExample(board, $"King takes queen at move {ii}", ii, 5));
+                        var kingColor = move.Piece.Color == PieceColor.White ? "White" : "Black";
+                        examples.Add(new NumericalExample(board, 
+                            $"{kingColor} king takes queen at move {ii} in game {gameName}", 
+                            ii, 
+                            10));
                     }
                     board.Next();
                 }
             }
-            var raw = totalKingsTakingQueens * 5;
+
+            // Print all queen captures
+            Console.WriteLine("\nAll Queen Captures:");
+            foreach (var capture in allQueenCaptures)
+            {
+                Console.WriteLine(capture);
+            }
+
+            // Print king-specific captures
+            Console.WriteLine("\nKing Takes Queen Examples:");
+            foreach (var example in examples)
+            {
+                Console.WriteLine(example.Details);
+            }
+            Console.WriteLine();
+
+            var raw = totalKingsTakingQueens * 10;
             var det = $"Total of {totalKingsTakingQueens} kings taking queens";
             return new NumericalEvaluationResult(raw, det, examples);
         }
@@ -675,7 +699,6 @@ namespace PawnCube
 
         public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            // Track both if visited and how many times visited
             var visited = new bool[8, 8];
             var visitCount = new int[8, 8];
             var unvisitedCount = 64;
@@ -879,4 +902,91 @@ namespace PawnCube
         return new NumericalEvaluationResult(raw, det, examples);
     }
 }
+
+    public class TwentyPercentPerEnPassantDoneNumericalEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TwentyPercentPerEnPassantDoneNumericalEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var totalEnPassants = 0;
+            var examples = new List<NumericalExample>();
+            
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                for (var ii = 1; ii < board.ExecutedMoves.Count; ii++) // Start at 1 to check previous move
+                {
+                    var currentMove = board.ExecutedMoves[ii];
+                    var previousMove = board.ExecutedMoves[ii - 1];
+
+                    // Check if current move is a pawn moving diagonally
+                    if (currentMove.Piece.Type == PieceType.Pawn && 
+                        Math.Abs(currentMove.OriginalPosition.X - currentMove.NewPosition.X) == 1)
+                    {
+                        // Check if previous move was a pawn moving two squares
+                        if (previousMove.Piece.Type == PieceType.Pawn && 
+                            Math.Abs(previousMove.OriginalPosition.Y - previousMove.NewPosition.Y) == 2 &&
+                            previousMove.NewPosition.X == currentMove.NewPosition.X)
+                        {
+                            // Verify the capture occurred on the square the opponent's pawn passed through
+                            int expectedY = (previousMove.OriginalPosition.Y + previousMove.NewPosition.Y) / 2;
+                            if (currentMove.NewPosition.Y == expectedY)
+                            {
+                                totalEnPassants++;
+                                examples.Add(new NumericalExample(board, 
+                                    $"En passant capture at move {ii}", 
+                                    ii, 
+                                    20));
+                            }
+                        }
+                    }
+                    board.Next();
+                }
+            }
+
+            var raw = totalEnPassants * 20;
+            var det = $"Total of {totalEnPassants} en passant captures";
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
+    public class TwentyPercentPerExtraPawnMaxAdvantageEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TwentyPercentPerExtraPawnMaxAdvantageEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var maxPawnAdvantage = 0;
+            NumericalExample bestExample = null;
+            var det = "";
+            
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var pieces = GetAllPieces(board);
+                    var whitePawns = pieces.Count(p => p.Type == PieceType.Pawn && p.Color == PieceColor.White);
+                    var blackPawns = pieces.Count(p => p.Type == PieceType.Pawn && p.Color == PieceColor.Black);
+                    
+                    var advantage = Math.Abs(whitePawns - blackPawns);
+                    if (advantage > maxPawnAdvantage)
+                    {
+                        maxPawnAdvantage = advantage;
+                        var leadingColor = whitePawns > blackPawns ? "White" : "Black";
+                        det = $"Greatest pawn advantage was {advantage} pawns ({leadingColor} ahead) at move {ii}";
+                        bestExample = new NumericalExample(board, det, ii, advantage * 20);
+                    }
+                    board.Next();
+                }
+            }
+
+            var raw = maxPawnAdvantage * 20;
+            var examples = bestExample != null ? new List<NumericalExample> { bestExample } : new List<NumericalExample>();
+            //var det = bestExample?.Description ?? "No pawn advantage found";
+            
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
 }

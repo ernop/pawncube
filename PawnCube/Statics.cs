@@ -26,9 +26,9 @@ namespace PawnCube
         public static IEnumerable<BoardSet> LoadBoardSets()
         {
             var paths = new List<string>();
-            paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn"));
+            //paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\Ding.pgn"));
             //paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-liren-tata-steel-2024.pgn"));
-            //paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-gukesh-2024-championship.pgn"));
+            paths.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Ding\ding-gukesh-2024-championship.pgn"));
             var maxGamesToProcess = 20000;
             var ct = 0;
             foreach (var path in paths)

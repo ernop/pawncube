@@ -249,6 +249,77 @@ public class Connect5Evaluator : PatternMatcherChecker
     }
 }
 
+public class Connect6Evaluator : PatternMatcherChecker
+{
+    public override string Name => nameof(Connect6Evaluator);
+
+    public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
+    {
+        details = "";
+        var upright = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 1), new Tuple<short, short>(2, 2), new Tuple<short, short>(3, 3), new Tuple<short, short>(4, 4), new Tuple<short, short>(5, 5) };
+        var right = new List<Tuple<short, short>>() { new Tuple<short, short>(1, 0), new Tuple<short, short>(2, 0), new Tuple<short, short>(3, 0), new Tuple<short, short>(4, 0), new Tuple<short, short>(5, 0) };
+        var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0, 3), new Tuple<short, short>(0, 4), new Tuple<short, short>(0, 5) };
+
+        var vectors = new List<List<Tuple<short, short>>>() { upright, right, up };
+
+        var p = testBoard[xx, yy];
+        if (p == null || p.Type != PieceType.Pawn) { return false; }
+
+        var testColor = p.Color;
+        foreach (var vector in vectors)
+        {
+            //exclude starting position.
+            if (yy == 1 && testColor == PieceColor.White && vector == right)
+            {
+                continue;
+            }
+            if (yy == 6 && testColor == PieceColor.Black && vector == right)
+            {
+                continue;
+            }
+            var bad = false;
+            foreach (var pos in vector)
+            {
+                var target = new Tuple<short, short>((short)(xx + pos.Item1), (short)(yy + pos.Item2));
+                if (!Statics.IsInBounds(target))
+                {
+                    bad = true;
+                    break;
+                }
+                var targetp = testBoard[target.Item1, target.Item2];
+                if (targetp == null)
+                {
+                    bad = true;
+                    break;
+                }
+                if (targetp.Color != testColor)
+                {
+                    bad = true;
+                    break;
+                }
+                if (targetp.Type != PieceType.Pawn)
+                {
+                    bad = true;
+                    break;
+                }
+            }
+            if (bad) //the whole vector broke.
+            {
+                break;
+            }
+
+            //we got through a whole vector without dying.
+            foreach (var pos in vector)
+            {
+                details += $" {xx + pos.Item1},{yy + pos.Item2}";
+            }
+
+            return true;
+        }
+        return false;
+    }
+}
+
 public class Connect3Evaluator : PatternMatcherChecker
 {
     public override string Name => nameof(Connect3Evaluator);

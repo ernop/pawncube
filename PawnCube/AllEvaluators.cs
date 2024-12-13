@@ -28,16 +28,17 @@ namespace PawnCube
                 //new CastleAfterMove20Evaluator(),
                 //new CastleAfterMove40Evaluator(),
                 //new CheckmateWithAPawnEvaluator(),
-                ////new Connect3Evaluator(),
+                //new Connect3Evaluator(),
                 //new Connect4Evaluator(),
                 //new Connect5Evaluator(),
+                //new Connect6Evaluator(),
                 //new Down4PtsOrMoreMaterialButWins(),
-                //new EnPassantCaptureHappensEvaluator(),
-                //new EnPassantRefusedEvaluator(),
+                new EnPassantRefusedEvaluator(),
+                //new EnPassantDoneInGameEvaluator(),
                 //new EverQvsRREndgameEvaluator(),
                 //new FirstCaptureIsQueen(),
                 //new FirstCaptureIsRook(),
-                //new FirstCaptureRIsQueen(),
+                //new FirstCaptureIsQueen(),
                 //new FourteenPieceGameEndEvaluator(),
                 //new FullComplimentOfMinorPiecesSurvivesEvaluator(),
                 //new FullFileEvaluator(),
@@ -59,9 +60,10 @@ namespace PawnCube
                 //new QueenInACornerEvaluator(),
                 //new RookTakesAQueenEvaluator(),
                 //new SamePieceMovesEightTimesInARowEvaluator(),
-                //new TripledPawnEvaluator(),
+                new TripledPawnEvaluator(),
                 //new TwoBishopsVsTwoKnightsEvaluator(),
                 //new TwoKnightsOnSideEdgeEvaluator(),
+                //new AnyPawnPromotionEvaluator(),
                 //new TwoPawnPromotionsInOneGameEvaluator(),
                 //new SinglePieceCaptures19PointsOfMaterialInAGame(),
                 // new ThanosSnapEvaluator(),
@@ -70,6 +72,8 @@ namespace PawnCube
                 // new ChainReactionCastlingEvaluator(), 
                 // new RomeoAndJulietEvaluator(),
                 // new FortKnoxEvaluator(),
+                //new IdentityCrisisEvaluator(),
+                //new QueenEnPriseThreeMovesEvaluator(),
             };
             return booleanEvaluators;
         }
@@ -113,7 +117,10 @@ namespace PawnCube
                 //new TotalWhiteAdvantageAtLastPositionTenPercentForeEachMaterialPoint(),
                 // new PieceTourEvaluator(),
                 // new KnightCoverageEvaluator(),
-                
+                //new TwentyPercentPerEnPassantDoneNumericalEvaluator(),
+                //new TwentyPercentPerExtraPawnMaxAdvantageEvaluator(),
+                //new KingTakesQueenTenPercentEachEvaluator(),
+
                 };
             return numericalEvaluators;
         }
