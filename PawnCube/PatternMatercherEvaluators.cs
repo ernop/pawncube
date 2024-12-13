@@ -97,6 +97,47 @@ public class TripledPawnEvaluator : PatternMatcherChecker
     }
 }
 
+public class QuadrupledPawnEvaluator : PatternMatcherChecker
+{
+    public override string Name => nameof(QuadrupledPawnEvaluator);
+
+    public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
+    {
+        details = "";
+        var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0,3)};
+
+        var p = testBoard[xx, yy];
+        if (p == null || p.Type != PieceType.Pawn) { return false; }
+
+        var testColor = p.Color;
+        foreach (var pos in up)
+        {
+            var target = new Tuple<short, short>((short)(xx + pos.Item1), (short)(yy + pos.Item2));
+            if (!Statics.IsInBounds(target))
+            {
+                return false;
+            }
+            var targetp = testBoard[target.Item1, target.Item2];
+            if (targetp == null)
+            {
+                return false;
+            }
+            if (targetp.Color != testColor)
+            {
+                return false;
+            }
+            if (targetp.Type != PieceType.Pawn)
+            {
+                return false;
+            }
+        }
+
+        //we got through a whole vector without dying.
+        details = $"at:  {new Position(xx, yy)}, {new Position((short)(xx + up[0].Item1), (short)(yy + up[0].Item2))}, {new Position((short)(xx + up[1].Item1), (short)(yy + up[1].Item2))}";
+        return true;
+    }
+}
+
 public class PieceCubeEvaluator : PatternMatcherChecker
 {
     public override string Name => nameof(PieceCubeEvaluator);
@@ -133,47 +174,6 @@ public class PieceCubeEvaluator : PatternMatcherChecker
         {
             details += $" {xx + pos.Item1},{yy + pos.Item2}";
         }
-        return true;
-    }
-}
-
-public class QuadrupledPawnEvaluator : PatternMatcherChecker
-{
-    public override string Name => nameof(QuadrupledPawnEvaluator);
-
-    public override bool CheckForPattern(ChessBoard testBoard, short xx, short yy, out string details)
-    {
-        details = "";
-        var up = new List<Tuple<short, short>>() { new Tuple<short, short>(0, 1), new Tuple<short, short>(0, 2), new Tuple<short, short>(0, 3), };
-
-        var p = testBoard[xx, yy];
-        if (p == null || p.Type != PieceType.Pawn) { return false; }
-
-        var testColor = p.Color;
-        foreach (var pos in up)
-        {
-            var target = new Tuple<short, short>((short)(xx + pos.Item1), (short)(yy + pos.Item2));
-            if (!Statics.IsInBounds(target))
-            {
-                return false;
-            }
-            var targetp = testBoard[target.Item1, target.Item2];
-            if (targetp == null)
-            {
-                return false;
-            }
-            if (targetp.Color != testColor)
-            {
-                return false;
-            }
-            if (targetp.Type != PieceType.Pawn)
-            {
-                return false;
-            }
-        }
-
-        details = $"at:  {new Position(xx, yy)}, {new Position((short)(xx + up[0].Item1), (short)(yy + up[0].Item2))}, {new Position((short)(xx + up[1].Item1), (short)(yy + up[1].Item2))}, {new Position((short)(xx + up[2].Item1), (short)(yy + up[2].Item2))}";
-        //we got through a whole vector without dying.
         return true;
     }
 }

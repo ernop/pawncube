@@ -17,6 +17,399 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PawnCube
 {
+    public class TenPercentForNonpawnNonmoversEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TenPercentForNonpawnNonmoversEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            int totalRaw = 0;
+            var examples = new List<NumericalExample>();
+
+            foreach (var board in boards)
+            {
+                // Go to starting position to identify initial non-pawn pieces
+                board.GoToStartingPosition();
+
+                // Get all non-pawn pieces at start
+                var nonPawnPieceIds = new HashSet<int>();
+                foreach (var piecePos in GetAllPiecesAndPositions(board))
+                {
+                    var piece = piecePos.Item1;
+                    if (piece.Type != PieceType.Pawn)
+                    {
+                        nonPawnPieceIds.Add(piece.Id);
+                    }
+                }
+
+                // Now iterate through moves and remove pieces that move
+                for (int i = 0; i < board.ExecutedMoves.Count; i++)
+                {
+                    var move = board.ExecutedMoves[i];
+                    // If this piece moves, it's no longer a non-mover
+                    if (nonPawnPieceIds.Contains(move.Piece.Id))
+                    {
+                        nonPawnPieceIds.Remove(move.Piece.Id);
+                    }
+                    board.Next();
+                }
+
+                // Now at final position, nonPawnPieceIds contains IDs of pieces that never moved
+                if (nonPawnPieceIds.Count > 0)
+                {
+                    int increment = nonPawnPieceIds.Count * 10;
+                    totalRaw += increment;
+
+                    var details = $"{nonPawnPieceIds.Count} non-pawn pieces never moved, contributing {increment}% for this board.";
+                    var lastMoveIndex = Math.Max(0, board.ExecutedMoves.Count - 1);
+                    examples.Add(new NumericalExample(board, details, lastMoveIndex, increment));
+                }
+            }
+
+            var finalDetails = $"Total raw score: {totalRaw}%. 10% for each non-pawn piece that never moved in all games considered.";
+            return new NumericalEvaluationResult(totalRaw, finalDetails, examples);
+        }
+
+        private IEnumerable<Tuple<Piece, Position>> GetAllPiecesAndPositions(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null)
+                    {
+                        yield return Tuple.Create(piece, new Position(x, y));
+                    }
+                }
+            }
+        }
+    }
+
+    public class TenPercentForPiecesReturningToStartAfterMovingEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TenPercentForPiecesReturningToStartAfterMovingEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            int totalRaw = 0;
+            var examples = new List<NumericalExample>();
+
+            foreach (var board in boards)
+            {
+                // Start at initial position
+                board.GoToStartingPosition();
+
+                // Record original positions for all pieces by their Id
+                var originalPositions = new Dictionary<int, Position>();
+                foreach (var piecePos in GetAllPiecesAndPositions(board))
+                {
+                    originalPositions[piecePos.Item1.Id] = piecePos.Item2;
+                }
+
+                // Track which pieces have moved
+                var movedPieces = new HashSet<int>();
+
+                // Advance to the end of the game
+                for (int i = 0; i < board.ExecutedMoves.Count; i++)
+                {
+                    var move = board.ExecutedMoves[i];
+                    movedPieces.Add(move.Piece.Id);
+                    board.Next();
+                }
+
+                // Now at final position
+                var finalPositions = GetAllPiecesAndPositions(board);
+
+                int boardCount = 0;
+                foreach (var piecePos in finalPositions)
+                {
+                    var piece = piecePos.Item1;
+                    var pos = piecePos.Item2;
+                    if (originalPositions.TryGetValue(piece.Id, out var startPos))
+                    {
+                        // Check if piece is on its original square at the end
+                        // and has moved during the game
+                        if (pos == startPos && movedPieces.Contains(piece.Id))
+                        {
+                            boardCount++;
+                        }
+                    }
+                }
+
+                if (boardCount > 0)
+                {
+                    int increment = boardCount * 10;
+                    totalRaw += increment;
+                    var details = $"{boardCount} pieces returned to their starting squares after having moved, contributing {increment}% for this board.";
+                    var lastMoveIndex = Math.Max(0, board.ExecutedMoves.Count - 1);
+                    examples.Add(new NumericalExample(board, details, lastMoveIndex, increment));
+                }
+            }
+
+            var finalDetails = $"Total raw score: {totalRaw}%. 10% for each piece that ended on its starting square after moving at least once.";
+            return new NumericalEvaluationResult(totalRaw, finalDetails, examples);
+        }
+
+        private IEnumerable<Tuple<Piece, Position>> GetAllPiecesAndPositions(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null)
+                    {
+                        yield return Tuple.Create(piece, new Position(x, y));
+                    }
+                }
+            }
+        }
+    }
+
+    public class KnightDirection3PercentVerticalMinus4PercentHorizontalEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(KnightDirection3PercentVerticalMinus4PercentHorizontalEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var examples = new List<NumericalExample>();
+            int totalRaw = 0;
+
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                int boardVerticalCount = 0;
+                int boardHorizontalCount = 0;
+
+                for (int i = 0; i < board.ExecutedMoves.Count; i++)
+                {
+                    var move = board.ExecutedMoves[i];
+                    board.Next();
+
+                    if (move.Piece.Type == PieceType.Knight)
+                    {
+                        var oldPos = move.OriginalPosition;
+                        var newPos = move.NewPosition;
+                        var dx = Math.Abs(oldPos.X - newPos.X);
+                        var dy = Math.Abs(oldPos.Y - newPos.Y);
+
+                        // Knight moves in an L-shape: (dx, dy) is either (1, 2) or (2, 1)
+                        // If dx = 1 and dy = 2, the move is more vertical
+                        // If dx = 2 and dy = 1, the move is more horizontal
+                        if ((dx == 1 && dy == 2))
+                        {
+                            // vertical move +3%
+                            boardVerticalCount++;
+                        }
+                        else if ((dx == 2 && dy == 1))
+                        {
+                            // horizontal move -4%
+                            boardHorizontalCount++;
+                        }
+                        else
+                        {
+                            // Any other pattern would be unexpected for a knight
+                            throw new Exception("Unexpected knight move pattern.");
+                        }
+                    }
+                }
+
+                if (boardVerticalCount > 0 || boardHorizontalCount > 0)
+                {
+                    var boardIncrement = boardVerticalCount * 3 + boardHorizontalCount * (-4);
+                    totalRaw += boardIncrement;
+
+                    var detail = $"Board: {Statics.DescribeChessBoard(board)}, vertical knight moves: {boardVerticalCount} (+3% each), horizontal knight moves: {boardHorizontalCount} (-4% each), net: {boardIncrement}%";
+                    var lastMoveIndex = Math.Max(0, board.ExecutedMoves.Count - 1);
+                    examples.Add(new NumericalExample(board, detail, lastMoveIndex, boardIncrement));
+                }
+            }
+
+            var finalDetails = $"Total raw score: {totalRaw}%. Accumulated from +3% per vertical knight move and -4% per horizontal knight move across all boards.";
+            return new NumericalEvaluationResult(totalRaw, finalDetails, examples);
+        }
+    }
+
+    public class TenPercentPerPointOfFinalMaterialAdvantageEvaluator : INumericalEvaluator
+    {
+        public string Name => nameof(TenPercentPerPointOfFinalMaterialAdvantageEvaluator);
+
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var examples = new List<NumericalExample>();
+            int totalRaw = 0;
+
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+                board.Last();
+
+                var pieces = GetAllPieces(board);
+
+                int whiteMaterial = 0;
+                int blackMaterial = 0;
+
+                foreach (var piece in pieces)
+                {
+                    if (piece.Type != PieceType.King) { 
+                    int value = GetPieceValue(piece.Type);
+
+                        if (piece.Color == PieceColor.White)
+                            whiteMaterial += value;
+                        else
+                            blackMaterial += value;
+                    }
+                }
+
+                int difference = Math.Abs(whiteMaterial - blackMaterial);
+                if (difference != 0)
+                {
+                    int increment = difference * 10;
+                    totalRaw += increment;
+
+                    var sideAhead = difference > 0 ? "White" : "Black";
+                    var details = $"{sideAhead} is ahead by {difference} points of material in the final position, contributing {increment}%.";
+
+                    // Use last move index as example reference
+                    var moveIndex = board.ExecutedMoves.Count - 1;
+                    if (moveIndex < 0) moveIndex = 0; // In case no moves are made
+                    examples.Add(new NumericalExample(board, details, moveIndex, increment));
+                }
+            }
+
+            var det = $"Total raw score: {totalRaw}%. Calculated by summing 10% per material point advantage in each final position.";
+            return new NumericalEvaluationResult(totalRaw, det, examples);
+        }
+
+
+        private int GetPieceValue(PieceType type)
+        {
+            // Switch on the integer 'Value' property of PieceType.
+            switch (type.Value)
+            {
+                case 1: // Pawn
+                    return 1;
+                case 2: // Rook
+                    return 5;
+                case 3: // Knight
+                    return 3;
+                case 4: // Bishop
+                    return 3;
+                case 5: // Queen
+                    return 9;
+                case 6: // King
+                        // Normally not captured, so handle as an error
+                    throw new Exception("Unexpected piece type captured (King).");
+                default:
+                    throw new Exception($"Unexpected piece type value: {type.Value}");
+            }
+        }
+
+        private IEnumerable<Piece> GetAllPieces(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null)
+                        yield return piece;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 5% for every pawn who jumps two steps in his first move, -5% for every pawn who takes one step or captures in his first move
+    /// </summary>
+    public class PawnMoveTypesFiveForTwoJumpMinusFiveForOtherFirstMove2 : INumericalEvaluator
+    {
+        public string Name => nameof(PawnMoveTypesFiveForTwoJumpMinusFiveForOtherFirstMove);
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
+        {
+            var twoSpaceJumpCountTotal = 0;
+            var oneSpaceJumpCountTotal = 0;
+            var firstMoveCapturesTotal = 0;
+
+            var examples = new List<NumericalExample>();
+
+            foreach (var board in boards)
+            {
+                board.GoToStartingPosition();
+
+                // For each pawn, we only care about its first move.
+                // We'll track which pawns have moved and what their first move was.
+                var pawnFirstMoveDone = new HashSet<int>();
+
+                int boardTwoSteps = 0;
+                int boardOneSteps = 0;
+                int boardCaptures = 0;
+
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    board.Next();
+
+                    if (move.Piece.Type == PieceType.Pawn && !pawnFirstMoveDone.Contains(move.Piece.Id))
+                    {
+                        // Pawn is making its first move
+                        pawnFirstMoveDone.Add(move.Piece.Id);
+
+                        // Check if it's from the initial rank (White pawns start at y=1, Black at y=6)
+                        bool isStartingRank = (move.Piece.Color == PieceColor.White && move.OriginalPosition.Y == 1) ||
+                                              (move.Piece.Color == PieceColor.Black && move.OriginalPosition.Y == 6);
+
+                        if (isStartingRank)
+                        {
+                            var gap = Math.Abs(move.OriginalPosition.Y - move.NewPosition.Y);
+                            if (gap == 2)
+                            {
+                                // Two-step jump
+                                twoSpaceJumpCountTotal++;
+                                boardTwoSteps++;
+                            }
+                            else if (gap == 1)
+                            {
+                                if (move.CapturedPiece == null)
+                                {
+                                    // One-step advance
+                                    oneSpaceJumpCountTotal++;
+                                    boardOneSteps++;
+                                }
+                                else
+                                {
+                                    // Capture on first move
+                                    firstMoveCapturesTotal++;
+                                    boardCaptures++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If this board had any relevant moves, record an example
+                if (boardTwoSteps > 0 || boardOneSteps > 0 || boardCaptures > 0)
+                {
+                    // Calculate the board increment
+                    // +5 for each two-step jump, -5 for each one-step and -5 for each capture
+                    var boardIncrement = 5 * boardTwoSteps - 5 * boardOneSteps - 5 * boardCaptures;
+                    var details = $"Board had {boardTwoSteps} two-step first pawn moves, {boardOneSteps} one-step first pawn moves, and {boardCaptures} first-move captures, contributing {boardIncrement}%.";
+
+                    // Use last executed move index as a reference or -1 if no moves
+                    var moveIndex = Math.Max(0, board.ExecutedMoves.Count - 1);
+                    examples.Add(new NumericalExample(board, details, moveIndex, boardIncrement));
+                }
+            }
+
+            // Compute final raw result
+            var raw = 5 * twoSpaceJumpCountTotal - 5 * oneSpaceJumpCountTotal - 5 * firstMoveCapturesTotal;
+
+            var det = $"Across all boards: {twoSpaceJumpCountTotal} two-step jumps, {oneSpaceJumpCountTotal} one-step moves, and {firstMoveCapturesTotal} first-move captures. Result: {raw}%";
+            return new NumericalEvaluationResult(raw, det, examples);
+        }
+    }
+
     public class KingTakesQueenTenPercentEachEvaluator : INumericalEvaluator
     {
         public string Name => nameof(KingTakesQueenTenPercentEachEvaluator);
@@ -26,16 +419,16 @@ namespace PawnCube
             var totalKingsTakingQueens = 0;
             var examples = new List<NumericalExample>();
             var allQueenCaptures = new List<string>();
-            
+
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
                 var gameName = Statics.DescribeChessBoard(board);
-                
+
                 for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
                 {
                     var move = board.ExecutedMoves[ii];
-                    
+
                     // Track all queen captures
                     if (move.CapturedPiece != null && move.CapturedPiece.Type == PieceType.Queen)
                     {
@@ -44,17 +437,17 @@ namespace PawnCube
                             $"Game {gameName}: {captureColor} {move.Piece.Type} takes queen at move {ii}"
                         );
                     }
-                    
+
                     // Track king-specific captures for scoring
-                    if (move.Piece.Type == PieceType.King && 
-                        move.CapturedPiece != null && 
+                    if (move.Piece.Type == PieceType.King &&
+                        move.CapturedPiece != null &&
                         move.CapturedPiece.Type == PieceType.Queen)
                     {
                         totalKingsTakingQueens++;
                         var kingColor = move.Piece.Color == PieceColor.White ? "White" : "Black";
-                        examples.Add(new NumericalExample(board, 
-                            $"{kingColor} king takes queen at move {ii} in game {gameName}", 
-                            ii, 
+                        examples.Add(new NumericalExample(board,
+                            $"{kingColor} king takes queen at move {ii} in game {gameName}",
+                            ii,
                             10));
                     }
                     board.Next();
@@ -198,11 +591,11 @@ namespace PawnCube
                     moveNo++;
                 }
                 var thisNonPawnNonMovers = pieceIds.Count();
-                if (thisNonPawnNonMovers>mostNonPawnNonMovers)
+                if (thisNonPawnNonMovers > mostNonPawnNonMovers)
                 {
                     mostNonPawnNonMovers = thisNonPawnNonMovers;
                     bestGame = board;
-                    
+
                 }
             }
 
@@ -707,7 +1100,7 @@ namespace PawnCube
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
-                
+
                 // Mark initial positions
                 for (short x = 0; x < 8; x++)
                 {
@@ -736,17 +1129,17 @@ namespace PawnCube
                     var newY = move.NewPosition.Y;
 
                     visitCount[newX, newY]++;
-                    
+
                     if (!visited[newX, newY])
                     {
                         visited[newX, newY] = true;
                         unvisitedCount--;
-                        
+
                         if (unvisitedCount == 0)
                         {
-                            examples.Add(new NumericalExample(board, 
-                                "This move completed the tour of all squares", 
-                                ii, 
+                            examples.Add(new NumericalExample(board,
+                                "This move completed the tour of all squares",
+                                ii,
                                 100));
                         }
                     }
@@ -773,7 +1166,7 @@ namespace PawnCube
 
             var raw = unvisitedCount == 0 ? 100 : 0;
             var unvisitedSquares = new List<string>();
-            
+
             if (unvisitedCount > 0)
             {
                 for (short x = 0; x < 8; x++)
@@ -788,8 +1181,8 @@ namespace PawnCube
                 }
             }
 
-            var det = unvisitedCount == 0 
-                ? "All squares were visited by at least one piece across all games" 
+            var det = unvisitedCount == 0
+                ? "All squares were visited by at least one piece across all games"
                 : $"Squares never visited: {string.Join(", ", unvisitedSquares)}";
 
             return new NumericalEvaluationResult(raw, det, examples);
@@ -797,111 +1190,111 @@ namespace PawnCube
     }
 
     public class KnightCoverageEvaluator : INumericalEvaluator
-{
-    public string Name => nameof(KnightCoverageEvaluator);
-
-    public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
     {
-        // Track both if visited and how many times visited
-        var visited = new bool[8, 8];
-        var visitCount = new int[8, 8];
-        var unvisitedCount = 64;
-        var examples = new List<NumericalExample>();
+        public string Name => nameof(KnightCoverageEvaluator);
 
-        foreach (var board in boards)
+        public NumericalEvaluationResult Evaluate(IEnumerable<ChessBoard> boards)
         {
-            board.GoToStartingPosition();
-            
-            // Mark initial positions
-            for (short x = 0; x < 8; x++)
+            // Track both if visited and how many times visited
+            var visited = new bool[8, 8];
+            var visitCount = new int[8, 8];
+            var unvisitedCount = 64;
+            var examples = new List<NumericalExample>();
+
+            foreach (var board in boards)
             {
-                for (short y = 0; y < 8; y++)
+                board.GoToStartingPosition();
+
+                // Mark initial positions
+                for (short x = 0; x < 8; x++)
                 {
-                    var piece = board[new Position(x, y)];
-                    if (piece != null && piece.Type == PieceType.Knight)
+                    for (short y = 0; y < 8; y++)
                     {
-                        visitCount[x, y]++;
-                        if (!visited[x, y])
+                        var piece = board[new Position(x, y)];
+                        if (piece != null && piece.Type == PieceType.Knight)
                         {
-                            visited[x, y] = true;
+                            visitCount[x, y]++;
+                            if (!visited[x, y])
+                            {
+                                visited[x, y] = true;
+                                unvisitedCount--;
+                            }
+                        }
+                    }
+                }
+
+                // Track moves
+                for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+                {
+                    var move = board.ExecutedMoves[ii];
+                    board.Next();
+
+                    if (move.Piece.Type == PieceType.Knight)
+                    {
+                        var newX = move.NewPosition.X;
+                        var newY = move.NewPosition.Y;
+
+                        visitCount[newX, newY]++;
+
+                        if (!visited[newX, newY])
+                        {
+                            visited[newX, newY] = true;
                             unvisitedCount--;
+
+                            if (unvisitedCount == 0)
+                            {
+                                examples.Add(new NumericalExample(board,
+                                    "This move completed the knight coverage of all squares",
+                                    ii,
+                                    100));
+                            }
                         }
                     }
                 }
             }
 
-            // Track moves
-            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            // Print visitation counts
+            Console.WriteLine("\nSquare visitation counts:");
+            for (int y = 7; y >= 0; y--)
             {
-                var move = board.ExecutedMoves[ii];
-                board.Next();
-
-                if (move.Piece.Type == PieceType.Knight)
+                Console.Write($"{y + 1} ");
+                for (int x = 0; x < 8; x++)
                 {
-                    var newX = move.NewPosition.X;
-                    var newY = move.NewPosition.Y;
-
-                    visitCount[newX, newY]++;
-                    
-                    if (!visited[newX, newY])
-                    {
-                        visited[newX, newY] = true;
-                        unvisitedCount--;
-                        
-                        if (unvisitedCount == 0)
-                        {
-                            examples.Add(new NumericalExample(board, 
-                                "This move completed the knight coverage of all squares", 
-                                ii, 
-                                100));
-                        }
-                    }
+                    Console.Write($"{visitCount[x, y],5}");
                 }
+                Console.WriteLine();
             }
-        }
-
-        // Print visitation counts
-        Console.WriteLine("\nSquare visitation counts:");
-        for (int y = 7; y >= 0; y--)
-        {
-            Console.Write($"{y + 1} ");
+            Console.Write("   ");
             for (int x = 0; x < 8; x++)
             {
-                Console.Write($"{visitCount[x, y],5}");
+                Console.Write($"    {(char)('a' + x)}");
             }
-            Console.WriteLine();
-        }
-        Console.Write("   ");
-        for (int x = 0; x < 8; x++)
-        {
-            Console.Write($"    {(char)('a' + x)}");
-        }
-        Console.WriteLine("\n");
+            Console.WriteLine("\n");
 
-        var raw = unvisitedCount == 0 ? 100 : 0;
-        var unvisitedSquares = new List<string>();
-        
-        if (unvisitedCount > 0)
-        {
-            for (short x = 0; x < 8; x++)
+            var raw = unvisitedCount == 0 ? 100 : 0;
+            var unvisitedSquares = new List<string>();
+
+            if (unvisitedCount > 0)
             {
-                for (short y = 0; y < 8; y++)
+                for (short x = 0; x < 8; x++)
                 {
-                    if (!visited[x, y])
+                    for (short y = 0; y < 8; y++)
                     {
-                        unvisitedSquares.Add($"{(char)('a' + x)}{y + 1}");
+                        if (!visited[x, y])
+                        {
+                            unvisitedSquares.Add($"{(char)('a' + x)}{y + 1}");
+                        }
                     }
                 }
             }
+
+            var det = unvisitedCount == 0
+                ? "All squares were visited by at least one knight across all games"
+                : $"Squares never visited by knights: {string.Join(", ", unvisitedSquares)}";
+
+            return new NumericalEvaluationResult(raw, det, examples);
         }
-
-        var det = unvisitedCount == 0 
-            ? "All squares were visited by at least one knight across all games" 
-            : $"Squares never visited by knights: {string.Join(", ", unvisitedSquares)}";
-
-        return new NumericalEvaluationResult(raw, det, examples);
     }
-}
 
     public class TwentyPercentPerEnPassantDoneNumericalEvaluator : INumericalEvaluator
     {
@@ -911,7 +1304,7 @@ namespace PawnCube
         {
             var totalEnPassants = 0;
             var examples = new List<NumericalExample>();
-            
+
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
@@ -921,11 +1314,11 @@ namespace PawnCube
                     var previousMove = board.ExecutedMoves[ii - 1];
 
                     // Check if current move is a pawn moving diagonally
-                    if (currentMove.Piece.Type == PieceType.Pawn && 
+                    if (currentMove.Piece.Type == PieceType.Pawn &&
                         Math.Abs(currentMove.OriginalPosition.X - currentMove.NewPosition.X) == 1)
                     {
                         // Check if previous move was a pawn moving two squares
-                        if (previousMove.Piece.Type == PieceType.Pawn && 
+                        if (previousMove.Piece.Type == PieceType.Pawn &&
                             Math.Abs(previousMove.OriginalPosition.Y - previousMove.NewPosition.Y) == 2 &&
                             previousMove.NewPosition.X == currentMove.NewPosition.X)
                         {
@@ -934,9 +1327,9 @@ namespace PawnCube
                             if (currentMove.NewPosition.Y == expectedY)
                             {
                                 totalEnPassants++;
-                                examples.Add(new NumericalExample(board, 
-                                    $"En passant capture at move {ii}", 
-                                    ii, 
+                                examples.Add(new NumericalExample(board,
+                                    $"En passant capture at move {ii}",
+                                    ii,
                                     20));
                             }
                         }
@@ -960,7 +1353,7 @@ namespace PawnCube
             var maxPawnAdvantage = 0;
             NumericalExample bestExample = null;
             var det = "";
-            
+
             foreach (var board in boards)
             {
                 board.GoToStartingPosition();
@@ -969,7 +1362,7 @@ namespace PawnCube
                     var pieces = GetAllPieces(board);
                     var whitePawns = pieces.Count(p => p.Type == PieceType.Pawn && p.Color == PieceColor.White);
                     var blackPawns = pieces.Count(p => p.Type == PieceType.Pawn && p.Color == PieceColor.Black);
-                    
+
                     var advantage = Math.Abs(whitePawns - blackPawns);
                     if (advantage > maxPawnAdvantage)
                     {
@@ -985,7 +1378,7 @@ namespace PawnCube
             var raw = maxPawnAdvantage * 20;
             var examples = bestExample != null ? new List<NumericalExample> { bestExample } : new List<NumericalExample>();
             //var det = bestExample?.Description ?? "No pawn advantage found";
-            
+
             return new NumericalEvaluationResult(raw, det, examples);
         }
     }

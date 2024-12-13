@@ -13,8 +13,603 @@ using System.Threading.Tasks;
 
 using static PawnCube.Statics;
 
+
 namespace PawnCube
 {
+    public class o1Comments
+    {
+        public string summary = @"General Patterns of Potential Bugs:
+
+    Piece Identity vs. Piece Type:
+    Some evaluators check conditions by only comparing piece types or positions without ensuring they track the same piece identity. For instance, if they want to confirm a specific piece moved repeatedly, they should consistently use piece IDs. Using just piece type and final positions can cause false positives if another piece of the same type occupies a certain square.
+
+    Promotion Handling:
+    Evaluators that deal with promoted pieces must carefully update their reference color or identity at the exact time the promotion occurs. Applying promotion logic retroactively or prematurely can produce incorrect results.
+
+    Move/Position Iteration and Board State Management:
+    Some evaluators repeatedly call board.Next() without ever reverting to a previous state or handling boundaries. This can cause confusion or errors when indexing moves or analyzing positions before or after certain moves. They must ensure that at each iteration, the board is in the correct state they expect.
+
+    Multiple Yields and Early Breaks:
+    Some evaluators yield conditions multiple times or fail to break after yielding, possibly leading to multiple results when only one might be intended.
+
+Specific Evaluators:
+
+    SamePieceMovesEightTimesInARowEvaluator:
+        Potential Issue: It attempts to verify if the same piece moved eight times in a row by looking at the original and new positions. However, it does not verify that the piece has the same piece ID, only that it’s the same piece type and that moves “line up” with previous positions. This could allow a different but identical-type piece to create a false positive scenario.
+        Also: It does not check for indexing issues if it looks back 2 moves at a time when ii is small. For a small ii, ii - checkedCount*2 - 2 could become negative, causing an index out of range error.
+
+    BishopManualUndoEvaluator:
+    This evaluator looks for a bishop returning to a square it occupied two moves ago. It checks only piece type (PieceType.Bishop) and not piece ID. Another bishop could have moved into that square, triggering a false positive. Ideally, it should verify that the exact same piece (by ID) returned, not just any bishop.
+
+    HomecomingPiecesTenPercentEachEvaluator:
+    This evaluator tries to assign piece IDs to starting positions (ranks 0,1,6,7) to track which pieces return home. However, the code assumes that piece IDs assigned by the chess library align exactly with the order of pieces on these ranks. This assumption may not hold if the engine assigns IDs differently. The logic also relies on id increments that may not match actual IDs, risking incorrect mappings and thus subtle bugs.
+
+    NoCapturesBeforeMoveXXEvaluator (10,20,30):
+    These evaluators check if no captures occur before a certain move number. Once they detect that no captures occurred through the threshold, they yield a result. However, they do so inside a loop that continues to run, potentially yielding multiple times if there are more moves after the threshold. They should break after yielding once.
+
+    BothKingsWrongSideEvaluator:
+    At first glance, the logic is a bit confusing but on careful inspection it appears correct. It sets bad = true if white king is still on its original side (pos.Y < 4 for White means not crossed the midpoint) or black king is on its original side (pos.Y >= 4 for Black means not crossed down). If after checking both kings bad remains false, it yields. This logic, while correct, is not very intuitive and can easily confuse a reader. It’s not strictly a bug, but a place for improvement in clarity. A future maintainer might mistake this for a bug.
+
+    QueenEnPriseThreeMovesEvaluator:
+    This evaluator seems incomplete or at least overly complicated:
+        It tries to track if a queen is attackable for three consecutive moves, but the code snippet given doesn’t fully revert the board to check each position properly or ensure timing is correct.
+        It writes to console (suggesting debugging) and has logic that might not be fully tested.
+        The logic uses board.Moves() at each iteration without ensuring the board is in the correct state. If board.Next() is repeatedly called, by the time it checks moves, it might not refer to the intended position in the timeline.
+
+    FullRankEvaluator:
+    The logic that checks if a rank is full of pieces and also counts how many are in their original positions is somewhat arbitrary and complex. It may not be a bug per se, but the conditions (piecesInOriginalPosition > 6 || (totalPieces - piecesInOriginalPosition) < 2) might not be what the author intended. It’s unclear what the exact goal is and whether the condition correctly implements that goal. Without clearer documentation, it’s hard to confirm correctness.";
+    }
+
+    public class BoardTiltEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(BoardTiltEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            for (int ii = 0; ii <= board.ExecutedMoves.Count; ii++)
+            {
+                if (ii > 0)
+                {
+                    board.Next();
+                }
+
+                var pieces = GetAllPiecesPositions(board);
+
+                // Count how many pieces are in each half
+                int topHalfCount = pieces.Count(p => p.Y >= 4);
+                int bottomHalfCount = pieces.Count(p => p.Y <= 3);
+                int leftHalfCount = pieces.Count(p => p.X <= 3);
+                int rightHalfCount = pieces.Count(p => p.X >= 4);
+
+                // Check horizontal halves
+                // top half >=10 and bottom half=0, or bottom half>=10 and top half=0
+                if ((topHalfCount >= 10 && bottomHalfCount == 0) || (bottomHalfCount >= 10 && topHalfCount == 0))
+                {
+                    var detail = $"Board tilt horizontally at move {ii}. One horizontal half has ≥10 pieces, the other is empty.";
+                    yield return new BooleanExample(board, detail, Math.Max(0, ii - 1));
+                    yield break;
+                }
+
+                // Check vertical halves
+                // left half >=10 and right half=0, or right half>=10 and left half=0
+                if ((leftHalfCount >= 10 && rightHalfCount == 0) || (rightHalfCount >= 10 && leftHalfCount == 0))
+                {
+                    var detail = $"Board tilt vertically at move {ii}. One vertical half has ≥10 pieces, the other is empty.";
+                    yield return new BooleanExample(board, detail, Math.Max(0, ii - 1));
+                    yield break;
+                }
+            }
+        }
+
+        private IEnumerable<Position> GetAllPiecesPositions(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null) yield return new Position(x, y);
+                }
+            }
+        }
+    }
+
+    public class KingReachesOpponentsHomeEdgeEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(KingReachesOpponentsHomeEdgeEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            // After each move, check king positions
+            for (int ii = 0; ii <= board.ExecutedMoves.Count; ii++)
+            {
+                if (ii > 0)
+                {
+                    board.Next();
+                }
+
+                var pieces = GetAllPieces(board);
+                var whiteKing = pieces.FirstOrDefault(p => p.Type == PieceType.King && p.Color == PieceColor.White);
+                var blackKing = pieces.FirstOrDefault(p => p.Type == PieceType.King && p.Color == PieceColor.Black);
+
+                if (whiteKing != null)
+                {
+                    var wPos = FindPiece(board, whiteKing.Id);
+                    if (wPos.Y == 7)
+                    {
+                        var details = $"White King has reached Black's home edge at move {ii}.";
+                        yield return new BooleanExample(board, details, Math.Max(0, ii - 1));
+                        yield break;
+                    }
+                }
+
+                if (blackKing != null)
+                {
+                    var bPos = FindPiece(board, blackKing.Id);
+                    if (bPos.Y == 0)
+                    {
+                        var details = $"Black King has reached White's home edge at move {ii}.";
+                        yield return new BooleanExample(board, details, Math.Max(0, ii - 1));
+                        yield break;
+                    }
+                }
+            }
+        }
+
+        private Position FindPiece(ChessBoard board, int pieceId)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var p = board[new Position(x, y)];
+                    if (p != null && p.Id == pieceId)
+                        return new Position(x, y);
+                }
+            }
+            throw new Exception("Piece not found");
+        }
+
+        private IEnumerable<Piece> GetAllPieces(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var p = board[new Position(x, y)];
+                    if (p != null) yield return p;
+                }
+            }
+        }
+    }
+
+    public class BothKingsWrongSideEvaluator2 : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(BothKingsWrongSideEvaluator2);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            // After each move (and including the initial state), check kings' positions
+            for (int ii = 0; ii <= board.ExecutedMoves.Count; ii++)
+            {
+                // If ii > 0, advance to the next move position
+                if (ii > 0)
+                {
+                    board.Next();
+                }
+
+                // Find both kings
+                var pieces = GetAllPieces(board);
+                var whiteKing = pieces.FirstOrDefault(p => p.Color == PieceColor.White && p.Type == PieceType.King);
+                var blackKing = pieces.FirstOrDefault(p => p.Color == PieceColor.Black && p.Type == PieceType.King);
+
+                if (whiteKing == null || blackKing == null)
+                {
+                    // If for some reason a king is missing (extremely unusual in normal chess),
+                    // we just continue.
+                    continue;
+                }
+
+                // Check positions
+                var whiteKingPos = FindPiece(board, whiteKing.Id);
+                var blackKingPos = FindPiece(board, blackKing.Id);
+
+                // White king wrong side: y >= 4
+                // Black king wrong side: y <= 3
+                if (whiteKingPos.Y >= 4 && blackKingPos.Y <= 3)
+                {
+                    var details = $"At move {ii}, both kings on wrong side: White king at {whiteKingPos}, Black king at {blackKingPos}.";
+                    yield return new BooleanExample(board, details, Math.Max(0, ii - 1));
+                    yield break;
+                }
+            }
+        }
+
+        private Position FindPiece(ChessBoard board, int pieceId)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var p = board[new Position(x, y)];
+                    if (p != null && p.Id == pieceId)
+                        return new Position(x, y);
+                }
+            }
+            throw new Exception("Piece not found");
+        }
+
+        private IEnumerable<Piece> GetAllPieces(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var p = board[new Position(x, y)];
+                    if (p != null) yield return p;
+                }
+            }
+        }
+    }
+
+    public class FirstCaptureIsQueenEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(FirstCaptureIsQueenEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            for (int i = 0; i < board.ExecutedMoves.Count; i++)
+            {
+                var move = board.ExecutedMoves[i];
+                board.Next();
+
+                if (move.CapturedPiece != null)
+                {
+                    // This is the first capture encountered
+                    if (move.Piece.Type == PieceType.Queen)
+                    {
+                        var details = $"The first capture of the game was made by a queen at move {i}.";
+                        yield return new BooleanExample(board, details, i);
+                    }
+                    break; // Stop after finding the first capture
+                }
+            }
+        }
+    }
+
+    public class SamePieceMovesEightTimesInARowEvaluator2 : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(SamePieceMovesEightTimesInARowEvaluator2);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            // We'll track moves by White and Black separately
+            // White moves are even indices, Black moves are odd indices
+            var whiteMoves = board.ExecutedMoves.Where((m, idx) => idx % 2 == 0).ToList();
+            var blackMoves = board.ExecutedMoves.Where((m, idx) => idx % 2 == 1).ToList();
+
+            // Function to check one color's moves
+            IEnumerable<BooleanExample> CheckColorMoves(List<Move> moves, PieceColor color, ChessBoard brd)
+            {
+                if (moves.Count < 8) yield break; // Need at least 8 moves by that side
+
+                int consecutiveCount = 1;
+                int lastPieceId = moves[0].Piece.Id;
+
+                for (int i = 1; i < moves.Count; i++)
+                {
+                    var currentPieceId = moves[i].Piece.Id;
+                    if (currentPieceId == lastPieceId)
+                    {
+                        consecutiveCount++;
+                        if (consecutiveCount >= 8)
+                        {
+                            // Found a scenario where the same piece moved 8 times in a row for this color
+                            // Determine the global move index for this scenario
+                            // If these are white moves, their indices in ExecutedMoves are even; 
+                            // If black moves, indices are odd.
+                            // We can find any representative global move index:
+                            // For example, the last move that confirmed the streak.
+                            int globalMoveIndex = -1;
+                            int countSoFar = 0;
+                            for (int globalIdx = 0; globalIdx < brd.ExecutedMoves.Count; globalIdx++)
+                            {
+                                if (brd.ExecutedMoves[globalIdx].Piece.Color == color)
+                                {
+                                    countSoFar++;
+                                    if (countSoFar == i + 1) // i+1 because i is 0-based index in color moves
+                                    {
+                                        globalMoveIndex = globalIdx;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            brd.GoToStartingPosition();
+                            for (int step = 0; step <= globalMoveIndex; step++)
+                                brd.Next();
+
+                            var sideStr = color == PieceColor.White ? "White" : "Black";
+                            var details = $"{sideStr}'s same piece (ID={lastPieceId}) moved 8 times in a row.";
+                            yield return new BooleanExample(brd, details, globalMoveIndex);
+                            yield break;
+                        }
+                    }
+                    else
+                    {
+                        // Reset count
+                        consecutiveCount = 1;
+                        lastPieceId = currentPieceId;
+                    }
+                }
+            }
+
+            foreach (var example in CheckColorMoves(whiteMoves, PieceColor.White, board))
+            {
+                yield return example;
+            }
+
+            foreach (var example in CheckColorMoves(blackMoves, PieceColor.Black, board))
+            {
+                yield return example;
+            }
+        }
+    }
+
+    /// <summary>
+    /// "2 Bishops vs 2 Knights" condition:
+    /// At any point, one color has exactly 2 bishops and 0 knights,
+    /// and the opposing color has exactly 2 knights and 0 bishops.
+    /// Other pieces may be present.
+    /// </summary>
+    public class TwoBishopsVsTwoKnightsEvaluator2 : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(TwoBishopsVsTwoKnightsEvaluator2);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (int ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+
+                var pieces = GetAllPieces(board);
+
+                var whiteBishops = pieces.Count(p => p.Type == PieceType.Bishop && p.Color == PieceColor.White);
+                var whiteKnights = pieces.Count(p => p.Type == PieceType.Knight && p.Color == PieceColor.White);
+
+                var blackBishops = pieces.Count(p => p.Type == PieceType.Bishop && p.Color == PieceColor.Black);
+                var blackKnights = pieces.Count(p => p.Type == PieceType.Knight && p.Color == PieceColor.Black);
+
+                // Check condition: one side has 2 bishops & 0 knights, the other side has 2 knights & 0 bishops
+                bool whiteHas2BishopsNoKnights = (whiteBishops == 2 && whiteKnights == 0);
+                bool blackHas2BishopsNoKnights = (blackBishops == 2 && blackKnights == 0);
+                bool whiteHas2KnightsNoBishops = (whiteKnights == 2 && whiteBishops == 0);
+                bool blackHas2KnightsNoBishops = (blackKnights == 2 && blackBishops == 0);
+
+                if ((whiteHas2BishopsNoKnights && blackHas2KnightsNoBishops) ||
+                    (blackHas2BishopsNoKnights && whiteHas2KnightsNoBishops))
+                {
+                    var det = "Position reached: One side has exactly 2 bishops and 0 knights, while the other side has exactly 2 knights and 0 bishops.";
+                    yield return new BooleanExample(board, det, ii);
+                    yield break;
+                }
+            }
+        }
+
+        private IEnumerable<Piece> GetAllPieces(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null)
+                    {
+                        yield return piece;
+                    }
+                }
+            }
+        }
+    }
+
+    public class SinglePieceCaptures19PointsOfMaterialEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(SinglePieceCaptures19PointsOfMaterialEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            // Dictionary to track total captured material by each piece (keyed by Piece.Id)
+            var pieceIdToCapturedValue = new Dictionary<int, int>();
+
+            board.GoToStartingPosition();
+            for (int moveIndex = 0; moveIndex < board.ExecutedMoves.Count; moveIndex++)
+            {
+                var move = board.ExecutedMoves[moveIndex];
+                board.Next();
+
+                if (move.CapturedPiece != null)
+                {
+                    int value = GetPieceValue(move.CapturedPiece.Type);
+
+                    if (!pieceIdToCapturedValue.ContainsKey(move.Piece.Id))
+                    {
+                        pieceIdToCapturedValue[move.Piece.Id] = 0;
+                    }
+
+                    pieceIdToCapturedValue[move.Piece.Id] += value;
+
+                    if (pieceIdToCapturedValue[move.Piece.Id] >= 19)
+                    {
+                        var det = $"A single piece (ID={move.Piece.Id}, {move.Piece}) has captured at least 19 points of material.";
+                        yield return new BooleanExample(board, det, moveIndex);
+                        yield break;
+                    }
+                }
+            }
+        }
+
+        private int GetPieceValue(PieceType type)
+        {
+            // Switch on the integer 'Value' property of PieceType.
+            switch (type.Value)
+            {
+                case 1: // Pawn
+                    return 1;
+                case 2: // Rook
+                    return 5;
+                case 3: // Knight
+                    return 3;
+                case 4: // Bishop
+                    return 3;
+                case 5: // Queen
+                    return 9;
+                case 6: // King
+                        // Normally not captured, so handle as an error
+                    throw new Exception("Unexpected piece type captured (King).");
+                default:
+                    throw new Exception($"Unexpected piece type value: {type.Value}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// "Center Pawn Cube" - The four center squares (3,3), (4,3), (3,4), (4,4)
+    /// all occupied by pawns of the same color.
+    /// </summary>
+    public class CenterPawnCubeEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(CenterPawnCubeEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (int moveIndex = 0; moveIndex < board.ExecutedMoves.Count; moveIndex++)
+            {
+                board.Next();
+
+                var p1 = board[new Position(3, 3)];
+                var p2 = board[new Position(4, 3)];
+                var p3 = board[new Position(3, 4)];
+                var p4 = board[new Position(4, 4)];
+
+                if (p1 != null && p2 != null && p3 != null && p4 != null &&
+                    p1.Type == PieceType.Pawn && p2.Type == PieceType.Pawn &&
+                    p3.Type == PieceType.Pawn && p4.Type == PieceType.Pawn &&
+                    p1.Color == p2.Color && p2.Color == p3.Color && p3.Color == p4.Color)
+                {
+                    var det = $"Center Pawn Cube detected at center squares.";
+                    yield return new BooleanExample(board, det, moveIndex);
+                    yield break;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// "Pawn Cube" - Detect a 2x2 square of 4 pawns all of the same color.
+    /// </summary>
+    public class PawnCubeEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(PawnCubeEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (int moveIndex = 0; moveIndex < board.ExecutedMoves.Count; moveIndex++)
+            {
+                board.Next();
+
+                // Check all 2x2 squares in an 8x8 board.
+                // The top-left corner of a 2x2 block can start at most from (6,6) since we need (x+1,y+1).
+                for (short x = 0; x < 7; x++)
+                {
+                    for (short y = 0; y < 7; y++)
+                    {
+                        var p1 = board[new Position(x, y)];
+                        var p2 = board[new Position((short)(x + 1), y)];
+                        var p3 = board[new Position(x, (short)(y + 1))];
+                        var p4 = board[new Position((short)(x + 1), (short)(y + 1))];
+
+                        // Check if all are non-null, pawns, and the same color
+                        if (p1 != null && p2 != null && p3 != null && p4 != null &&
+                            p1.Type == PieceType.Pawn && p2.Type == PieceType.Pawn &&
+                            p3.Type == PieceType.Pawn && p4.Type == PieceType.Pawn &&
+                            p1.Color == p2.Color && p2.Color == p3.Color && p3.Color == p4.Color)
+                        {
+                            var det = $"Pawn Cube detected at positions: {(x, y)}, {(x + 1, y)}, {(x, y + 1)}, {(x + 1, y + 1)}.";
+                            yield return new BooleanExample(board, det, moveIndex);
+                            yield break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// "Social Distancing" - All pieces are at least 2 squares apart from each other (manhattan distance >= 2)
+    /// Requires at least 6 pieces on the board.
+    ///
+    /// Manhattan distance between two positions (x1,y1) and (x2,y2) is |x1-x2| + |y1-y2|.
+    /// 
+    /// If at any point all pieces on the board (≥6) have pairwise distances ≥2, we yield a result.
+    /// </summary>
+    public class SocialDistancingEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(SocialDistancingEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (int ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            {
+                board.Next();
+
+                var piecesPositions = GetAllPiecesAndPositions(board).ToList();
+                if (piecesPositions.Count < 6)
+                {
+                    continue;
+                }
+
+                bool allDistanced = true;
+                for (int i = 0; i < piecesPositions.Count && allDistanced; i++)
+                {
+                    for (int j = i + 1; j < piecesPositions.Count && allDistanced; j++)
+                    {
+                        var posA = piecesPositions[i].Item2;
+                        var posB = piecesPositions[j].Item2;
+                        int distance = Math.Abs(posA.X - posB.X) + Math.Abs(posA.Y - posB.Y);
+                        if (distance < 2)
+                        {
+                            // Found a pair too close
+                            allDistanced = false;
+                        }
+                    }
+                }
+
+                if (allDistanced)
+                {
+                    var det = $"Social Distancing: All {piecesPositions.Count} pieces are at least 2 squares apart.";
+                    yield return new BooleanExample(board, det, ii);
+                    // After yielding once, we can break or continue. Usually we break since we found an occurrence.
+                    break;
+                }
+            }
+        }
+    }
+
     public class LargestNxNSquareInAnyPositionInAnyGame : INumericalEvaluator
     {
         public string Name => nameof(LargestNxNSquareInAnyPositionInAnyGame);
@@ -139,7 +734,7 @@ namespace PawnCube
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 var move = board.ExecutedMoves[ii];
-                
+
                 if (move.CapturedPiece != null)
                 {
                     var capturer = move.Piece.Id;
@@ -161,7 +756,7 @@ namespace PawnCube
                     pieceId2totalMaterialCaptured[capturer] += val;
                     foreach (var k in pieceId2totalMaterialCaptured.Keys)
                     {
-                        
+
                         if (pieceId2totalMaterialCaptured[k] >= 19)
                         {
                             var det = $"At this move, a certain piece actually captured 19 points of material (or more, :{pieceId2totalMaterialCaptured[k]}";
@@ -414,7 +1009,7 @@ namespace PawnCube
         }
     }
 
-    
+
     public class FirstCaptureIsRook : AbstractBooleanEvaluator, IBooleanEvaluator
     {
         public string Name => nameof(FirstCaptureIsRook);
@@ -525,7 +1120,7 @@ namespace PawnCube
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 board.Next();
-                
+
                 // Check each rank
                 for (short yy = 0; yy < 8; yy++)
                 {
@@ -542,7 +1137,7 @@ namespace PawnCube
                             bad = true;
                             break;
                         }
-                        
+
                         totalPieces++;
                         // Check if piece is in its original position
                         if (originalPositions.Contains($"{piece.Id}:{xx},{yy}"))
@@ -575,10 +1170,10 @@ namespace PawnCube
             {
                 board.Next();
                 var pieces = GetAllPieces(board);
-                
+
                 var whitePieces = pieces.Where(p => p.Color == PieceColor.White);
                 var blackPieces = pieces.Where(p => p.Color == PieceColor.Black);
-                
+
                 // Count each piece type for both sides
                 var whitePawns = whitePieces.Count(p => p.Type == PieceType.Pawn);
                 var whiteKnights = whitePieces.Count(p => p.Type == PieceType.Knight);
@@ -979,7 +1574,7 @@ namespace PawnCube
                 board.Next();
 
                 // Check if this was a pawn moving two squares
-                if (move.Piece.Type != PieceType.Pawn || 
+                if (move.Piece.Type != PieceType.Pawn ||
                     Math.Abs(move.OriginalPosition.Y - move.NewPosition.Y) != 2)
                 {
                     continue;
@@ -987,8 +1582,8 @@ namespace PawnCube
 
                 // Check for enemy pawns in position to capture en passant
                 var capturingColor = move.Piece.Color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-                var possibleCapturers = new List<Position>(); 
-                
+                var possibleCapturers = new List<Position>();
+
                 // Check both adjacent files
                 if (move.NewPosition.X > 0)
                 {
@@ -1033,9 +1628,9 @@ namespace PawnCube
                 board.Next();
 
                 // Skip if not a pawn capture
-                if (move.Piece.Type != PieceType.Pawn || move.CapturedPiece == null) 
-                { 
-                    continue; 
+                if (move.Piece.Type != PieceType.Pawn || move.CapturedPiece == null)
+                {
+                    continue;
                 }
 
                 // Check if this was a diagonal pawn capture
@@ -1044,12 +1639,12 @@ namespace PawnCube
                     Math.Abs(move.OriginalPosition.Y - move.NewPosition.Y) == 1) // Moved one rank
                 {
                     // Verify previous move was a pawn moving two squares
-                    if (previousMove.Piece.Type == PieceType.Pawn && 
+                    if (previousMove.Piece.Type == PieceType.Pawn &&
                         Math.Abs(previousMove.OriginalPosition.Y - previousMove.NewPosition.Y) == 2 &&
                         previousMove.NewPosition.X == move.NewPosition.X) // The captured pawn should be on same file as destination
                     {
                         // For white's en passant (moving up)
-                        if (move.Piece.Color == PieceColor.White && 
+                        if (move.Piece.Color == PieceColor.White &&
                             move.NewPosition.Y == previousMove.NewPosition.Y + 1 &&
                             previousMove.NewPosition.Y == 4)
                         {
@@ -1058,7 +1653,7 @@ namespace PawnCube
                             break;
                         }
                         // For black's en passant (moving down)
-                        else if (move.Piece.Color == PieceColor.Black && 
+                        else if (move.Piece.Color == PieceColor.Black &&
                                 move.NewPosition.Y == previousMove.NewPosition.Y - 1 &&
                                 previousMove.NewPosition.Y == 3)
                         {
@@ -1489,6 +2084,156 @@ namespace PawnCube
             }
         }
     }
+    public class AllPiecesSameColorSquareWithAtLeast7Evaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(AllPiecesSameColorSquareWithAtLeast7Evaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+            for (int ii = 0; ii <= board.ExecutedMoves.Count; ii++)
+            {
+                if (ii > 0)
+                {
+                    board.Next();
+                }
+
+                var piecesAndPositions = GetAllPiecesAndPositions(board).ToList();
+                if (piecesAndPositions.Count < 7) continue; // Need at least 7 pieces
+
+                // Determine the required color based on the first piece's square
+                var firstPos = piecesAndPositions[0].Item2;
+                bool firstColor = ((firstPos.X + firstPos.Y) % 2 == 0);
+
+                bool allSameColor = true;
+                foreach (var pp in piecesAndPositions)
+                {
+                    var pos = pp.Item2;
+                    var squareColor = ((pos.X + pos.Y) % 2 == 0);
+                    if (squareColor != firstColor)
+                    {
+                        allSameColor = false;
+                        break;
+                    }
+                }
+
+                if (allSameColor)
+                {
+                    var colorStr = firstColor ? "light" : "dark";
+                    var details = $"All {piecesAndPositions.Count} pieces are on {colorStr} squares at move {ii}.";
+                    yield return new BooleanExample(board, details, Math.Max(0, ii - 1));
+                    yield break;
+                }
+            }
+        }
+
+        private IEnumerable<Tuple<Piece, Position>> GetAllPiecesAndPositions(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var piece = board[new Position(x, y)];
+                    if (piece != null)
+                    {
+                        yield return Tuple.Create(piece, new Position(x, y));
+                    }
+                }
+            }
+        }
+    }
+
+    public class ThreeByThreeFullEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(ThreeByThreeFullEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            for (int ii = 0; ii <= board.ExecutedMoves.Count; ii++)
+            {
+                if (ii > 0)
+                {
+                    board.Next();
+                }
+
+                // Check all possible 3x3 squares.
+                // 3x3 squares can start at (x,y) from 0 to 5 (0-based) because:
+                // top-left corner of a 3x3 block at max is (5,5)
+                // so that (5+2=7 and 5+2=7 for max indexes)
+                for (int startX = 0; startX <= 5; startX++)
+                {
+                    for (int startY = 0; startY <= 5; startY++)
+                    {
+                        if (Is3x3Full(board, startX, startY))
+                        {
+                            var details = $"A 3x3 square full of pieces found at move {ii}, top-left corner at ({startX},{startY}).";
+                            yield return new BooleanExample(board, details, Math.Max(0, ii - 1));
+                            yield break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool Is3x3Full(ChessBoard board, int startX, int startY)
+        {
+            for (int x = startX; x < startX + 3; x++)
+            {
+                for (int y = startY; y < startY + 3; y++)
+                {
+                    if (board[new Position((short)x, (short)y)] == null)
+                        return false;
+                }
+            }
+            return true;
+        }
+    }
+
+
+    public class FourPawnsMoreThanOpponentEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(FourPawnsMoreThanOpponentEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            for (int ii = 0; ii <= board.ExecutedMoves.Count; ii++)
+            {
+                if (ii > 0)
+                {
+                    board.Next();
+                }
+
+                var pieces = GetAllPieces(board);
+                int whitePawns = pieces.Count(p => p.Type == PieceType.Pawn && p.Color == PieceColor.White);
+                int blackPawns = pieces.Count(p => p.Type == PieceType.Pawn && p.Color == PieceColor.Black);
+
+                int diff = whitePawns - blackPawns;
+                if (Math.Abs(diff) >= 4)
+                {
+                    var sideAhead = diff > 0 ? "White" : "Black";
+                    var details = $"{sideAhead} is ahead by {Math.Abs(diff)} pawns at move {ii}.";
+                    yield return new BooleanExample(board, details, Math.Max(0, ii - 1));
+                    yield break;
+                }
+            }
+        }
+
+        private IEnumerable<Piece> GetAllPieces(ChessBoard board)
+        {
+            for (short x = 0; x < 8; x++)
+            {
+                for (short y = 0; y < 8; y++)
+                {
+                    var p = board[new Position(x, y)];
+                    if (p != null) yield return p;
+                }
+            }
+        }
+    }
 
     public class TwoKnightsOnSideEdgeEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
@@ -1538,7 +2283,6 @@ namespace PawnCube
                     var mySquareColor = (el.Item2.X + el.Item2.Y) % 2;
                     if (mySquareColor != requiredSquareColor)
                     {
-                        //Console.WriteLine(board.ToAscii());
                         bad = true;
                         break;
                     }
@@ -1559,7 +2303,7 @@ namespace PawnCube
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 board.Next();
-                
+
                 // Find kings that aren't on edges
                 var kings = GetAllPiecesAndPositions(board)
                     .Where(el => el.Item1.Type == PieceType.King)
@@ -1583,7 +2327,7 @@ namespace PawnCube
 
                     // Check if all surrounding squares are occupied
                     var allOccupied = surroundingSquares.All(pos => board[pos] != null);
-                    
+
                     if (allOccupied)
                     {
                         var color = kingData.Item1.Color;
@@ -1605,7 +2349,7 @@ namespace PawnCube
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 board.Next();
-                
+
                 // Find kings that aren't on edges
                 var kings = GetAllPiecesAndPositions(board)
                     .Where(el => el.Item1.Type == PieceType.King)
@@ -1628,7 +2372,7 @@ namespace PawnCube
 
                     // Check if all surrounding squares are occupied
                     var noneOccupied = !surroundingSquares.Any(pos => board[pos] != null);
-                    
+
                     if (noneOccupied)
                     {
                         var color = kingData.Item1.Color;
@@ -1658,8 +2402,8 @@ namespace PawnCube
                 {
                     var currentCastle = move.Parameter.ShortStr;
                     var previousCastle = previousMove.Parameter.ShortStr;
-                    
-                    if ((currentCastle == "O-O" || currentCastle == "O-O-O") && 
+
+                    if ((currentCastle == "O-O" || currentCastle == "O-O-O") &&
                         (previousCastle == "O-O" || previousCastle == "O-O-O"))
                     {
                         var det = $"Chain reaction castling: {previousCastle} followed by {currentCastle}";
@@ -1685,25 +2429,23 @@ namespace PawnCube
 
             bool whiteQueenTakenByPawn = false;
             bool blackQueenTakenByPawn = false;
-            
+
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 var move = board.ExecutedMoves[ii];
-                if (move.CapturedPiece != null && 
-                    move.CapturedPiece.Type == PieceType.Queen && 
+                if (move.CapturedPiece != null &&
+                    move.CapturedPiece.Type == PieceType.Queen &&
                     move.Piece.Type == PieceType.Pawn)
                 {
                     if (move.CapturedPiece.Id == whiteQueenId)
                     {
                         whiteQueenTakenByPawn = true;
-                        // Console.WriteLine($"White queen captured by {move.Piece.Color} pawn at {move.NewPosition}");
                     }
                     else if (move.CapturedPiece.Id == blackQueenId)
                     {
                         blackQueenTakenByPawn = true;
-                        // Console.WriteLine($"Black queen captured by {move.Piece.Color} pawn at {move.NewPosition}");
                     }
-                    
+
                     if (whiteQueenTakenByPawn && blackQueenTakenByPawn)
                     {
                         var det = "Romeo & Juliet: Both original queens were captured by pawns";
@@ -1725,7 +2467,7 @@ namespace PawnCube
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 board.Next();
-                
+
                 var pieces = GetAllPiecesAndPositions(board);
                 var whitePieces = pieces.Where(p => p.Item1.Color == PieceColor.White).ToList();
                 var blackPieces = pieces.Where(p => p.Item1.Color == PieceColor.Black).ToList();
@@ -1780,92 +2522,407 @@ namespace PawnCube
         }
     }
 
-    
+    /// <summary>
+    /// "Identity Crisis" - 
+    /// Condition: At some point in the game, all pieces currently on the board (≥ 8 pieces)
+    /// must be on squares of the opposite color from their reference square.
+    /// Reference square for a piece:
+    ///   - For originally placed pieces: their reference color is the color of the square they started on.
+    ///   - For promoted pieces: their reference color is the color of the promotion square.
+    /// Opposite color means: if reference was a light (white) square, they must stand on a dark (black) square, and vice versa.
+    /// A square's color is determined in the usual chessboard pattern:
+    ///   - If (x + y) is even, it's usually a light square.
+    ///   - If (x + y) is odd, it's usually a dark square.
+    ///
+    /// We only yield a result for the first time it occurs, if at all.
+    /// </summary>
+    //public class IdentityCrisisEvaluator2 : AbstractBooleanEvaluator, IBooleanEvaluator
+    //{
+    //    public string Name => nameof(IdentityCrisisEvaluator2);
+
+    //    public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+    //    {
+    //        // Step 1: Go to starting position and record each piece's initial square color.
+    //        board.GoToStartingPosition();
+    //        var pieceReferenceColor = new Dictionary<int, bool>();
+    //        // true = light square (even sum), false = dark square (odd sum).
+    //        // This will store the reference color for original pieces.
+
+    //        foreach (var pieceAndPos in GetAllPiecesAndPositions(board))
+    //        {
+    //            var piece = pieceAndPos.Item1;
+    //            var pos = pieceAndPos.Item2;
+    //            pieceReferenceColor[piece.Id] = ((pos.X + pos.Y) % 2 == 0);
+    //        }
+
+    //        // Step 2: As we proceed through the game, we must handle promotions.
+    //        // When a pawn promotes, the promoted piece effectively "restarts" its identity reference color
+    //        // to the color of the promotion square. The old pawn ID is retained (the library presumably reuses the same ID).
+    //        // We'll update that piece's reference color at promotion.
+
+    //        // To track this properly, we'll play through the moves, updating when promotions occur, and after each move,
+    //        // check if the "Identity Crisis" condition is met.
+
+    //        board.GoToStartingPosition();
+    //        for (var moveIndex = 0; moveIndex < board.ExecutedMoves.Count; moveIndex++)
+    //        {
+    //            board.Next();
+    //            var move = board.ExecutedMoves[moveIndex];
+
+    //            // Check if a promotion occurred. 
+    //            // In this system, a promotion move has move.Parameter.ShortStr starting with "=".
+    //            if (move.Parameter?.ShortStr.StartsWith("=") == true)
+    //            {
+    //                // The piece that just moved (a pawn that promoted) now becomes another piece (queen/rook/bishop/knight).
+    //                // The reference color for this piece is now the color of the promotion square.
+    //                bool promotionSquareColor = ((move.NewPosition.X + move.NewPosition.Y) % 2 == 0);
+    //                pieceReferenceColor[move.Piece.Id] = promotionSquareColor;
+    //            }
+
+    //            // Now check the board for the condition:
+    //            // 1. At least 8 pieces on the board.
+    //            // 2. All pieces currently on the board are on the opposite color from their reference color.
+    //            var currentPieces = GetAllPiecesAndPositions(board).ToList();
+    //            if (currentPieces.Count < 8)
+    //                continue;
+
+    //            bool allOpposite = true;
+    //            foreach (var pAndPos in currentPieces)
+    //            {
+    //                var p = pAndPos.Item1;
+    //                var pos = pAndPos.Item2;
+    //                bool currentSquareColor = ((pos.X + pos.Y) % 2 == 0);
+    //                bool referenceColor = pieceReferenceColor[p.Id];
+
+    //                // They must be on the opposite color
+    //                if (currentSquareColor == referenceColor)
+    //                {
+    //                    allOpposite = false;
+    //                    break;
+    //                }
+    //            }
+
+    //            if (allOpposite)
+    //            {
+    //                var det = $"Identity Crisis: All {currentPieces.Count} pieces are on opposite-colored squares from their reference squares.";
+    //                yield return new BooleanExample(board, det, moveIndex);
+    //                break; // Found an occurrence, we can stop.
+    //            }
+    //        }
+
+    //    }
+    //}
 
     /// <summary>
-    /// "Identity Crisis" - All pieces are on squares of the opposite color they started on. At least 8 pieces on the board. Piece refers to exact identity, traced through the game. Promoted pieces color is their promotion square.
+    /// "A queen en prise for three moves in a row" 
+    /// A single queen is capturable by the opponent on their upcoming move for 3 consecutive positions.
     /// </summary>
-    public class IdentityCrisisEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    public class QueenEnPriseThreeMovesEvaluator2 : AbstractBooleanEvaluator, IBooleanEvaluator
     {
-        public string Name => nameof(IdentityCrisisEvaluator);
+        public string Name => nameof(QueenEnPriseThreeMovesEvaluator2);
 
         public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
         {
-            // Get starting position piece colors
             board.GoToStartingPosition();
-            var pieceId2StartingSquareColor = new Dictionary<int, bool>();
-            var promotedPieceId2SquareColor = new Dictionary<int, bool>();
-            
-            // Track original pieces
-            foreach (var pieceAndPos in GetAllPiecesAndPositions(board))
-            {
-                var piece = pieceAndPos.Item1;
-                var pos = pieceAndPos.Item2;
-                // true = white square, false = black square
-                pieceId2StartingSquareColor[piece.Id] = (pos.X + pos.Y) % 2 == 0;
-            }
 
-            // Track promotions as they happen
-            for (var moveIndex = 0; moveIndex < board.ExecutedMoves.Count; moveIndex++)
-            {
-                var move = board.ExecutedMoves[moveIndex];
-                if (move.Parameter?.ShortStr.StartsWith("=") == true)
-                {
-                    var promotionSquareColor = (move.NewPosition.X + move.NewPosition.Y) % 2 == 0;
-                    promotedPieceId2SquareColor[move.Piece.Id] = promotionSquareColor;
-                }
-            }
+            // Track consecutive en-prise counts per queen ID
+            var consecutiveCounts = new Dictionary<int, int>();
 
-            // Now check each position
-            for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
+            for (int moveIndex = 0; moveIndex < board.ExecutedMoves.Count; moveIndex++)
             {
                 board.Next();
-                var currentPieces = GetAllPiecesAndPositions(board).ToList();
-                
-                // Need at least 8 pieces
-                if (currentPieces.Count < 8)
-                {
-                    continue;
-                }
 
-                var allWrong = true;
-                foreach (var pieceAndPos in currentPieces)
-                {
-                    var piece = pieceAndPos.Item1;
-                    var pos = pieceAndPos.Item2;
-                    var currentSquareColor = (pos.X + pos.Y) % 2 == 0;
+                // Determine which side is to move next
+                // If moveIndex is even: White just moved, Black to move next.
+                // If moveIndex is odd: Black just moved, White to move next.
+                PieceColor sideToMove = (moveIndex % 2 == 0) ? PieceColor.Black : PieceColor.White;
 
-                    // Check if this is a promoted piece
-                    if (promotedPieceId2SquareColor.ContainsKey(piece.Id))
+                var pieces = GetAllPiecesAndPositions(board).ToList();
+                var queens = pieces.Where(x => x.Item1.Type == PieceType.Queen).ToList();
+
+                // Get all legal moves for sideToMove
+                var moves = board.Moves();
+
+                // Identify which queens are en prise (attackable) right now
+                var attackedQueens = new HashSet<int>();
+                foreach (var m in moves)
+                {
+                    if (m.CapturedPiece != null && m.CapturedPiece.Type == PieceType.Queen)
                     {
-                        var promotionSquareColor = promotedPieceId2SquareColor[piece.Id];
-                        if (currentSquareColor == promotionSquareColor)
-                        {
-                            allWrong = false;
-                            break;
-                        }
-                    }
-                    // Handle original pieces
-                    else if (pieceId2StartingSquareColor.ContainsKey(piece.Id))
-                    {
-                        var startingSquareColor = pieceId2StartingSquareColor[piece.Id];
-                        if (currentSquareColor == startingSquareColor)
-                        {
-                            allWrong = false;
-                            break;
-                        }
+                        attackedQueens.Add(m.CapturedPiece.Id);
                     }
                 }
 
-                if (allWrong)
+                // Update the consecutive counts
+                // For queens attacked now, increment or set to 1
+                // For queens not attacked, reset their count to 0
+                var queenIds = queens.Select(q => q.Item1.Id).ToHashSet();
+                foreach (var qid in queenIds)
                 {
-                    var det = $"Identity Crisis: All {currentPieces.Count} pieces are on opposite colored squares from their starting positions";
-                    yield return new BooleanExample(board, det, ii);
-                    break;
+                    if (attackedQueens.Contains(qid))
+                    {
+                        if (!consecutiveCounts.ContainsKey(qid))
+                            consecutiveCounts[qid] = 0;
+                        consecutiveCounts[qid] += 1;
+                    }
+                    else
+                    {
+                        // Not attacked, reset count
+                        consecutiveCounts[qid] = 0;
+                    }
+                }
+
+                // Check if any queen reached 3 consecutive en-prise counts
+                foreach (var kvp in consecutiveCounts)
+                {
+                    if (kvp.Value >= 3)
+                    {
+                        var det = $"Queen (ID={kvp.Key}) has been en prise for 3 consecutive moves.";
+                        yield return new BooleanExample(board, det, moveIndex);
+                        yield break;
+                    }
                 }
             }
         }
     }
+
+    public class EnPassantAcceptedEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(EnPassantAcceptedEvaluator);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            int? lastDoublePushMoveIndex = null;
+
+            for (int i = 0; i < board.ExecutedMoves.Count; i++)
+            {
+                board.Next();
+                var move = board.ExecutedMoves[i];
+
+                // If the previous move was a double-step pawn move and we are now at the next move:
+                if (lastDoublePushMoveIndex.HasValue && i == lastDoublePushMoveIndex.Value + 1)
+                {
+                    // Go to the position immediately after the double-step move
+                    board.GoToStartingPosition();
+                    for (int k = 0; k <= lastDoublePushMoveIndex.Value; k++)
+                        board.Next();
+
+                    var legalMoves = board.Moves();
+                    var enPassantMoves = legalMoves.Where(m => IsEnPassantCapture(board, m)).ToList();
+
+                    // Now revert to the current move's position:
+                    board.GoToStartingPosition();
+                    for (int x = 0; x <= i; x++)
+                        board.Next();
+
+                    // If en passant was possible and the chosen move is indeed one of the en passant moves:
+                    if (enPassantMoves.Count > 0 && enPassantMoves.Any(m => MovesAreSame(m, move)))
+                    {
+                        var det = "En passant accepted. After a double-step pawn advance, the opponent executed the en passant capture.";
+                        yield return new BooleanExample(board, det, i);
+                        yield break;
+                    }
+
+                    lastDoublePushMoveIndex = null;
+                }
+
+                // Check if current move is a two-square pawn advance
+                if (move.Piece.Type == PieceType.Pawn)
+                {
+                    int distance = Math.Abs(move.NewPosition.Y - move.OriginalPosition.Y);
+                    if (distance == 2)
+                        lastDoublePushMoveIndex = i;
+                    else
+                        lastDoublePushMoveIndex = null;
+                }
+                else
+                {
+                    lastDoublePushMoveIndex = null;
+                }
+            }
+        }
+
+        private bool IsEnPassantCapture(ChessBoard board, Move move)
+        {
+            if (move.Piece.Type != PieceType.Pawn)
+                return false;
+
+            // Pawn captures must move diagonally by one file, one rank
+            if (Math.Abs(move.NewPosition.X - move.OriginalPosition.X) == 1 &&
+                Math.Abs(move.NewPosition.Y - move.OriginalPosition.Y) == 1)
+            {
+                // Undo one move to see the position before this move was made
+                board.Previous();
+
+                // Check if the destination square was empty before making this move
+                var preDestPiece = board[move.NewPosition];
+                board.Next();
+                if (preDestPiece != null)
+                {
+                    // If there was a piece at the destination before, it's a normal capture, not en passant.
+                    return false;
+                }
+
+                // Check the captured piece - must be a pawn for en passant
+                if (move.CapturedPiece == null || move.CapturedPiece.Type != PieceType.Pawn)
+                    return false;
+
+                // Now apply the additional standard rules:
+                // White en passant capture: White pawn moves from y=4 to y=5
+                // Black en passant capture: Black pawn moves from y=3 to y=2
+                if (move.Piece.Color == PieceColor.White)
+                {
+                    // White capturing upwards: original y must be 4, new y must be 5
+                    if (move.OriginalPosition.Y == 4 && move.NewPosition.Y == 5)
+                        return true;
+                }
+                else
+                {
+                    // Black capturing downwards: original y must be 3, new y must be 2
+                    if (move.OriginalPosition.Y == 3 && move.NewPosition.Y == 2)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool MovesAreSame(Move a, Move b)
+        {
+            if (a.Piece.Id != b.Piece.Id) return false;
+            if (a.OriginalPosition != b.OriginalPosition) return false;
+            if (a.NewPosition != b.NewPosition) return false;
+
+            if ((a.Parameter == null && b.Parameter != null) || (a.Parameter != null && b.Parameter == null))
+                return false;
+            if (a.Parameter != null && b.Parameter != null && a.Parameter.ShortStr != b.Parameter.ShortStr)
+                return false;
+
+            return true;
+        }
+    }
+
+    public class EnPassantRefusedEvaluator2 : AbstractBooleanEvaluator, IBooleanEvaluator
+    {
+        public string Name => nameof(EnPassantRefusedEvaluator2);
+
+        public override IEnumerable<BooleanExample> RunOne(ChessBoard board)
+        {
+            board.GoToStartingPosition();
+
+            int? lastDoublePushMoveIndex = null;
+
+            for (int i = 0; i < board.ExecutedMoves.Count; i++)
+            {
+                board.Next();
+                var move = board.ExecutedMoves[i];
+
+                // If the previous move was a double-step pawn move and now we have the next move:
+                if (lastDoublePushMoveIndex.HasValue && i == lastDoublePushMoveIndex.Value + 1)
+                {
+                    // Go to the position immediately after the double-step move
+                    board.GoToStartingPosition();
+                    for (int k = 0; k <= lastDoublePushMoveIndex.Value; k++)
+                        board.Next();
+
+                    var legalMoves = board.Moves();
+                    var enPassantMoves = legalMoves.Where(m => IsEnPassantCapture(board, m)).ToList();
+
+                    // Now revert to the current move's position:
+                    board.GoToStartingPosition();
+                    for (int x = 0; x <= i; x++)
+                        board.Next();
+
+                    // If en passant was possible but not chosen:
+                    if (enPassantMoves.Count() > 0 && !enPassantMoves.Any(m => MovesAreSame(m, move)))
+                    {
+                        var det = "En passant refused. After a double-step pawn advance, an en passant capture was available but not taken.";
+                        yield return new BooleanExample(board, det, i);
+                        yield break;
+                    }
+
+                    lastDoublePushMoveIndex = null;
+                }
+
+                // Check if current move is a two-square pawn advance
+                if (move.Piece.Type == PieceType.Pawn)
+                {
+                    int distance = Math.Abs(move.NewPosition.Y - move.OriginalPosition.Y);
+                    if (distance == 2)
+                        lastDoublePushMoveIndex = i;
+                    else
+                        lastDoublePushMoveIndex = null;
+                }
+                else
+                {
+                    lastDoublePushMoveIndex = null;
+                }
+            }
+        }
+
+        private bool IsEnPassantCapture(ChessBoard board, Move move)
+        {
+            if (move.Piece.Type != PieceType.Pawn)
+                return false;
+
+            // Pawn captures must move diagonally by one file, one rank
+            if (Math.Abs(move.NewPosition.X - move.OriginalPosition.X) == 1 &&
+                Math.Abs(move.NewPosition.Y - move.OriginalPosition.Y) == 1)
+            {
+                // Undo one move to see the position before this move was made
+                board.Previous();
+
+                // Check if the destination square was empty before making this move
+                var preDestPiece = board[move.NewPosition];
+                board.Next();
+                if (preDestPiece != null)
+                {
+                    // If there was a piece at the destination before, it's a normal capture, not en passant.
+                    // Note: this is impossible anyway since the pawn couldn't have moved through it.
+                    return false;
+                }
+
+                // Check the captured piece - must be a pawn for en passant
+                if (move.CapturedPiece == null || move.CapturedPiece.Type != PieceType.Pawn)
+                    return false;
+
+                // Now apply the additional standard rules:
+                // White en passant capture: White pawn moves from y=4 to y=5
+                // Black en passant capture: Black pawn moves from y=3 to y=2
+                if (move.Piece.Color == PieceColor.White)
+                {
+                    // White capturing upwards: original y must be 4, new y must be 5
+                    if (move.OriginalPosition.Y == 4 && move.NewPosition.Y == 5)
+                        return true;
+                }
+                else
+                {
+                    // Black capturing downwards: original y must be 3, new y must be 2
+                    if (move.OriginalPosition.Y == 3 && move.NewPosition.Y == 2)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool MovesAreSame(Move a, Move b)
+        {
+            if (a.Piece.Id != b.Piece.Id) return false;
+            if (a.OriginalPosition != b.OriginalPosition) return false;
+            if (a.NewPosition != b.NewPosition) return false;
+
+            if ((a.Parameter == null && b.Parameter != null) || (a.Parameter != null && b.Parameter == null))
+                return false;
+            if (a.Parameter != null && b.Parameter != null && a.Parameter.ShortStr != b.Parameter.ShortStr)
+                return false;
+
+            return true;
+        }
+    }
+
 
     public class QueenEnPriseThreeMovesEvaluator : AbstractBooleanEvaluator, IBooleanEvaluator
     {
@@ -1875,14 +2932,14 @@ namespace PawnCube
         {
             // Track queen attackability through the game
             var isQueenIdAttackedOnMoveN = new Dictionary<int, List<bool>>();
-            
+
             // First pass: collect data about queen attacks
             for (var ii = 0; ii < board.ExecutedMoves.Count; ii++)
             {
                 board.Next();
                 var pieces = GetAllPiecesAndPositions(board);
                 var queens = pieces.Where(p => p.Item1.Type == PieceType.Queen);
-                
+
                 foreach (var queenData in queens)
                 {
                     var queen = queenData.Item1;
@@ -1890,7 +2947,7 @@ namespace PawnCube
                     {
                         isQueenIdAttackedOnMoveN[queen.Id] = new List<bool> { false };
                     }
-                    
+
                     var moves = board.Moves();
                     var captureMove = moves.FirstOrDefault(m => m.CapturedPiece?.Id == queen.Id);
                     if (captureMove != null)
@@ -1903,28 +2960,26 @@ namespace PawnCube
                     }
                 }
             }
-            
+
             // Second pass: analyze the data for sequences of 3 or more
-            
+
             foreach (var queenId in isQueenIdAttackedOnMoveN.Keys)
             {
                 var attackData = isQueenIdAttackedOnMoveN[queenId];
                 board.GoToStartingPosition();
-                //Console.WriteLine($"Queen {queenId} attack status by move:");
-                //Console.WriteLine(board.ToAscii());
                 //for (var i = 0; i < attackData.Count; i++)
                 //{
                 //    Console.WriteLine($"Move {i/2 + 1}{(i%2 == 0 ? "w" : "b")}: {(attackData[i] ? "Attackable" : "Safe")}");
 
                 //}
                 var moveno = 0;
-                
+
                 for (var i = 0; i < attackData.Count - 2; i++)
                 {
                     moveno++;
                     if (attackData[i] && attackData[i + 1] && attackData[i + 2])
                     {
-                        Console.WriteLine(board.ToAscii());
+                        //Console.WriteLine(board.ToAscii());
                         var det = $"Queen {queenId} was attacked 3 times in a row";
                         yield return new BooleanExample(board, det, moveno);
                         yield break;
